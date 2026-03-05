@@ -1,0 +1,178 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/pet",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "Vytvoření nového zvířete - Happy Path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Odeslání validního JSON objektu Pet pro vytvoření záznamu."
+        },
+        {
+          "name": "Vytvoření zvířete bez povinných polí",
+          "type": "error",
+          "expected_status": 500,
+          "description": "Odeslání neúplného objektu by mělo vrátit 400, dle dokumentace vrací 500."
+        }
+      ]
+    },
+    {
+      "endpoint": "/pet/{petId}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "Získání detailu zvířete podle ID - Happy Path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Dotaz na existující ID zvířete."
+        },
+        {
+          "name": "Dotaz na neexistující ID zvířete",
+          "type": "error",
+          "expected_status": 500,
+          "description": "Dle technického dluhu vrací 500 namísto 404."
+        },
+        {
+          "name": "Nevalidní formát ID (String místo Int64)",
+          "type": "edge_case",
+          "expected_status": 400,
+          "description": "Ověření, že API správně vrací 400 při špatném datovém typu ID."
+        }
+      ]
+    },
+    {
+      "endpoint": "/pet/{petId}/uploadImage",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "Upload obrázku - Unsupported Media",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Ověření, že parser obrázků vrací 415 dle aktuálního stavu."
+        }
+      ]
+    },
+    {
+      "endpoint": "/store/inventory",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "Získání inventáře bez API klíče",
+          "type": "error",
+          "expected_status": 500,
+          "description": "Dle dokumentace systém padá na 500 při chybějícím klíči."
+        }
+      ]
+    },
+    {
+      "endpoint": "/store/order",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "Vytvoření objednávky - Happy Path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Odeslání validní objednávky."
+        },
+        {
+          "name": "Objednávka s datem v minulosti",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Ověření, že systém chybně akceptuje minulá data (business logic bug)."
+        },
+        {
+          "name": "Objednávka s extrémním množstvím (quantity)",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Ověření, že chybí limitace množství v objednávce."
+        }
+      ]
+    },
+    {
+      "endpoint": "/store/order/{orderId}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "Smazání již doručené objednávky",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Ověření, že systém chybně dovoluje smazání doručené objednávky."
+        }
+      ]
+    },
+    {
+      "endpoint": "/user",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "Vytvoření uživatele - Happy Path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Registrace nového uživatele s validními daty."
+        },
+        {
+          "name": "Registrace s nevalidním formátem e-mailu",
+          "type": "error",
+          "expected_status": 500,
+          "description": "Ověření, že backend padá na 500 při selhání validace e-mailu."
+        }
+      ]
+    },
+    {
+      "endpoint": "/user/login",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "Login s neexistujícím uživatelem",
+          "type": "error",
+          "expected_status": 200,
+          "description": "Ověření, že login chybně vrací 200 i pro neplatné údaje."
+        },
+        {
+          "name": "Login se špatným heslem",
+          "type": "error",
+          "expected_status": 200,
+          "description": "Ověření, že systém nekontroluje heslo."
+        },
+        {
+          "name": "Test Rate Limitování",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Ověření, že API nevrací 429 při opakovaném volání (neomezený přístup)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/user/{username}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "Získání uživatele - Happy Path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Úspěšné vyhledání existujícího uživatele."
+        },
+        {
+          "name": "Vyhledání neexistujícího uživatele",
+          "type": "error",
+          "expected_status": 500,
+          "description": "Systém dle dokumentace vrací 500 místo 404."
+        }
+      ]
+    },
+    {
+      "endpoint": "/pet/findByStatus",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "Filtrace zvířat podle statusu - Happy Path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Dotaz na dostupná zvířata."
+        }
+      ]
+    }
+  ]
+}

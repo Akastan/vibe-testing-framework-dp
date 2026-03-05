@@ -1,0 +1,15 @@
+# Skryté soubory s klíči
+.env
+
+# Virtuální prostředí
+.venv/
+venv/
+env/
+
+# Cache soubory (Python a Pytest)
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# (Volitelné) Složka s výstupy
+# outputs/

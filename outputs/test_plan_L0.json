@@ -1,0 +1,184 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/pet",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "Add new valid pet",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify creation of a pet with all required fields."
+        },
+        {
+          "name": "Add pet with missing required fields",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verify validation error when 'name' or 'photoUrls' is missing."
+        }
+      ]
+    },
+    {
+      "endpoint": "/pet/{petId}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "Get pet by existing ID",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify fetching an existing pet by valid integer ID."
+        },
+        {
+          "name": "Get pet with non-existent ID",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verify 404 response for non-existent resource."
+        },
+        {
+          "name": "Get pet with invalid ID format",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 response when ID is not an integer."
+        }
+      ]
+    },
+    {
+      "endpoint": "/pet/findByStatus",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "Find pets by valid status",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify filtering pets by 'available' status."
+        },
+        {
+          "name": "Find pets with invalid status string",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error for unsupported status value."
+        }
+      ]
+    },
+    {
+      "endpoint": "/pet/{petId}/uploadImage",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "Upload image for valid pet",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify successful image upload with valid binary stream."
+        },
+        {
+          "name": "Upload image to non-existent pet",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verify 404 error when uploading image to missing pet ID."
+        }
+      ]
+    },
+    {
+      "endpoint": "/store/order",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "Place valid order",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify placing a new order with valid JSON body."
+        },
+        {
+          "name": "Place order with invalid quantity",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify error when providing string instead of integer for quantity."
+        }
+      ]
+    },
+    {
+      "endpoint": "/store/order/{orderId}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "Delete order with valid ID",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify successful deletion of order < 1000."
+        },
+        {
+          "name": "Delete non-existent order",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verify 404 error when order ID does not exist."
+        }
+      ]
+    },
+    {
+      "endpoint": "/user",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "Create new user successfully",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify user registration with complete object."
+        }
+      ]
+    },
+    {
+      "endpoint": "/user/login",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "User login with valid credentials",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify successful login and receipt of session token."
+        },
+        {
+          "name": "User login with wrong credentials",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error for incorrect username/password pair."
+        }
+      ]
+    },
+    {
+      "endpoint": "/user/{username}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "Get non-existing user",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verify 404 when querying a non-existent username."
+        },
+        {
+          "name": "Empty username parameter",
+          "type": "edge_case",
+          "expected_status": 400,
+          "description": "Verify handling of empty string as username."
+        }
+      ]
+    },
+    {
+      "endpoint": "/pet",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "Update non-existent pet",
+          "type": "edge_case",
+          "expected_status": 404,
+          "description": "Verify 404 when updating a pet that doesn't exist."
+        },
+        {
+          "name": "Update pet with malformed JSON",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 bad request for invalid JSON payload."
+        }
+      ]
+    }
+  ]
+}
