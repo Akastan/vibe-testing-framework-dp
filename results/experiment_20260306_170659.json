@@ -1,0 +1,81 @@
+[
+  {
+    "timestamp": "2026-03-06T17:04:26.867179",
+    "model": "GeminiProvider",
+    "model_name": "gemini-3.1-flash-lite-preview",
+    "level": "L0",
+    "run_id": 1,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 118.18,
+    "metrics": {
+      "endpoint_coverage": {
+        "total_api_endpoints": 19,
+        "covered_endpoints": 12,
+        "uncovered_endpoints": [
+          "DELETE /store/order/{orderId}",
+          "GET /pet/findByTags",
+          "GET /user/logout",
+          "POST /pet/{petId}",
+          "POST /user/createWithList",
+          "PUT /pet",
+          "PUT /user/{username}"
+        ],
+        "endpoint_coverage_pct": 63.16
+      },
+      "assertion_depth": {
+        "total_test_functions": 19,
+        "total_assertions": 22,
+        "assertion_depth": 1.16
+      },
+      "test_validity": {
+        "tests_passed": 6,
+        "tests_failed": 13,
+        "tests_errors": 0,
+        "total_executed": 19,
+        "validity_rate_pct": 31.58
+      }
+    },
+    "plan_test_count": 19,
+    "output_filename": "test_generated_L0_run1.py",
+    "plan_filename": "test_plan_L0_run1.json"
+  },
+  {
+    "timestamp": "2026-03-06T17:06:59.001000",
+    "model": "GeminiProvider",
+    "model_name": "gemini-3.1-flash-lite-preview",
+    "level": "L1",
+    "run_id": 1,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 152.07,
+    "metrics": {
+      "endpoint_coverage": {
+        "total_api_endpoints": 19,
+        "covered_endpoints": 15,
+        "uncovered_endpoints": [
+          "DELETE /pet/{petId}",
+          "GET /store/order/{orderId}",
+          "POST /pet/{petId}",
+          "PUT /pet"
+        ],
+        "endpoint_coverage_pct": 78.95
+      },
+      "assertion_depth": {
+        "total_test_functions": 19,
+        "total_assertions": 21,
+        "assertion_depth": 1.11
+      },
+      "test_validity": {
+        "tests_passed": 16,
+        "tests_failed": 3,
+        "tests_errors": 0,
+        "total_executed": 19,
+        "validity_rate_pct": 84.21
+      }
+    },
+    "plan_test_count": 19,
+    "output_filename": "test_generated_L1_run1.py",
+    "plan_filename": "test_plan_L1_run1.json"
+  }
+]

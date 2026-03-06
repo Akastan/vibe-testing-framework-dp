@@ -1,0 +1,190 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/pet",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_new_pet_valid_data",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Pridani noveho domaciho mazlicka s validnimi JSON daty"
+        },
+        {
+          "name": "add_pet_missing_required_fields",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o pridani pet bez povinnych poli name a photoUrls"
+        }
+      ]
+    },
+    {
+      "endpoint": "/pet/findByStatus",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "find_pets_by_valid_status",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Filtrovani mazlicku dle statusu available"
+        },
+        {
+          "name": "find_pets_invalid_status_value",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Dotaz na status, ktery neni v definovanem enumu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/pet/{petId}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_pet_by_existing_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani detailu mazlicka dle validniho ID"
+        },
+        {
+          "name": "get_pet_nonexistent_id",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Ziskani mazlicka, ktery v systemu neexistuje"
+        },
+        {
+          "name": "get_pet_invalid_id_format",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Ziskani mazlicka s ID ve formatu string misto integer"
+        }
+      ]
+    },
+    {
+      "endpoint": "/pet/{petId}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_existing_pet",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Uspesne smazani mazlicka dle ID"
+        }
+      ]
+    },
+    {
+      "endpoint": "/pet/{petId}/uploadImage",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_image_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Uspesne nahrani binarniho souboru obrazku k mazlickovi"
+        }
+      ]
+    },
+    {
+      "endpoint": "/store/inventory",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_inventory_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Pokus o ziskani inventare bez validniho api_key"
+        }
+      ]
+    },
+    {
+      "endpoint": "/store/order",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "place_valid_order",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Vytvoreni nove objednavky s validnimi daty"
+        }
+      ]
+    },
+    {
+      "endpoint": "/store/order/{orderId}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_order_boundary_value",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Ziskani objednavky s hranicni hodnotou ID 5"
+        },
+        {
+          "name": "get_order_out_of_bounds",
+          "type": "edge_case",
+          "expected_status": 404,
+          "description": "Ziskani objednavky s ID, ktere generuje vyjimku"
+        }
+      ]
+    },
+    {
+      "endpoint": "/user",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_user_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Uspesne vytvoreni noveho uzivatele"
+        }
+      ]
+    },
+    {
+      "endpoint": "/user/login",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "login_valid_credentials",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Uspesne prihlaseni uzivatele"
+        },
+        {
+          "name": "login_invalid_credentials",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Nevalidni kombinace uzivatelskeho jmena a hesla"
+        }
+      ]
+    },
+    {
+      "endpoint": "/user/{username}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_user_by_name_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani detailu uzivatele dle platneho uzivatelskeho jmena"
+        },
+        {
+          "name": "get_user_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Vyhledani uzivatele, ktery v databazi neexistuje"
+        }
+      ]
+    },
+    {
+      "endpoint": "/user/{username}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_existing_user",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Uspesne smazani uzivatelskeho uctu"
+        }
+      ]
+    }
+  ]
+}
