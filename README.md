@@ -1,3 +1,5 @@
+STARÉ
+
 === [VÝSLEDKY EXPERIMENTU A METRIKY] === PRVNÍ L0
 1. Assertion Depth: 1.2 asercí na test (Zjištěno 24 asercí v 20 testech)
 2. Test Validity Rate: 30.0% (6 prošlo z celkových 20 spuštěných testů)
