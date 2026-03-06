@@ -1,48 +1,68 @@
+"""
+Fáze 3: Generování spustitelných Python/pytest testů pomocí LLM.
+"""
 import json
+import re
+
+from config import API_BASE_URL
+
 
 def generate_test_code(test_plan: dict, context_data: str, llm, feedback: str = None) -> str:
     """
-    Využije předaný LLM k vygenerování spustitelných Python/pytest testů.
+    Instruuje LLM k napsání pytest testů na základě testovacího plánu.
+    Pokud je předán feedback (chybový log), model se pokusí kód opravit.
     """
-    print(f"Iniciuji model ({llm.__class__.__name__}) pro Fázi 3 (Generování kódu)...")
+    print(f"  Iniciuji model ({llm.__class__.__name__}) pro Fázi 3 (Generování kódu)...")
 
-    # Převod test_plan dict zpět na string pro vložení do promptu
     plan_str = json.dumps(test_plan, indent=2, ensure_ascii=False)
 
     prompt = f"""
-    Jsi expert na QA automatizaci. Tvojí úlohou je napsat plně funkční a spustitelné 
-    testy v jazyce Python pomocí knihoven `pytest` a `requests`.
+Jsi expert na QA automatizaci. Napiš plně funkční a spustitelné testy
+v Pythonu pomocí knihoven `pytest` a `requests`.
 
-    Tady je testovací plán, který musíš implementovat:
-    {plan_str}
+TESTOVACÍ PLÁN K IMPLEMENTACI:
+{plan_str}
 
-    Zde je kontext rozhraní (slouží jako zdroj pravdy pro datové typy a endpointy):
-    {context_data}
+KONTEXT API (zdroj pravdy pro datové typy, schémata a endpointy):
+{context_data}
 
-    Základní URL pro testy je: https://petstore3.swagger.io/api/v3
+BASE URL: {API_BASE_URL}
 
-    POŽADAVKY NA KÓD:
-    1. Každý test musí mít hluboké aserce (ověřuj status kód, strukturu JSON odpovědi a hlavičky).
-    2. Předpokládej, že importy `pytest` a `requests` jsou k dispozici.
-    3. Vygeneruj POUZE čistý a spustitelný Python kód. Nepiš žádné vysvětlivky, žádný markdown text okolo.
-    """
+STRIKTNÍ POŽADAVKY NA KÓD:
+1. Na začátek souboru vlož: import pytest, import requests
+2. Definuj BASE_URL = "{API_BASE_URL}" jako globální konstantu.
+3. Každá testovací funkce musí začínat prefixem test_ (aby ji pytest našel).
+4. Každý test musí obsahovat HLUBOKÉ ASERCE:
+   - Ověř HTTP status kód (assert response.status_code == ...)
+   - Pokud odpověď vrací JSON, ověř strukturu (klíče, typy hodnot)
+   - Ověř Content-Type hlavičku kde je to relevantní
+5. Pro POST/PUT requesty vždy nastav header Content-Type: application/json.
+6. Nepoužívej žádné fixtures ani conftest – testy musí být self-contained.
+7. Nepoužívej žádné knihovny třetích stran kromě pytest a requests.
+
+VRAŤ POUZE čistý Python kód. Žádné vysvětlivky, žádný markdown.
+"""
 
     if feedback:
         prompt += f"""
-        UPOZORNĚNÍ: Předchozí verze tvého kódu při spuštění selhala s touto chybou:
-        {feedback}
-        Analyzuj tuto chybu a kód oprav. Znovu vrať POUZE opravený Python kód.
-        """
 
-    raw_text = llm.generate_text(prompt)
+POZOR: Předchozí verze kódu selhala s touto chybou:
+--- ZAČÁTEK CHYBOVÉHO LOGU ---
+{feedback[-3000:]}
+--- KONEC CHYBOVÉHO LOGU ---
 
-    # Očištění výstupu od ```python markdown bloku
-    clean_text = raw_text.strip()
-    if clean_text.startswith("```python"):
-        clean_text = clean_text[9:]  # Odstraní ```python
-    elif clean_text.startswith("```"):
-        clean_text = clean_text[3:]  # Odstraní ```
-    if clean_text.endswith("```"):
-        clean_text = clean_text[:-3] # Odstraní koncový ```
+Analyzuj chybu a vrať KOMPLETNÍ opravený Python kód (ne jen opravu).
+"""
 
-    return clean_text.strip()
+    raw = llm.generate_text(prompt)
+
+    # Očištění markdown wrapperu
+    clean = raw.strip()
+    if clean.startswith("```python"):
+        clean = clean[9:]
+    elif clean.startswith("```"):
+        clean = clean[3:]
+    if clean.endswith("```"):
+        clean = clean[:-3]
+
+    return clean.strip()

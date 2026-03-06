@@ -1,68 +1,81 @@
+"""
+Fáze 2: Generování testovacího plánu pomocí LLM.
+"""
 import json
 import re
 
 
-def generate_test_plan(context_data: str, llm) -> dict:
+def generate_test_plan(context_data: str, llm, level: str = "L0") -> dict:
     """
-    Využije předaný LLM k vygenerování testovacího plánu ve formátu JSON.
+    Instruuje LLM k vytvoření strukturovaného testovacího plánu (JSON).
 
     TODO (DIPLOMKA - TEMPORARY LIMIT):
-    Aktuálně je v promptu natvrdo nastaven limit na max 20 nejdůležitějších testů,
-    aby nedocházelo k useknutí vygenerovaného kódu ve Fázi 3 kvůli limitu output tokenů.
-    Až se naimplementuje generování po částech (chunking), tento limit z promptu odstraň!
+    Aktuálně je v promptu limit na max 20 testů kvůli output token limitu.
+    Po implementaci chunkingu tento limit odstraň.
     """
-    print(f"Iniciuji model ({llm.__class__.__name__}) pro Fázi 2 (Plánování)...")
-    print("⚠️ UPOZORNĚNÍ: Testovací plán je dočasně omezen na max 20 nejdůležitějších testů!")
+    print(f"  Iniciuji model ({llm.__class__.__name__}) pro Fázi 2 (Plánování)...")
+    print("  ⚠️ Testovací plán je dočasně omezen na max 20 nejdůležitějších testů.")
+
+    # Doplňující instrukce podle úrovně kontextu
+    level_hint = ""
+    if level == "L0":
+        level_hint = """
+    KONTEXT: Máš k dispozici POUZE OpenAPI specifikaci (black-box testování).
+    Vycházej striktně z definovaných endpointů, schémat a status kódů.
+    Nemáš přístup k vnitřní implementaci – testuj pouze veřejné chování API."""
+    elif level == "L1":
+        level_hint = """
+    KONTEXT: Máš k dispozici OpenAPI specifikaci A technickou/byznys dokumentaci.
+    Dokumentace obsahuje informace o známých chybách (Known Issues) a reálném chování serveru.
+    KRITICKY DŮLEŽITÉ: Pokud dokumentace uvádí, že server vrací jiný kód než specifikace
+    (např. 500 místo 404), použij v expected_status kód, který server REÁLNĚ vrací."""
 
     prompt = f"""
-    Jsi expert na softwarové testování (QA inženýr). Tvým úkolem je analyzovat 
-    následující specifikaci a vytvořit testovací plán.
+Jsi expert na softwarové testování (QA inženýr). Tvým úkolem je analyzovat
+následující kontext a vytvořit testovací plán pro REST API.
+{level_hint}
 
-    DŮLEŽITÉ OMEZENÍ PRO TENTO BĚH:
-    Vyber a vygeneruj POUZE 20 NEJDŮLEŽITĚJŠÍCH testovacích případů (test cases) 
-    napříč celým API. Nesmíš jich vygenerovat více než 20 celkem! 
-    Z těchto 20 testů vyber reprezentativní mix, který pokryje:
-    1. Hlavní ideální průchody (Happy paths) - např. CRUD operace
-    2. Kritické hraniční stavy (Edge cases)
-    3. Zásadní ošetření chybových stavů (Error handling) - např. 400, 401, 404
+OMEZENÍ: Vyber POUZE 20 NEJDŮLEŽITĚJŠÍCH testovacích případů celkem.
+Vytvoř reprezentativní mix pokrývající:
+1. Hlavní happy paths (CRUD operace, login, inventory)
+2. Kritické edge cases (nevalidní vstupy, hraniční hodnoty)
+3. Ošetření chybových stavů (chybějící zdroje, nevalidní formáty)
 
-    Vrať POUZE validní JSON v této struktuře a nic jiného:
+Vrať POUZE validní JSON (žádný markdown, žádný text okolo):
+{{
+  "test_plan": [
     {{
-      "test_plan": [
+      "endpoint": "/cesta/k/endpointu",
+      "method": "GET",
+      "test_cases": [
         {{
-          "endpoint": "/cesta/k/endpointu",
-          "method": "GET/POST/...",
-          "test_cases": [
-            {{
-              "name": "Název testu",
-              "type": "happy_path | edge_case | error",
-              "expected_status": 200,
-              "description": "Co přesně se zde testuje"
-            }}
-          ]
+          "name": "popisny_nazev_testu",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Co přesně se testuje"
         }}
       ]
     }}
+  ]
+}}
 
-    Zde je kontext (Specifikace a dokumentace):
-    {context_data}
-    """
+Pravidla pro pole "type": použij POUZE jednu z hodnot "happy_path", "edge_case", "error".
+Pravidla pro pole "name": použij snake_case bez diakritiky.
 
-    # Využití abstrahovaného LLM providera
-    raw_text = llm.generate_text(prompt)
+Zde je kontext:
+{context_data}
+"""
 
-    # Očištění výstupu od markdownu, pokud tam je
-    clean_text = raw_text.strip()
-    if clean_text.startswith("```json"):
-        clean_text = re.sub(r'^```json\s*', '', clean_text)
-        clean_text = re.sub(r'\s*```$', '', clean_text)
-    elif clean_text.startswith("```"):
-        clean_text = re.sub(r'^```\s*', '', clean_text)
-        clean_text = re.sub(r'\s*```$', '', clean_text)
+    raw = llm.generate_text(prompt)
+
+    # Očištění od markdown wrapperu
+    clean = raw.strip()
+    clean = re.sub(r'^```(?:json)?\s*', '', clean)
+    clean = re.sub(r'\s*```$', '', clean)
 
     try:
-        return json.loads(clean_text)
+        return json.loads(clean)
     except json.JSONDecodeError as e:
-        print(f"Chyba při parsování JSON z výstupu: {e}")
-        print("Surový výstup:", raw_text)
+        print(f"  ❌ Chyba při parsování JSON: {e}")
+        print(f"  Surový výstup (prvních 500 znaků): {raw[:500]}")
         return {"test_plan": []}

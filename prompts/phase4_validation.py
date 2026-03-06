@@ -1,33 +1,37 @@
+"""
+Fáze 4: Automatické spuštění vygenerovaných testů a zachycení výstupu.
+"""
 import os
 import subprocess
+
+from config import OUTPUTS_DIR
 
 
 def run_tests_and_validate(test_code: str, output_filename: str = "test_generated.py") -> tuple[bool, str]:
     """
-    Uloží vygenerovaný kód do souboru a spustí pytest v izolovaném subprocessu.
-    Vrací tuple: (Úspěch - bool, Výstup z terminálu - str)
-    """
-    output_dir = "outputs"
-    os.makedirs(output_dir, exist_ok=True)
-    file_path = os.path.join(output_dir, output_filename)
+    Uloží vygenerovaný kód do souboru a spustí pytest v subprocesu.
 
-    # Uložení kódu
+    Returns:
+        (success: bool, output_log: str)
+    """
+    os.makedirs(OUTPUTS_DIR, exist_ok=True)
+    file_path = os.path.join(OUTPUTS_DIR, output_filename)
+
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(test_code)
 
-    print(f"Testovací kód uložen do {file_path}. Spouštím pytest...")
+    print(f"  Kód uložen do {file_path}. Spouštím pytest...")
 
-    # Spuštění testů přes příkazovou řádku
     result = subprocess.run(
-        ["pytest", file_path, "-v", "--tb=short"],
+        ["pytest", file_path, "-v", "--tb=short", "--disable-warnings"],
         capture_output=True,
-        text=True
+        text=True,
+        timeout=120  # Timeout 2 minuty pro případ zacyklení
     )
 
-    # pytest vrací returncode 0 pokud vše prošlo, 1 pokud něco selhalo
+    full_log = result.stdout + "\n" + result.stderr
+
     if result.returncode == 0:
-        return True, result.stdout
+        return True, full_log
     else:
-        # Spojíme standardní výstup a chybový výstup do jednoho logu pro LLM
-        error_log = result.stdout + "\n" + result.stderr
-        return False, error_log
+        return False, full_log
