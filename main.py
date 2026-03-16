@@ -14,7 +14,7 @@ from llm_provider import create_llm
 from prompts.phase1_context import analyze_context
 from prompts.phase2_planning import generate_test_plan
 from prompts.phase3_generation import generate_test_code
-from prompts.phase4_validation import run_tests_and_validate
+from prompts.phase4_validation import run_tests_and_validate, stop_managed_server
 from prompts.phase5_metrics import (
     calculate_assertion_depth,
     calculate_endpoint_coverage,
@@ -215,6 +215,9 @@ def main():
                             "run_id": run_id,
                             "error": str(e),
                         })
+
+            # Zastavit server po dokončení všech úrovní pro toto API
+            stop_managed_server(api_cfg)
 
     # Uložit výsledky
     os.makedirs(RESULTS_DIR, exist_ok=True)

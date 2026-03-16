@@ -41,7 +41,7 @@ def run_metrics(test_file: str, plan_file: str = None, openapi_path: str = None)
     print("\n🧪 Spouštím pytest...")
     result = subprocess.run(
         ["pytest", test_file, "-v", "--tb=short", "--disable-warnings"],
-        capture_output=True, text=True, timeout=300,
+        capture_output=True, text=True, timeout=600,
     )
     output_log = result.stdout + "\n" + result.stderr
 

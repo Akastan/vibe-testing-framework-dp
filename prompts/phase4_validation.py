@@ -97,7 +97,7 @@ def run_tests_and_validate(
     try:
         result = subprocess.run(
             ["pytest", file_path, "-v", "--tb=short", "--disable-warnings"],
-            capture_output=True, text=True, timeout=300,
+            capture_output=True, text=True, timeout=600,
         )
         full_log = result.stdout + "\n" + result.stderr
 
@@ -114,7 +114,7 @@ def run_tests_and_validate(
         return (result.returncode == 0), full_log
 
     except subprocess.TimeoutExpired:
-        msg = "TIMEOUT: pytest překročil 300s limit.\n"
+        msg = "TIMEOUT: pytest překročil 600s limit.\n"
         return False, msg
 
     finally:

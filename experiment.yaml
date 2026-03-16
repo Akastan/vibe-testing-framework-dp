@@ -12,9 +12,9 @@ experiment:
 # ── LLM modely ───────────────────────────────────────────
 # Každý model musí mít provider a api_key_env (název env proměnné)
 llms:
-  - name: "gemini-3.0-flash"
+  - name: "gemini-3-flash-preview"
     provider: "gemini"
-    model: "gemini-3.0-flash"
+    model: "gemini-3-flash-preview"
     api_key_env: "GEMINI_API_KEY"
 
   # - name: "gemini-2.0-flash"
