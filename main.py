@@ -10,7 +10,8 @@ from dotenv import load_dotenv
 
 from config import (
     MAX_ITERATIONS, OPENAPI_PATH, DOC_PATH,
-    OUTPUTS_DIR, RESULTS_DIR, CONTEXT_LEVELS
+    SOURCE_CODE_PATH, DB_SCHEMA_PATH, EXISTING_TESTS_PATH,
+    OUTPUTS_DIR, RESULTS_DIR, CONTEXT_LEVELS, API_BASE_URL
 )
 from llm_provider import GeminiProvider
 from prompts.phase1_context import analyze_context
@@ -27,11 +28,7 @@ from prompts.phase5_metrics import (
 def run_pipeline(llm, level: str = "L0", run_id: int = 1) -> dict:
     """
     Spustí jednu kompletní iteraci pipeline pro danou úroveň a vrátí metriky.
-
-    Returns:
-        dict s výsledky experimentu
     """
-    # Dynamické názvy souborů
     output_filename = f"test_generated_{level}_run{run_id}.py"
     plan_filename = f"test_plan_{level}_run{run_id}.json"
     output_path = os.path.join(OUTPUTS_DIR, output_filename)
@@ -49,14 +46,15 @@ def run_pipeline(llm, level: str = "L0", run_id: int = 1) -> dict:
         openapi_path=OPENAPI_PATH,
         doc_path=DOC_PATH,
         level=level,
-        # Pro budoucí L2–L4: přidat cesty k source_code, db_schema, existing_tests
+        source_code_path=SOURCE_CODE_PATH,
+        db_schema_path=DB_SCHEMA_PATH,
+        existing_tests_path=EXISTING_TESTS_PATH,
     )
 
     # ── FÁZE 2: Plánování ────────────────────────────────
     print("\n[FÁZE 2] Generování testovacího plánu...")
     test_plan = generate_test_plan(context, llm, level=level)
 
-    # Uložení plánu
     os.makedirs(OUTPUTS_DIR, exist_ok=True)
     with open(os.path.join(OUTPUTS_DIR, plan_filename), "w", encoding="utf-8") as f:
         json.dump(test_plan, f, indent=2, ensure_ascii=False)
@@ -99,7 +97,6 @@ def run_pipeline(llm, level: str = "L0", run_id: int = 1) -> dict:
     assertions = calculate_assertion_depth(output_path)
     validity = parse_test_validity_rate(output_log)
 
-    # Výpis
     print(f"\n{'─' * 50}")
     print(f"  VÝSLEDKY | {level} | Běh {run_id}")
     print(f"{'─' * 50}")
@@ -115,7 +112,6 @@ def run_pipeline(llm, level: str = "L0", run_id: int = 1) -> dict:
     if "error" in assertions:
         print(f"  ⚠️ Assertion warning: {assertions['error']}")
 
-    # Sestavení výsledku pro export
     result = {
         "timestamp": datetime.now().isoformat(),
         "model": llm.__class__.__name__,
@@ -157,12 +153,10 @@ if __name__ == "__main__":
     if not gemini_key:
         raise ValueError("GEMINI_API_KEY nenalezen v .env souboru.")
 
-    # Konfigurace modelu
     llm = GeminiProvider(api_key=gemini_key, model_name='gemini-3.1-flash-lite-preview')
 
     # === EXPERIMENT ===
-    # Definuj, které úrovně chceš spustit a kolik běhů na každou
-    levels_to_run = ["L0", "L1"]
+    levels_to_run = ["L0", "L1", "L2", "L3", "L4"]
     runs_per_level = 1  # Pro diplomku nastavíš na 3–5
 
     all_results = []
@@ -172,7 +166,6 @@ if __name__ == "__main__":
             result = run_pipeline(llm=llm, level=level, run_id=run_id)
             all_results.append(result)
 
-    # Uložení souhrnných výsledků
     save_results(all_results)
 
     print("\n" + "=" * 60)

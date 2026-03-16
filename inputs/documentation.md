@@ -1,39 +1,70 @@
-# Technická a Byznys Dokumentace: Petstore API v3
-**Verze dokumentu:** 1.3 (Aktualizováno s ohledem na známé chyby/Known Issues)
-**Určení:** Vývojový a QA tým
-**Popis:** Tento dokument definuje obchodní logiku pro Petstore API. **DŮLEŽITÉ:** API se aktuálně nachází ve fázi technologického dluhu. Mnoho validačních pravidel není na serveru implementováno správně a backend často padá na neošetřené výjimky. Testy musí reflektovat tento reálný stav systému.
+# Bookstore API – Technická a byznys dokumentace
 
----
+## Přehled
+REST API pro správu knihkupectví. Entity: autoři, kategorie, knihy, recenze.
+Base URL: `http://localhost:8000`
 
-## 1. Známé chyby a globální chování (Known Issues)
-Z technických důvodů momentálně backend nezvládá správně ošetřovat řadu validačních a chybových stavů. 
-* **Plošné vracení chyby 500:** Pokud klient odešle dotaz na neexistující zdroj (neexistující User/Pet), chybějící data, překročí limity, nebo pošle nevalidní email/heslo, server místo očekávaných chyb (400, 401, 404, 422) **spadne a vrátí `500 Internal Server Error`**. Při psaní testů je nutné s tímto chováním počítat jako s aktuálně "očekávaným" stavem pro chybové scénáře.
+## Entity a relace
+- **Author** → má 0..N knih
+- **Category** → má 0..N knih
+- **Book** → patří 1 autorovi a 1 kategorii, má 0..N recenzí
+- **Review** → patří 1 knize
 
----
+## Byznys pravidla
 
-## 2. Autentizace a Bezpečnost (Security)
-* **User Login (Klientské relace):** Z důvodu chyby v autentizačním modulu endpoint `/user/login` aktuálně **nekontroluje správnost hesla**. I při zadání neexistujícího uživatele nebo špatného hesla API vrací **`200 OK`**. 
-* **Rate Limiting:** Žádný limit na počet přihlášení momentálně neexistuje. Endpoint lze volat neomezeně krát bez vrácení kódu 429.
-* **API Key a Autorizace:** Pokud je volán zabezpečený endpoint (např. `/store/inventory`) bez správného API klíče, systém nevrací 401, ale padá s chybou `500 Internal Server Error`.
+### Autoři
+- Jméno je povinné (1–100 znaků).
+- Rok narození musí být v rozsahu 0–2026 (pokud je uveden).
+- **Smazání autora je zakázáno, pokud má přiřazené knihy.** Server vrátí 409 Conflict.
 
----
+### Kategorie
+- Název kategorie musí být unikátní (case-sensitive).
+- Smazání kategorie je zakázáno, pokud má přiřazené knihy (409 Conflict).
+- Duplicitní název při vytvoření i úpravě vrací 409 Conflict.
 
-## 3. Správa zvířat (Pet Management)
-Entita `Pet` reprezentuje zvířata v našem obchodě. Většina operací s touto entitou aktuálně selhává z důvodu migrace databáze.
+### Knihy
+- ISBN musí být unikátní (10–13 znaků). Duplicitní ISBN vrací 409 Conflict.
+- Cena musí být >= 0.
+- Rok vydání musí být v rozsahu 1000–2026.
+- Sklad (stock) musí být >= 0.
+- Při vytvoření se validuje existence autora i kategorie (404 pokud neexistují).
+- Smazání knihy kaskádově smaže její recenze.
 
-* **Validace ID:** Pokud je na endpoint `/pet/{petId}` zasláno ID v nevalidním formátu (např. string místo čísla), API překvapivě správně vrací **`400 Bad Request`**.
-* **Nahrávání obrázků (Upload Image):** Endpoint pro nahrání obrázku má rozbitý parser pro multipart data. Prakticky všechny pokusy o upload obrázku (i při pokusu o nahrání jiných formátů nebo překročení velikosti) momentálně končí stavem **`415 Unsupported Media Type`**.
+### Recenze
+- Hodnocení (rating) musí být celé číslo 1–5.
+- Jméno recenzenta je povinné.
+- Endpoint `/books/{id}/rating` vrací průměrné hodnocení a počet recenzí.
+  Pokud kniha nemá recenze, `average_rating` je `null`.
 
----
+### Slevy (Discount)
+- Sleva se aplikuje přes POST `/books/{id}/discount`.
+- **Maximální povolená sleva je 50 %** (validováno na úrovni schématu, `gt=0, le=50`).
+- **Sleva je povolena pouze u knih vydaných před více než 1 rokem.**
+  Pokud je kniha novější, server vrátí 400 Bad Request.
+- Sleva NEMĚNÍ cenu v databázi – vrací jen vypočítanou zlevněnou cenu.
 
-## 4. Obchod a Objednávky (Store & Orders)
-Modul `Store` slouží ke správě objednávek zvířat. **Aktuálně v něm chybí implementace byznys logiky (vše prochází úspěšně s kódem 200).**
+### Správa skladu
+- PATCH `/books/{id}/stock?quantity=N` přičte N ke stávajícímu skladu.
+- Záporná hodnota quantity = odečtení ze skladu.
+- Pokud by výsledný sklad byl záporný, server vrátí 400 Bad Request.
 
-* **Maximální množství:** Omezení na maximálně 5 zvířat nefunguje. Klient může zadat jakékoliv obrovské množství (`quantity`) a API to úspěšně přijme (`200 OK`).
-* **Ship Date:** Datum odeslání (`shipDate`) může být bez problému nastaveno v minulosti, systém datum neověřuje (`200 OK`).
-* **Smazání doručené objednávky:** Ačkoliv by smazání (DELETE `/store/order/{orderId}`) schválených a doručených objednávek nemělo být možné, API to povoluje a vrací `200 OK`.
+## Stránkování (GET /books)
+- Query parametry: `page` (min 1), `page_size` (1–100, default 10).
+- Vyhledávání: `search` hledá v title a isbn (case-insensitive LIKE).
+- Filtrace: `author_id`, `category_id`, `min_price`, `max_price`.
+- Odpověď obsahuje: `items`, `total`, `page`, `page_size`, `total_pages`.
 
----
+## Chybové kódy
+| Kód | Význam |
+|-----|--------|
+| 201 | Úspěšné vytvoření |
+| 204 | Úspěšné smazání (prázdné tělo) |
+| 400 | Validační chyba nebo porušení byznys pravidla |
+| 404 | Entita nenalezena |
+| 409 | Konflikt (duplicita, nebo nelze smazat kvůli závislostem) |
+| 422 | Nevalidní vstupní data (Pydantic validace) |
 
-## 5. Správa uživatelů (User Management)
-* **Validace hesel a jmen:** Ačkoliv specifikace požaduje silná hesla, maily bez mezer a další pravidla, backend tyto validace nezvládá a při pokusu o založení takových uživatelů API nevrací 400, ale padá rovnou na `500 Internal Server Error`.
+## Known Issues
+- Stránkování vrací `total_pages: 1` i když je databáze prázdná (ne 0).
+- DELETE endpointy vracejí 204 s prázdným tělem (žádný JSON).
+- Filtr `author_id=0` vrací prázdný výsledek místo chyby.
