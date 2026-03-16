@@ -1,21 +1,79 @@
-STARÉ
+# Vibe Testing Framework – Výsledky experimentu
 
-=== [VÝSLEDKY EXPERIMENTU A METRIKY] === PRVNÍ L0
-1. Assertion Depth: 1.2 asercí na test (Zjištěno 24 asercí v 20 testech)
-2. Test Validity Rate: 30.0% (6 prošlo z celkových 20 spuštěných testů)
+## Konfigurace
+| Parametr | Hodnota |
+|---|---|
+| **LLM** | Gemini 3 Flash Preview |
+| **API** | Bookstore API |
+| **Počet testů (plán)** | 40 |
+| **Max iterací** | 5 |
+| **Datum** | 2026-03-16 |
 
+---
 
+## Výsledky podle úrovně kontextu
 
-=== [VÝSLEDKY EXPERIMENTU A METRIKY] === DRUHÝ L0
-1. Assertion Depth: 1.15 asercí na test (Zjištěno 23 asercí v 20 testech)
-2. Test Validity Rate: 35.0% (7 prošlo z celkových 20 spuštěných testů)
+### L0 – OpenAPI specifikace (black-box baseline)
 
+**Kontext:** Pouze OpenAPI specifikace. LLM nemá přístup k dokumentaci, zdrojovému kódu ani DB schématu.
 
-Není oficiální dokumentace ->
-Dokumentace byla vygenerovaná podle openapi + výstup L0
+#### Automatické metriky (pipeline)
 
-=== [VÝSLEDKY EXPERIMENTU A METRIKY] === L1
-1. Assertion Depth: 1.11 asercí na test (Zjištěno 21 asercí v 19 testech)
-2. Test Validity Rate: 84.21% (16 prošlo z celkových 19 spuštěných testů)
+| Metrika | Hodnota |
+|---|---|
+| **Test Validity Rate** | 100.0% (44/44) |
+| **Endpoint Coverage** | 90.91% (20/22) |
+| **Assertion Depth** | 1.61 avg (71 asserts / 44 tests) |
+| **Iterací použito** | ? / 5 |
 
+**Nepokryté endpointy:**
+- `DELETE /categories/{category_id}`
+- `GET /categories/{category_id}`
 
+#### Code Coverage (ruční měření)
+
+| Soubor | Statements | Miss | Coverage |
+|---|---|---|---|
+| `app/__init__.py` | 0 | 0 | 100% |
+| `app/crud.py` | 151 | 20 | 87% |
+| `app/database.py` | 17 | 0 | 100% |
+| `app/main.py` | 79 | 2 | 97% |
+| `app/models.py` | 43 | 0 | 100% |
+| `app/schemas.py` | 99 | 0 | 100% |
+| **TOTAL** | **389** | **22** | **94%** |
+
+---
+
+### L1 – OpenAPI + byznys dokumentace
+
+*Čeká na spuštění*
+
+---
+
+### L2 – L1 + zdrojový kód
+
+*Čeká na spuštění*
+
+---
+
+### L3 – L2 + DB schéma
+
+*Čeká na spuštění*
+
+---
+
+### L4 – L3 + existující testy (plný kontext)
+
+*Čeká na spuštění*
+
+---
+
+## Souhrn
+
+| Úroveň | Validity | Endpoint Cov | Assertion Depth | Code Coverage | Iterací |
+|---|---|---|---|---|---|
+| **L0** | 100.0% | 90.91% | 1.61 | 94% | ? |
+| **L1** | – | – | – | – | – |
+| **L2** | – | – | – | – | – |
+| **L3** | – | – | – | – | – |
+| **L4** | – | – | – | – | – |
