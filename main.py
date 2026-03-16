@@ -1,59 +1,76 @@
 """
-Vibe Testing Framework – Hlavní pipeline.
-Spouští celý experiment: kontext → plán → kód → validace → metriky.
+Vibe Testing Framework – Experiment Runner.
+Čte experiment.yaml a spouští všechny kombinace: LLM × API × Level × Run.
 """
 import os
+import sys
 import json
 import time
+import yaml
 from datetime import datetime
 from dotenv import load_dotenv
 
-from config import (
-    MAX_ITERATIONS, OPENAPI_PATH, DOC_PATH,
-    SOURCE_CODE_PATH, DB_SCHEMA_PATH, EXISTING_TESTS_PATH,
-    OUTPUTS_DIR, RESULTS_DIR, CONTEXT_LEVELS, API_BASE_URL,
-    API_SOURCE_DIR, API_PYTHON, API_SERVER_CMD,
-    API_SOURCE_MODULE, MUTATION_TARGET, API_STARTUP_WAIT,
-    RUN_CODE_COVERAGE, RUN_MUTATION_SCORE,
-)
-from llm_provider import GeminiProvider
+from llm_provider import create_llm
 from prompts.phase1_context import analyze_context
 from prompts.phase2_planning import generate_test_plan
 from prompts.phase3_generation import generate_test_code
 from prompts.phase4_validation import run_tests_and_validate
 from prompts.phase5_metrics import (
-    calculate_all_metrics,
+    calculate_assertion_depth,
+    calculate_endpoint_coverage,
+    parse_test_validity_rate,
     IterationTracker,
 )
 
+OUTPUTS_DIR = "outputs"
+RESULTS_DIR = "results"
 
-def run_pipeline(llm, level: str = "L0", run_id: int = 1) -> dict:
-    """Spustí jednu kompletní iteraci pipeline pro danou úroveň."""
-    output_filename = f"test_generated_{level}_run{run_id}.py"
-    plan_filename = f"test_plan_{level}_run{run_id}.json"
+CONTEXT_LEVELS = {
+    "L0": "OpenAPI specifikace",
+    "L1": "OpenAPI + dokumentace",
+    "L2": "L1 + zdrojový kód",
+    "L3": "L2 + DB schéma",
+    "L4": "L3 + existující testy",
+}
+
+
+def load_experiment_config(path: str = "experiment.yaml") -> dict:
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def run_pipeline(
+    llm, llm_name: str, api_cfg: dict, level: str,
+    run_id: int, test_count: int, max_iterations: int,
+) -> dict:
+    """Spustí jednu kombinaci: 1 LLM × 1 API × 1 Level × 1 Run."""
+    api_name = api_cfg["name"]
+    tag = f"{llm_name}__{api_name}__{level}__run{run_id}"
+    output_filename = f"test_generated_{tag}.py"
+    plan_filename = f"test_plan_{tag}.json"
     output_path = os.path.join(OUTPUTS_DIR, output_filename)
 
-    print(f"\n{'=' * 60}")
-    print(f"  PIPELINE | Model: {llm.__class__.__name__} | Úroveň: {level} | Běh: {run_id}")
-    print(f"  Popis: {CONTEXT_LEVELS.get(level, 'Neznámá úroveň')}")
-    print(f"{'=' * 60}")
+    inputs = api_cfg["inputs"]
+
+    print(f"\n{'=' * 65}")
+    print(f"  {llm_name} | {api_name} | {level} | Běh {run_id}")
+    print(f"{'=' * 65}")
 
     start_time = time.time()
 
     # ── FÁZE 1: Kontext ──────────────────────────────────
-    print("\n[FÁZE 1] Načítání kontextu...")
     context = analyze_context(
-        openapi_path=OPENAPI_PATH,
-        doc_path=DOC_PATH,
+        openapi_path=inputs["openapi"],
+        doc_path=inputs.get("documentation"),
         level=level,
-        source_code_path=SOURCE_CODE_PATH,
-        db_schema_path=DB_SCHEMA_PATH,
-        existing_tests_path=EXISTING_TESTS_PATH,
+        source_code_path=inputs.get("source_code"),
+        db_schema_path=inputs.get("db_schema"),
+        existing_tests_path=inputs.get("existing_tests"),
     )
 
     # ── FÁZE 2: Plánování ────────────────────────────────
-    print("\n[FÁZE 2] Generování testovacího plánu...")
-    test_plan = generate_test_plan(context, llm, level=level)
+    print(f"  [Fáze 2] Generování plánu ({test_count} testů)...")
+    test_plan = generate_test_plan(context, llm, level=level, test_count=test_count)
 
     os.makedirs(OUTPUTS_DIR, exist_ok=True)
     with open(os.path.join(OUTPUTS_DIR, plan_filename), "w", encoding="utf-8") as f:
@@ -63,166 +80,159 @@ def run_pipeline(llm, level: str = "L0", run_id: int = 1) -> dict:
         len(ep.get("test_cases", []))
         for ep in test_plan.get("test_plan", [])
     )
-    print(f"  Plán obsahuje {plan_test_count} testovacích případů.")
+    print(f"  Plán: {plan_test_count} testů")
 
-    # ── FÁZE 3 + 4: Generování kódu + Feedback loop ─────
-    print("\n[FÁZE 3+4] Generování kódu a iterativní validace...")
-    test_code = generate_test_code(test_plan, context, llm)
+    # ── FÁZE 3 + 4: Generování + Feedback loop ──────────
+    print(f"  [Fáze 3+4] Generování kódu (max {max_iterations} iterací)...")
+    test_code = generate_test_code(
+        test_plan, context, llm,
+        base_url=api_cfg["base_url"],
+    )
 
     tracker = IterationTracker()
     iteration = 0
     success = False
     output_log = ""
 
-    while iteration < MAX_ITERATIONS and not success:
+    while iteration < max_iterations and not success:
         iteration += 1
-        print(f"\n  --- Iterace {iteration}/{MAX_ITERATIONS} ---")
+        print(f"\n  --- Iterace {iteration}/{max_iterations} ---")
 
         success, output_log = run_tests_and_validate(
-            test_code, output_filename=output_filename
+            test_code,
+            output_filename=output_filename,
+            api_cfg=api_cfg,
         )
 
-        # Zaznamenej metriky této iterace
         tracker.record_iteration(iteration, output_log, output_path)
 
         if success:
             print("  ✅ Všechny testy prošly!")
+        elif iteration < max_iterations:
+            print("  ❌ Testy selhaly. Opravuji...")
+            test_code = generate_test_code(
+                test_plan, context, llm,
+                base_url=api_cfg["base_url"],
+                feedback=output_log,
+            )
         else:
-            if iteration < MAX_ITERATIONS:
-                print("  ❌ Testy selhaly. Spouštím sebereflexi LLM...")
-                test_code = generate_test_code(
-                    test_plan, context, llm, feedback=output_log
-                )
-            else:
-                print(f"  ⚠️ Dosažen max. počet iterací ({MAX_ITERATIONS}).")
+            print(f"  ⚠️ Max iterací dosaženo.")
 
     elapsed = round(time.time() - start_time, 2)
 
     # ── FÁZE 5: Metriky ─────────────────────────────────
-    print(f"\n[FÁZE 5] Výpočet metrik...")
+    ad = calculate_assertion_depth(output_path)
+    ec = calculate_endpoint_coverage(inputs["openapi"], test_plan)
+    tv = parse_test_validity_rate(output_log)
+    delta = tracker.get_delta()
 
-    api_dir = os.path.abspath(API_SOURCE_DIR) if os.path.isdir(API_SOURCE_DIR) else None
-    if not api_dir and (RUN_CODE_COVERAGE or RUN_MUTATION_SCORE):
-        print(f"  ⚠️ API adresář ({API_SOURCE_DIR}) nenalezen.")
-        print(f"     Code coverage a mutation score budou přeskočeny.")
-
-    metrics = calculate_all_metrics(
-        test_file=output_path,
-        openapi_path=OPENAPI_PATH,
-        test_plan=test_plan,
-        pytest_output=output_log,
-        api_source_dir=api_dir,
-        api_python=API_PYTHON,
-        server_cmd=API_SERVER_CMD,
-        source_module=API_SOURCE_MODULE,
-        run_coverage=RUN_CODE_COVERAGE and api_dir is not None,
-        run_mutation=RUN_MUTATION_SCORE and api_dir is not None,
-        mutation_paths=MUTATION_TARGET,
-        startup_wait=API_STARTUP_WAIT,
-        iteration_tracker=tracker,
-    )
-
-    # ── Výpis ────────────────────────────────────────────
-    cov = metrics["endpoint_coverage"]
-    ad = metrics["assertion_depth"]
-    tv = metrics["test_validity"]
-    cc = metrics.get("code_coverage", {})
-    ms = metrics.get("mutation_score", {})
-    delta = metrics.get("iteration_delta", {})
-
-    print(f"\n{'─' * 55}")
-    print(f"  VÝSLEDKY | {level} | Běh {run_id}")
-    print(f"{'─' * 55}")
-    print(f"  Test Validity Rate:  {tv['validity_rate_pct']}% "
-          f"({tv['tests_passed']} prošlo z {tv['total_executed']})")
-    print(f"  Endpoint Coverage:   {cov['endpoint_coverage_pct']}% "
-          f"({cov['covered_endpoints']}/{cov['total_api_endpoints']})")
-    print(f"  Assertion Depth:     {ad['assertion_depth']} asercí/test "
-          f"({ad['total_assertions']} v {ad['total_test_functions']} testech)")
-
-    if not cc.get("skipped"):
-        if "error" in cc:
-            print(f"  Code Coverage:       ❌ {cc['error']}")
-        else:
-            print(f"  Code Coverage:       {cc.get('line_coverage_pct', 'N/A')}% "
-                  f"({cc.get('covered_lines', '?')}/{cc.get('total_statements', '?')} řádků)")
-    else:
-        print(f"  Code Coverage:       přeskočeno")
-
-    if not ms.get("skipped"):
-        if "error" in ms:
-            print(f"  Mutation Score:      ❌ {ms['error']}")
-        else:
-            print(f"  Mutation Score:      {ms.get('mutation_score_pct', 'N/A')}% "
-                  f"({ms.get('mutants_killed', '?')}/{ms.get('total_mutants', '?')} zabitých)")
-    else:
-        print(f"  Mutation Score:      přeskočeno")
+    # Výpis
+    print(f"\n  {'─' * 50}")
+    print(f"  Validity: {tv['validity_rate_pct']}% ({tv['tests_passed']}/{tv['total_executed']})")
+    print(f"  Endpoint: {ec['endpoint_coverage_pct']}% ({ec['covered_endpoints']}/{ec['total_api_endpoints']})")
+    print(f"  Assert:   {ad['assertion_depth']} avg ({ad['total_assertions']} total)")
+    print(f"  Čas:      {elapsed}s | Iterací: {iteration}")
 
     d = delta.get("delta", {})
     if d:
-        print(f"\n  --- Iteration Delta (iter 1 → {delta.get('iterations_total', '?')}) ---")
-        print(f"  Validity Rate:  {d.get('validity_rate_delta', 0):+.2f} pp")
-        print(f"  Tests Passed:   {d.get('tests_passed_delta', 0):+d}")
-        print(f"  Tests Failed:   {d.get('tests_failed_delta', 0):+d}")
-        print(f"  Assert. Depth:  {d.get('assertion_depth_delta', 0):+.2f}")
-    elif delta.get("note"):
-        print(f"\n  Iteration Delta: {delta['note']}")
+        print(f"  Delta:    validity {d.get('validity_rate_delta', 0):+.1f}pp, "
+              f"assert {d.get('assertion_depth_delta', 0):+.2f}")
 
-    print(f"\n  Feedback iterací:    {iteration}")
-    print(f"  Celkový čas:         {elapsed}s")
-
-    result = {
+    return {
         "timestamp": datetime.now().isoformat(),
-        "model": llm.__class__.__name__,
-        "model_name": getattr(llm, 'model_name', 'unknown'),
+        "llm": llm_name,
+        "api": api_name,
         "level": level,
         "run_id": run_id,
         "iterations_used": iteration,
         "all_tests_passed": success,
         "elapsed_seconds": elapsed,
-        "metrics": metrics,
         "plan_test_count": plan_test_count,
         "output_filename": output_filename,
         "plan_filename": plan_filename,
+        "metrics": {
+            "test_validity": tv,
+            "endpoint_coverage": ec,
+            "assertion_depth": ad,
+            "iteration_delta": delta,
+        },
     }
 
-    return result
 
+def main():
+    load_dotenv()
 
-def save_results(results: list[dict]):
-    """Uloží všechny výsledky experimentu do JSON souboru."""
+    cfg = load_experiment_config()
+    exp = cfg["experiment"]
+    levels = exp["levels"]
+    max_iter = exp["max_iterations"]
+    runs = exp["runs_per_combination"]
+    test_count = exp["test_count"]
+
+    # Celkový počet kombinací
+    total = len(cfg["llms"]) * len(cfg["apis"]) * len(levels) * runs
+    print(f"\n🔬 EXPERIMENT: {exp['name']}")
+    print(f"   {len(cfg['llms'])} LLMs × {len(cfg['apis'])} APIs × {len(levels)} levels × {runs} runs = {total} běhů")
+    print(f"   Max iterací: {max_iter} | Testů na plán: {test_count}\n")
+
+    all_results = []
+    done = 0
+
+    for llm_cfg in cfg["llms"]:
+        api_key = os.environ.get(llm_cfg["api_key_env"])
+        if not api_key:
+            print(f"⚠️ {llm_cfg['api_key_env']} nenalezen, přeskakuji {llm_cfg['name']}")
+            continue
+
+        llm = create_llm(llm_cfg["provider"], api_key, llm_cfg["model"])
+        print(f"\n🤖 LLM: {llm_cfg['name']}")
+
+        for api_cfg in cfg["apis"]:
+            print(f"\n📦 API: {api_cfg['name']}")
+
+            for level in levels:
+                for run_id in range(1, runs + 1):
+                    done += 1
+                    print(f"\n[{done}/{total}] ", end="")
+
+                    try:
+                        result = run_pipeline(
+                            llm=llm,
+                            llm_name=llm_cfg["name"],
+                            api_cfg=api_cfg,
+                            level=level,
+                            run_id=run_id,
+                            test_count=test_count,
+                            max_iterations=max_iter,
+                        )
+                        all_results.append(result)
+                    except Exception as e:
+                        print(f"  ❌ CHYBA: {e}")
+                        all_results.append({
+                            "llm": llm_cfg["name"],
+                            "api": api_cfg["name"],
+                            "level": level,
+                            "run_id": run_id,
+                            "error": str(e),
+                        })
+
+    # Uložit výsledky
     os.makedirs(RESULTS_DIR, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    path = os.path.join(RESULTS_DIR, f"experiment_{timestamp}.json")
+    path = os.path.join(RESULTS_DIR, f"experiment_{exp['name']}_{timestamp}.json")
 
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
+        json.dump(all_results, f, indent=2, ensure_ascii=False)
 
-    print(f"\n📊 Výsledky uloženy do: {path}")
+    # Shrnutí
+    print(f"\n\n{'=' * 65}")
+    print(f"  EXPERIMENT DOKONČEN | {len(all_results)} běhů | Výsledky: {path}")
+    print(f"{'=' * 65}")
+
+    ok = sum(1 for r in all_results if r.get("all_tests_passed"))
+    err = sum(1 for r in all_results if "error" in r)
+    print(f"  ✅ Passed: {ok} | ❌ Failed: {len(all_results) - ok - err} | 💥 Error: {err}")
 
 
 if __name__ == "__main__":
-    load_dotenv()
-
-    gemini_key = os.environ.get("GEMINI_API_KEY")
-    if not gemini_key:
-        raise ValueError("GEMINI_API_KEY nenalezen v .env souboru.")
-
-    llm = GeminiProvider(api_key=gemini_key, model_name='gemini-3.1-flash-lite-preview')
-
-    # === EXPERIMENT ===
-    levels_to_run = ["L0"]  # Pro testování metrik; pro experiment ["L0","L1","L2","L3","L4"]
-    runs_per_level = 1
-
-    all_results = []
-
-    for level in levels_to_run:
-        for run_id in range(1, runs_per_level + 1):
-            result = run_pipeline(llm=llm, level=level, run_id=run_id)
-            all_results.append(result)
-
-    save_results(all_results)
-
-    print("\n" + "=" * 60)
-    print("  EXPERIMENT DOKONČEN")
-    print("=" * 60)
+    main()
