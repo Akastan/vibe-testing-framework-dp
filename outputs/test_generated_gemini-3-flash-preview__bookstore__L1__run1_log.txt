@@ -1,0 +1,1413 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+collecting ... collected 42 items
+
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_health_check_success PASSED [  2%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_author_valid PASSED [  4%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_author_missing_name PASSED [  7%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_author_born_year_min PASSED [  9%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_author_born_year_future PASSED [ 11%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_authors_default PASSED [ 14%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_get_author_by_id PASSED [ 16%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_delete_author_with_books PASSED [ 19%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_delete_author_success PASSED [ 21%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_category_valid PASSED [ 23%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_category_duplicate_name PASSED [ 26%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_delete_category_with_books PASSED [ 28%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_update_category_name_valid PASSED [ 30%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_update_category_name_duplicate PASSED [ 33%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_book_valid PASSED [ 35%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_book_duplicate_isbn PASSED [ 38%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_book_invalid_author PASSED [ 40%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_book_published_year_edge_min PASSED [ 42%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_book_negative_price PASSED [ 45%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_books_search_title FAILED [ 47%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_books_filter_price_range FAILED [ 50%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_books_pagination_max_limit FAILED [ 52%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_books_invalid_author_id_zero FAILED [ 54%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_get_book_not_found FAILED [ 57%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_get_book_detail FAILED [ 59%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_delete_book_cascade_reviews FAILED [ 61%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_books_empty_db FAILED [ 64%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_review_valid FAILED [ 66%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_review_rating_out_of_range FAILED [ 69%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_review_empty_reviewer FAILED [ 71%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_reviews_success FAILED [ 73%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_get_rating_with_data FAILED [ 76%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_get_rating_no_reviews FAILED [ 78%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_apply_discount_valid_old_book FAILED [ 80%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_apply_discount_new_book FAILED [ 83%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_apply_discount_exceed_max FAILED [ 85%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_apply_discount_zero_percent FAILED [ 88%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_update_stock_add_quantity FAILED [ 90%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_update_stock_remove_quantity_valid FAILED [ 92%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_update_stock_negative_result FAILED [ 95%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_update_stock_zero_quantity FAILED [ 97%]
+outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_reset_database_functional FAILED [100%]
+
+================================== FAILURES ===================================
+________________________ test_list_books_search_title _________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:220: in test_list_books_search_title
+    a = create_author()
+        ^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:11: in create_author
+    r = requests.post(f"{BASE_URL}/authors", json=payload, timeout=5)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+_____________________ test_list_books_filter_price_range ______________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:228: in test_list_books_filter_price_range
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+____________________ test_list_books_pagination_max_limit _____________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:239: in test_list_books_pagination_max_limit
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+___________________ test_list_books_invalid_author_id_zero ____________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:244: in test_list_books_invalid_author_id_zero
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+___________________________ test_get_book_not_found ___________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:250: in test_get_book_not_found
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+____________________________ test_get_book_detail _____________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:256: in test_get_book_detail
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+______________________ test_delete_book_cascade_reviews _______________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:267: in test_delete_book_cascade_reviews
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+__________________________ test_list_books_empty_db ___________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:276: in test_list_books_empty_db
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+__________________________ test_create_review_valid ___________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:284: in test_create_review_valid
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+___________________ test_create_review_rating_out_of_range ____________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:293: in test_create_review_rating_out_of_range
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+______________________ test_create_review_empty_reviewer ______________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:302: in test_create_review_empty_reviewer
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+__________________________ test_list_reviews_success __________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:311: in test_list_reviews_success
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+__________________________ test_get_rating_with_data __________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:323: in test_get_rating_with_data
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+_________________________ test_get_rating_no_reviews __________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:334: in test_get_rating_no_reviews
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+_____________________ test_apply_discount_valid_old_book ______________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:345: in test_apply_discount_valid_old_book
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+________________________ test_apply_discount_new_book _________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:354: in test_apply_discount_new_book
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+_______________________ test_apply_discount_exceed_max ________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:363: in test_apply_discount_exceed_max
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+______________________ test_apply_discount_zero_percent _______________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:371: in test_apply_discount_zero_percent
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+_______________________ test_update_stock_add_quantity ________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:381: in test_update_stock_add_quantity
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+___________________ test_update_stock_remove_quantity_valid ___________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:390: in test_update_stock_remove_quantity_valid
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+______________________ test_update_stock_negative_result ______________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:399: in test_update_stock_negative_result
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+_______________________ test_update_stock_zero_quantity _______________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:408: in test_update_stock_zero_quantity
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+_______________________ test_reset_database_functional ________________________
+.venv\Lib\site-packages\urllib3\connectionpool.py:534: in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\connection.py:571: in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:1419: in getresponse
+    response.begin()
+C:\Program Files\Python312\Lib\http\client.py:331: in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\http\client.py:292: in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\Python312\Lib\socket.py:707: in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+E   TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+.venv\Lib\site-packages\requests\adapters.py:644: in send
+    resp = conn.urlopen(
+.venv\Lib\site-packages\urllib3\connectionpool.py:841: in urlopen
+    retries = retries.increment(
+.venv\Lib\site-packages\urllib3\util\retry.py:490: in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\urllib3\util\util.py:39: in reraise
+    raise value
+.venv\Lib\site-packages\urllib3\connectionpool.py:787: in urlopen
+    response = self._make_request(
+.venv\Lib\site-packages\urllib3\connectionpool.py:536: in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+.venv\Lib\site-packages\urllib3\connectionpool.py:367: in _raise_timeout
+    raise ReadTimeoutError(
+E   urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+
+During handling of the above exception, another exception occurred:
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:419: in test_reset_database_functional
+    reset_db()
+outputs\test_generated_gemini-3-flash-preview__bookstore__L1__run1.py:7: in reset_db
+    requests.post(f"{BASE_URL}/reset", timeout=5)
+.venv\Lib\site-packages\requests\api.py:115: in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\api.py:59: in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:589: in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\sessions.py:703: in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\requests\adapters.py:690: in send
+    raise ReadTimeout(e, request=request)
+E   requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=5)
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_books_search_title
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_books_filter_price_range
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_books_pagination_max_limit
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_books_invalid_author_id_zero
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_get_book_not_found
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_get_book_detail
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_delete_book_cascade_reviews
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_books_empty_db
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_review_valid
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_review_rating_out_of_range
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_create_review_empty_reviewer
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_list_reviews_success
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_get_rating_with_data
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_get_rating_no_reviews
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_apply_discount_valid_old_book
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_apply_discount_new_book
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_apply_discount_exceed_max
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_apply_discount_zero_percent
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_update_stock_add_quantity
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_update_stock_remove_quantity_valid
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_update_stock_negative_result
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_update_stock_zero_quantity
+FAILED outputs/test_generated_gemini-3-flash-preview__bookstore__L1__run1.py::test_reset_database_functional
+================== 23 failed, 19 passed in 294.49s (0:04:54) ==================
+

@@ -46,13 +46,68 @@
 
 ### L1 – OpenAPI + byznys dokumentace
 
-*Čeká na spuštění*
+**Kontext:** OpenAPI specifikace + technická a byznys dokumentace (chybové kódy, byznys pravidla, known issues).
+
+#### Automatické metriky (pipeline)
+
+| Metrika | Hodnota |
+|---|---|
+| **Test Validity Rate** | 100.0% (42/42) |
+| **Endpoint Coverage** | 81.82% (18/22) |
+| **Assertion Depth** | 2.02 avg (85 asserts / 42 tests) |
+| **Iterací použito** | ? / 5 |
+
+**Nepokryté endpointy:**
+- `GET /categories`
+- `GET /categories/{category_id}`
+- `PUT /authors/{author_id}`
+- `PUT /books/{book_id}`
+
+#### Code Coverage (ruční měření)
+
+| Soubor | Statements | Miss | Coverage |
+|---|---|---|---|
+| `app/__init__.py` | 0 | 0 | 100% |
+| `app/crud.py` | 151 | 28 | 81% |
+| `app/database.py` | 17 | 0 | 100% |
+| `app/main.py` | 79 | 4 | 95% |
+| `app/models.py` | 43 | 0 | 100% |
+| `app/schemas.py` | 99 | 0 | 100% |
+| **TOTAL** | **389** | **32** | **92%** |
 
 ---
 
 ### L2 – L1 + zdrojový kód
 
-*Čeká na spuštění*
+**Kontext:** OpenAPI + dokumentace + zdrojový kód endpointů (main.py, crud.py, schemas.py).
+
+#### Automatické metriky (pipeline)
+
+| Metrika | Hodnota |
+|---|---|
+| **Test Validity Rate** | 100.0% (40/40) |
+| **Endpoint Coverage** | 77.27% (17/22) |
+| **Assertion Depth** | 2.20 avg (88 asserts / 40 tests) |
+| **Iterací použito** | ? / 5 |
+
+**Nepokryté endpointy:**
+- `GET /books/{book_id}`
+- `GET /categories`
+- `GET /categories/{category_id}`
+- `PUT /authors/{author_id}`
+- `PUT /categories/{category_id}`
+
+#### Code Coverage (ruční měření)
+
+| Soubor | Statements | Miss | Coverage |
+|---|---|---|---|
+| `app/__init__.py` | 0 | 0 | 100% |
+| `app/crud.py` | 151 | 28 | 81% |
+| `app/database.py` | 17 | 0 | 100% |
+| `app/main.py` | 79 | 5 | 94% |
+| `app/models.py` | 43 | 0 | 100% |
+| `app/schemas.py` | 99 | 0 | 100% |
+| **TOTAL** | **389** | **33** | **92%** |
 
 ---
 
@@ -73,7 +128,7 @@
 | Úroveň | Validity | Endpoint Cov | Assertion Depth | Code Coverage | Iterací |
 |---|---|---|---|---|---|
 | **L0** | 100.0% | 90.91% | 1.61 | 94% | ? |
-| **L1** | – | – | – | – | – |
-| **L2** | – | – | – | – | – |
+| **L1** | 100.0% | 81.82% | 2.02 | 92% | ? |
+| **L2** | 100.0% | 77.27% | 2.20 | 92% | ? |
 | **L3** | – | – | – | – | – |
 | **L4** | – | – | – | – | – |

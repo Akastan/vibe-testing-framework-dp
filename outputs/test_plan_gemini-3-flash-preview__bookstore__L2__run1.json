@@ -1,0 +1,346 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_status_ok",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Overeni, ze API bezi a vraci status ok."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni autora se vsemi validnimi poli."
+        },
+        {
+          "name": "create_author_empty_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o vytvoreni autora s prazdnym jmenem."
+        },
+        {
+          "name": "create_author_max_length_name",
+          "type": "edge_case",
+          "expected_status": 201,
+          "description": "Vytvoreni autora se jmenem o delce presne 100 znaku."
+        },
+        {
+          "name": "create_author_future_born_year",
+          "type": "edge_case",
+          "expected_status": 201,
+          "description": "Vytvoreni autora s rokem narozeni 2026 (hranicni hodnota)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_default",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani seznamu autoru s vychozim strankovanim."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani detailu existujiciho autora."
+        },
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Ziskani autora s neexistujicim ID."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_with_books",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Smazani autora, ktery ma prirazene knihy (zakazano byznys pravidlem)."
+        },
+        {
+          "name": "delete_author_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Uspesne smazani autora bez knih."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni nove kategorie s popisem."
+        },
+        {
+          "name": "create_category_duplicate_name",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Pokus o vytvoreni kategorie se stejnym nazvem."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories/{category_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_category_with_books",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Pokus o smazani kategorie obsahujici knihy."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni knihy s validnimi FK (autor, kategorie)."
+        },
+        {
+          "name": "create_book_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Vytvoreni knihy s jiz existujicim ISBN."
+        },
+        {
+          "name": "create_book_invalid_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Vytvoreni knihy pro neexistujiciho autora."
+        },
+        {
+          "name": "create_book_zero_price",
+          "type": "edge_case",
+          "expected_status": 201,
+          "description": "Vytvoreni knihy s cenou 0 (min_limit)."
+        },
+        {
+          "name": "create_book_isbn_min_length",
+          "type": "edge_case",
+          "expected_status": 201,
+          "description": "Vytvoreni knihy s ISBN o delce presne 10 znaku."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Test strankovani: druha strana, velikost 5."
+        },
+        {
+          "name": "list_books_search_title",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Vyhledavani knihy podle casti nazvu."
+        },
+        {
+          "name": "list_books_filter_price",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Filtrace knih podle cenoveho rozpeti min_price a max_price."
+        },
+        {
+          "name": "list_books_author_id_zero",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Filtrace author_id=0 (known issue - vraci prazdny list)."
+        },
+        {
+          "name": "list_books_page_size_max",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Pozadavek na maximalni page_size 100."
+        },
+        {
+          "name": "list_books_invalid_page",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pozadavek na stranku 0 (musi byt >= 1)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_book_partial",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Aktualizace pouze ceny knihy."
+        },
+        {
+          "name": "update_book_invalid_published_year",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Aktualizace roku vydani mimo povoleny rozsah (napriklad 999)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Pridani validni recenze ke knize."
+        },
+        {
+          "name": "create_review_rating_out_of_range",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o hodnoceni 6 (limit je 5)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_reviews_for_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani vsech recenzi pro konkretni knihu."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/rating",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_rating_existing_reviews",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani prumerneho hodnoceni knihy s recenzemi."
+        },
+        {
+          "name": "get_rating_no_reviews",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Ziskani hodnoceni u knihy bez recenzi (ocekava se null)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_valid_old_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Uplatneni slevy 20% na knihu starsi nez 1 rok."
+        },
+        {
+          "name": "apply_discount_too_high",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o slevu 51% (limit 50%)."
+        },
+        {
+          "name": "apply_discount_new_book",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Pokus o slevu na novou knihu (vydanou v aktualnim roce)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_add",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Navyseni skladu o kladnou hodnotu."
+        },
+        {
+          "name": "update_stock_subtract",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Snizeni skladu o validni mnozstvi."
+        },
+        {
+          "name": "update_stock_negative_result",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Snizeni skladu pod nulu (zakazano)."
+        },
+        {
+          "name": "update_stock_zero_change",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Zmena skladu o 0 jednotek."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_book_cascade_reviews",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Smazani knihy a overeni kaskadoveho smazani recenzi."
+        }
+      ]
+    },
+    {
+      "endpoint": "/reset",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "reset_database_full",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Smazani vsech dat v DB pro ucely testovani."
+        }
+      ]
+    }
+  ]
+}
