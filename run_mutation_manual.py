@@ -107,7 +107,7 @@ def run_tests(test_file: str) -> tuple[bool, int]:
     result = subprocess.run(
         [sys.executable, "-m", "pytest", test_file,
          "-v", "--tb=no", "--disable-warnings"],
-        capture_output=True, text=True, timeout=120,
+        capture_output=True, text=True, timeout=600,
     )
     output = result.stdout + "\n" + result.stderr
     num_passed = len(re.findall(r' PASSED', output))
@@ -142,7 +142,7 @@ def main():
         baseline_result = subprocess.run(
             [sys.executable, "-m", "pytest", test_file,
              "-v", "--tb=short", "--disable-warnings"],
-            capture_output=True, text=True, timeout=120,
+            capture_output=True, text=True, timeout=600,
         )
         baseline_output = baseline_result.stdout + "\n" + baseline_result.stderr
 

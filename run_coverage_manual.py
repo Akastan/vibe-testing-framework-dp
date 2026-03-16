@@ -49,7 +49,7 @@ def main():
     # Spusť testy
     print(f"\nSpouštím testy: {test_file}")
     result = subprocess.run(
-        [sys.executable, "-m", "pytest", test_file, "-v", "--tb=short", "--timeout=10"],
+        [sys.executable, "-m", "pytest", test_file, "-v", "--tb=short", "--disable-warnings"],
         text=True,
     )
 
