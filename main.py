@@ -11,7 +11,10 @@ from dotenv import load_dotenv
 from config import (
     MAX_ITERATIONS, OPENAPI_PATH, DOC_PATH,
     SOURCE_CODE_PATH, DB_SCHEMA_PATH, EXISTING_TESTS_PATH,
-    OUTPUTS_DIR, RESULTS_DIR, CONTEXT_LEVELS, API_BASE_URL
+    OUTPUTS_DIR, RESULTS_DIR, CONTEXT_LEVELS, API_BASE_URL,
+    API_SOURCE_DIR, API_PYTHON, API_SERVER_CMD,
+    API_SOURCE_MODULE, MUTATION_TARGET, API_STARTUP_WAIT,
+    RUN_CODE_COVERAGE, RUN_MUTATION_SCORE,
 )
 from llm_provider import GeminiProvider
 from prompts.phase1_context import analyze_context
@@ -19,16 +22,13 @@ from prompts.phase2_planning import generate_test_plan
 from prompts.phase3_generation import generate_test_code
 from prompts.phase4_validation import run_tests_and_validate
 from prompts.phase5_metrics import (
-    calculate_assertion_depth,
-    calculate_endpoint_coverage,
-    parse_test_validity_rate
+    calculate_all_metrics,
+    IterationTracker,
 )
 
 
 def run_pipeline(llm, level: str = "L0", run_id: int = 1) -> dict:
-    """
-    Spustí jednu kompletní iteraci pipeline pro danou úroveň a vrátí metriky.
-    """
+    """Spustí jednu kompletní iteraci pipeline pro danou úroveň."""
     output_filename = f"test_generated_{level}_run{run_id}.py"
     plan_filename = f"test_plan_{level}_run{run_id}.json"
     output_path = os.path.join(OUTPUTS_DIR, output_filename)
@@ -69,6 +69,7 @@ def run_pipeline(llm, level: str = "L0", run_id: int = 1) -> dict:
     print("\n[FÁZE 3+4] Generování kódu a iterativní validace...")
     test_code = generate_test_code(test_plan, context, llm)
 
+    tracker = IterationTracker()
     iteration = 0
     success = False
     output_log = ""
@@ -77,14 +78,21 @@ def run_pipeline(llm, level: str = "L0", run_id: int = 1) -> dict:
         iteration += 1
         print(f"\n  --- Iterace {iteration}/{MAX_ITERATIONS} ---")
 
-        success, output_log = run_tests_and_validate(test_code, output_filename=output_filename)
+        success, output_log = run_tests_and_validate(
+            test_code, output_filename=output_filename
+        )
+
+        # Zaznamenej metriky této iterace
+        tracker.record_iteration(iteration, output_log, output_path)
 
         if success:
             print("  ✅ Všechny testy prošly!")
         else:
             if iteration < MAX_ITERATIONS:
                 print("  ❌ Testy selhaly. Spouštím sebereflexi LLM...")
-                test_code = generate_test_code(test_plan, context, llm, feedback=output_log)
+                test_code = generate_test_code(
+                    test_plan, context, llm, feedback=output_log
+                )
             else:
                 print(f"  ⚠️ Dosažen max. počet iterací ({MAX_ITERATIONS}).")
 
@@ -93,24 +101,75 @@ def run_pipeline(llm, level: str = "L0", run_id: int = 1) -> dict:
     # ── FÁZE 5: Metriky ─────────────────────────────────
     print(f"\n[FÁZE 5] Výpočet metrik...")
 
-    coverage = calculate_endpoint_coverage(OPENAPI_PATH, test_plan)
-    assertions = calculate_assertion_depth(output_path)
-    validity = parse_test_validity_rate(output_log)
+    api_dir = os.path.abspath(API_SOURCE_DIR) if os.path.isdir(API_SOURCE_DIR) else None
+    if not api_dir and (RUN_CODE_COVERAGE or RUN_MUTATION_SCORE):
+        print(f"  ⚠️ API adresář ({API_SOURCE_DIR}) nenalezen.")
+        print(f"     Code coverage a mutation score budou přeskočeny.")
 
-    print(f"\n{'─' * 50}")
+    metrics = calculate_all_metrics(
+        test_file=output_path,
+        openapi_path=OPENAPI_PATH,
+        test_plan=test_plan,
+        pytest_output=output_log,
+        api_source_dir=api_dir,
+        api_python=API_PYTHON,
+        server_cmd=API_SERVER_CMD,
+        source_module=API_SOURCE_MODULE,
+        run_coverage=RUN_CODE_COVERAGE and api_dir is not None,
+        run_mutation=RUN_MUTATION_SCORE and api_dir is not None,
+        mutation_paths=MUTATION_TARGET,
+        startup_wait=API_STARTUP_WAIT,
+        iteration_tracker=tracker,
+    )
+
+    # ── Výpis ────────────────────────────────────────────
+    cov = metrics["endpoint_coverage"]
+    ad = metrics["assertion_depth"]
+    tv = metrics["test_validity"]
+    cc = metrics.get("code_coverage", {})
+    ms = metrics.get("mutation_score", {})
+    delta = metrics.get("iteration_delta", {})
+
+    print(f"\n{'─' * 55}")
     print(f"  VÝSLEDKY | {level} | Běh {run_id}")
-    print(f"{'─' * 50}")
-    print(f"  Endpoint Coverage:   {coverage['endpoint_coverage_pct']}% "
-          f"({coverage['covered_endpoints']}/{coverage['total_api_endpoints']})")
-    print(f"  Assertion Depth:     {assertions['assertion_depth']} asercí/test "
-          f"({assertions['total_assertions']} v {assertions['total_test_functions']} testech)")
-    print(f"  Test Validity Rate:  {validity['validity_rate_pct']}% "
-          f"({validity['tests_passed']} prošlo z {validity['total_executed']})")
-    print(f"  Feedback iterací:    {iteration}")
-    print(f"  Celkový čas:         {elapsed}s")
+    print(f"{'─' * 55}")
+    print(f"  Test Validity Rate:  {tv['validity_rate_pct']}% "
+          f"({tv['tests_passed']} prošlo z {tv['total_executed']})")
+    print(f"  Endpoint Coverage:   {cov['endpoint_coverage_pct']}% "
+          f"({cov['covered_endpoints']}/{cov['total_api_endpoints']})")
+    print(f"  Assertion Depth:     {ad['assertion_depth']} asercí/test "
+          f"({ad['total_assertions']} v {ad['total_test_functions']} testech)")
 
-    if "error" in assertions:
-        print(f"  ⚠️ Assertion warning: {assertions['error']}")
+    if not cc.get("skipped"):
+        if "error" in cc:
+            print(f"  Code Coverage:       ❌ {cc['error']}")
+        else:
+            print(f"  Code Coverage:       {cc.get('line_coverage_pct', 'N/A')}% "
+                  f"({cc.get('covered_lines', '?')}/{cc.get('total_statements', '?')} řádků)")
+    else:
+        print(f"  Code Coverage:       přeskočeno")
+
+    if not ms.get("skipped"):
+        if "error" in ms:
+            print(f"  Mutation Score:      ❌ {ms['error']}")
+        else:
+            print(f"  Mutation Score:      {ms.get('mutation_score_pct', 'N/A')}% "
+                  f"({ms.get('mutants_killed', '?')}/{ms.get('total_mutants', '?')} zabitých)")
+    else:
+        print(f"  Mutation Score:      přeskočeno")
+
+    d = delta.get("delta", {})
+    if d:
+        print(f"\n  --- Iteration Delta (iter 1 → {delta.get('iterations_total', '?')}) ---")
+        print(f"  Validity Rate:  {d.get('validity_rate_delta', 0):+.2f} pp")
+        print(f"  Tests Passed:   {d.get('tests_passed_delta', 0):+d}")
+        print(f"  Tests Failed:   {d.get('tests_failed_delta', 0):+d}")
+        print(f"  Assert. Depth:  {d.get('assertion_depth_delta', 0):+.2f}")
+    elif delta.get("note"):
+        print(f"\n  Iteration Delta: {delta['note']}")
+
+    print(f"\n  Feedback iterací:    {iteration}")
+    print(f"  Celkový čas:         {elapsed}s")
 
     result = {
         "timestamp": datetime.now().isoformat(),
@@ -121,11 +180,7 @@ def run_pipeline(llm, level: str = "L0", run_id: int = 1) -> dict:
         "iterations_used": iteration,
         "all_tests_passed": success,
         "elapsed_seconds": elapsed,
-        "metrics": {
-            "endpoint_coverage": coverage,
-            "assertion_depth": assertions,
-            "test_validity": validity,
-        },
+        "metrics": metrics,
         "plan_test_count": plan_test_count,
         "output_filename": output_filename,
         "plan_filename": plan_filename,
@@ -156,8 +211,8 @@ if __name__ == "__main__":
     llm = GeminiProvider(api_key=gemini_key, model_name='gemini-3.1-flash-lite-preview')
 
     # === EXPERIMENT ===
-    levels_to_run = ["L0", "L1", "L2", "L3", "L4"]
-    runs_per_level = 1  # Pro diplomku nastavíš na 3–5
+    levels_to_run = ["L0"]  # Pro testování metrik; pro experiment ["L0","L1","L2","L3","L4"]
+    runs_per_level = 1
 
     all_results = []
 
