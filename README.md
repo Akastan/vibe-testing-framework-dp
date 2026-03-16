@@ -1,5 +1,9 @@
 # Vibe Testing Framework – Výsledky experimentu
 
+## Netestovat na reálných API - zatím testuji s lokálním bookstorem
+## https://github.com/Akastan/bookstore-api
+# Testy mažou databázi!
+
 ## Konfigurace
 | Parametr | Hodnota |
 |---|---|
