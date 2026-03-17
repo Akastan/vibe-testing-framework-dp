@@ -19,24 +19,42 @@ PLÁN:
 KONTEXT:
 {context_data}
 
-PRAVIDLA:
-- import pytest, requests na začátku
-- Každý test začíná test_, je self-contained, používá timeout=5 na každém HTTP volání
+TECHNICKÉ POŽADAVKY (aby testy šly spustit):
+- import pytest, requests, uuid na začátku
+- Každý test začíná test_, používá timeout=10 na každém HTTP volání
 - Nepoužívej fixtures ani conftest
-- Na začátek přidej helper: def reset_db(): requests.post(f"{{BASE_URL}}/reset", timeout=5)
-- DŮLEŽITÉ: Přidej jako PRVNÍ test funkci test_00_reset_database(), která zavolá reset_db().
-  To zajistí čistý stav databáze před spuštěním ostatních testů.
-- Testy co potřebují data si je vytvoří samy (helper funkce)
-- Každý test musí používat UNIKÁTNÍ názvy pro entity (např. přidej UUID suffix nebo číslo testu do názvů),
-  aby nedocházelo ke kolizím s daty z jiných testů
-- Neověřuj přesný text chybových hlášek, ověřuj jen status kód a přítomnost klíče "detail"
-- Pro nejednoznačné chyby použij: assert r.status_code in [400, 404, 422]
+- Databáze se resetuje automaticky PŘED spuštěním testů (framework to zajistí).
+  Negeneruj test na reset databáze.
+- Každý test musí být self-contained – vytvoří si vlastní data přes helper funkce.
+
+UNIKÁTNÍ NÁZVY (povinné, jinak testy kolidují):
+- Pro unikátní názvy použij uuid4 suffix:
+    def unique(prefix="test"):
+        return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
+- V KAŽDÉM helper volání generuj unikátní názvy:
+    def create_author(name=None):
+        name = name or unique("Author")
+        r = requests.post(f"{{BASE_URL}}/authors", json={{"name": name}}, timeout=10)
+        assert r.status_code == 201
+        return r.json()
+
+SPECIFIKA TOHOTO API (bez tohoto testy spadnou):
+- DELETE endpointy vracejí 204 s PRÁZDNÝM tělem. Nevolej .json() na 204 odpovědích.
+- DELETE /books/{{id}}/tags používá REQUEST BODY: requests.delete(..., json={{"tag_ids": [...]}})
+- PATCH /books/{{id}}/stock používá QUERY parametr: params={{"quantity": N}}, ne JSON body.
+- Neověřuj přesný text chybových hlášek, ověřuj status kód a přítomnost klíče "detail".
 
 Vrať POUZE Python kód, žádný markdown.
 """
 
     if feedback:
-        prompt += f"\nPředchozí verze selhala:\n{feedback[-2000:]}\nVrať KOMPLETNÍ opravený kód.\n"
+        prompt += f"""
+PŘEDCHOZÍ VERZE SELHALA. Analyzuj chyby a oprav je:
+{feedback[-3000:]}
+
+Vrať KOMPLETNÍ opravený kód se VŠEMI testy.
+Pokud vidíš 409 Conflict chyby, ujisti se že každý test používá unique() helper.
+"""
 
     raw = llm.generate_text(prompt)
 

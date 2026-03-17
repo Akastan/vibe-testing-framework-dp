@@ -6,8 +6,8 @@ import re
 
 
 def generate_test_plan(context_data: str, llm, level: str = "L0", test_count: int = 40) -> dict:
-    prompt = f"""Analyzuj toto API a vytvoř testovací plán. Vyber PŘESNĚ {test_count} nejdůležitějších testů.
-Mix: 50% happy path, 30% error, 20% edge case.
+    prompt = f"""Analyzuj toto API a vytvoř testovací plán s PŘESNĚ {test_count} testy.
+Rozhodni sám, které endpointy a scénáře jsou nejdůležitější pro otestování.
 
 Vrať POUZE validní JSON:
 {{
@@ -20,14 +20,19 @@ Vrať POUZE validní JSON:
           "name": "nazev_testu",
           "type": "happy_path",
           "expected_status": 200,
-          "description": "Popis"
+          "description": "Popis co test ověřuje"
         }}
       ]
     }}
   ]
 }}
 
-Pravidla: type = "happy_path"|"edge_case"|"error", name = snake_case bez diakritiky.
+PRAVIDLA:
+- type = "happy_path" | "edge_case" | "error"
+- name = snake_case bez diakritiky, unikátní napříč celým plánem
+- endpoint musí být přesná cesta z API (s path parametry jako {{book_id}})
+- method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+- Jeden endpoint (method+path) = jeden objekt v poli, s více test_cases uvnitř
 
 Kontext:
 {context_data}
