@@ -24,7 +24,11 @@ PRAVIDLA:
 - Každý test začíná test_, je self-contained, používá timeout=5 na každém HTTP volání
 - Nepoužívej fixtures ani conftest
 - Na začátek přidej helper: def reset_db(): requests.post(f"{{BASE_URL}}/reset", timeout=5)
+- DŮLEŽITÉ: Přidej jako PRVNÍ test funkci test_00_reset_database(), která zavolá reset_db().
+  To zajistí čistý stav databáze před spuštěním ostatních testů.
 - Testy co potřebují data si je vytvoří samy (helper funkce)
+- Každý test musí používat UNIKÁTNÍ názvy pro entity (např. přidej UUID suffix nebo číslo testu do názvů),
+  aby nedocházelo ke kolizím s daty z jiných testů
 - Neověřuj přesný text chybových hlášek, ověřuj jen status kód a přítomnost klíče "detail"
 - Pro nejednoznačné chyby použij: assert r.status_code in [400, 404, 422]
 
