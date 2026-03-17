@@ -58,13 +58,18 @@ def load_experiment_config(path: str = "experiment.yaml") -> dict:
         return yaml.safe_load(f)
 
 
+
+def _sanitize_tag(name: str) -> str:
+    """Nahradí tečky a jiné problematické znaky v názvu souboru."""
+    return name.replace(".", "_").replace(" ", "_")
+
 def run_pipeline(
     llm, llm_name: str, api_cfg: dict, level: str,
     run_id: int, test_count: int, max_iterations: int,
 ) -> dict:
     """Spustí jednu kombinaci: 1 LLM × 1 API × 1 Level × 1 Run."""
     api_name = api_cfg["name"]
-    tag = f"{llm_name}__{api_name}__{level}__run{run_id}"
+    tag = f"{_sanitize_tag(llm_name)}__{api_name}__{level}__run{run_id}"
     output_filename = f"test_generated_{tag}.py"
     plan_filename = f"test_plan_{tag}.json"
     output_path = os.path.join(OUTPUTS_DIR, output_filename)
