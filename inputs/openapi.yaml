@@ -1,8 +1,9 @@
 openapi: 3.1.0
 info:
   title: Bookstore API
-  description: REST API pro správu knihkupectví – knihy, autoři, kategorie a recenze.
-  version: 1.0.0
+  description: REST API pro správu knihkupectví – knihy, autoři, kategorie, recenze,
+    tagy a objednávky.
+  version: 2.0.0
 paths:
   /health:
     get:
@@ -603,6 +604,349 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /tags:
+    get:
+      tags:
+      - Tags
+      summary: List Tags
+      operationId: list_tags_tags_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TagResponse'
+                type: array
+                title: Response List Tags Tags Get
+    post:
+      tags:
+      - Tags
+      summary: Create Tag
+      operationId: create_tag_tags_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /tags/{tag_id}:
+    get:
+      tags:
+      - Tags
+      summary: Get Tag
+      operationId: get_tag_tags__tag_id__get
+      parameters:
+      - name: tag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Tag Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Tags
+      summary: Update Tag
+      operationId: update_tag_tags__tag_id__put
+      parameters:
+      - name: tag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Tag Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Tags
+      summary: Delete Tag
+      operationId: delete_tag_tags__tag_id__delete
+      parameters:
+      - name: tag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Tag Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/{book_id}/tags:
+    post:
+      tags:
+      - Tags
+      summary: Add Tags To Book
+      description: Přidá tagy ke knize. Již existující vazby se ignorují.
+      operationId: add_tags_to_book_books__book_id__tags_post
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookTagAction'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Tags
+      summary: Remove Tags From Book
+      description: Odebere tagy z knihy.
+      operationId: remove_tags_from_book_books__book_id__tags_delete
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookTagAction'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /orders:
+    post:
+      tags:
+      - Orders
+      summary: Create Order
+      description: Vytvoří objednávku, odečte sklad a zachytí aktuální ceny.
+      operationId: create_order_orders_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Orders
+      summary: List Orders
+      operationId: list_orders_orders_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 10
+          title: Page Size
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Status
+      - name: customer_name
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Customer Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrders'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /orders/{order_id}:
+    get:
+      tags:
+      - Orders
+      summary: Get Order
+      operationId: get_order_orders__order_id__get
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Orders
+      summary: Delete Order
+      description: Smaže objednávku. Lze smazat pouze pending nebo cancelled objednávky.
+      operationId: delete_order_orders__order_id__delete
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /orders/{order_id}/status:
+    patch:
+      tags:
+      - Orders
+      summary: Update Order Status
+      description: Změní stav objednávky dle povolených přechodů. Při zrušení vrátí
+        sklad.
+      operationId: update_order_status_orders__order_id__status_patch
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderStatusUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /reset:
     post:
       tags:
@@ -806,6 +1150,11 @@ components:
           $ref: '#/components/schemas/AuthorResponse'
         category:
           $ref: '#/components/schemas/CategoryResponse'
+        tags:
+          items:
+            $ref: '#/components/schemas/TagResponse'
+          type: array
+          title: Tags
       type: object
       required:
       - id
@@ -820,6 +1169,18 @@ components:
       - author
       - category
       title: BookResponse
+    BookTagAction:
+      properties:
+        tag_ids:
+          items:
+            type: integer
+          type: array
+          minItems: 1
+          title: Tag Ids
+      type: object
+      required:
+      - tag_ids
+      title: BookTagAction
     BookUpdate:
       properties:
         title:
@@ -963,6 +1324,146 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    OrderCreate:
+      properties:
+        customer_name:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Customer Name
+        customer_email:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Customer Email
+        items:
+          items:
+            $ref: '#/components/schemas/OrderItemCreate'
+          type: array
+          minItems: 1
+          title: Items
+      type: object
+      required:
+      - customer_name
+      - customer_email
+      - items
+      title: OrderCreate
+    OrderItemCreate:
+      properties:
+        book_id:
+          type: integer
+          title: Book Id
+        quantity:
+          type: integer
+          minimum: 1.0
+          title: Quantity
+      type: object
+      required:
+      - book_id
+      - quantity
+      title: OrderItemCreate
+    OrderItemResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        book_id:
+          type: integer
+          title: Book Id
+        quantity:
+          type: integer
+          title: Quantity
+        unit_price:
+          type: number
+          title: Unit Price
+      type: object
+      required:
+      - id
+      - book_id
+      - quantity
+      - unit_price
+      title: OrderItemResponse
+    OrderListResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        customer_name:
+          type: string
+          title: Customer Name
+        customer_email:
+          type: string
+          title: Customer Email
+        status:
+          type: string
+          title: Status
+        total_price:
+          type: number
+          title: Total Price
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - customer_name
+      - customer_email
+      - status
+      - total_price
+      - created_at
+      title: OrderListResponse
+    OrderResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        customer_name:
+          type: string
+          title: Customer Name
+        customer_email:
+          type: string
+          title: Customer Email
+        status:
+          type: string
+          title: Status
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+        items:
+          items:
+            $ref: '#/components/schemas/OrderItemResponse'
+          type: array
+          title: Items
+        total_price:
+          type: number
+          title: Total Price
+      type: object
+      required:
+      - id
+      - customer_name
+      - customer_email
+      - status
+      - created_at
+      - updated_at
+      - items
+      - total_price
+      title: OrderResponse
+    OrderStatusUpdate:
+      properties:
+        status:
+          type: string
+          pattern: ^(confirmed|shipped|delivered|cancelled)$
+          title: Status
+      type: object
+      required:
+      - status
+      title: OrderStatusUpdate
     PaginatedBooks:
       properties:
         items:
@@ -990,6 +1491,33 @@ components:
       - page_size
       - total_pages
       title: PaginatedBooks
+    PaginatedOrders:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/OrderListResponse'
+          type: array
+          title: Items
+        total:
+          type: integer
+          title: Total
+        page:
+          type: integer
+          title: Page
+        page_size:
+          type: integer
+          title: Page Size
+        total_pages:
+          type: integer
+          title: Total Pages
+      type: object
+      required:
+      - items
+      - total
+      - page
+      - page_size
+      - total_pages
+      title: PaginatedOrders
     ReviewCreate:
       properties:
         rating:
@@ -1044,6 +1572,46 @@ components:
       - reviewer_name
       - created_at
       title: ReviewResponse
+    TagCreate:
+      properties:
+        name:
+          type: string
+          maxLength: 30
+          minLength: 1
+          title: Name
+      type: object
+      required:
+      - name
+      title: TagCreate
+    TagResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - name
+      - created_at
+      title: TagResponse
+    TagUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            maxLength: 30
+            minLength: 1
+          - type: 'null'
+          title: Name
+      type: object
+      title: TagUpdate
     ValidationError:
       properties:
         loc:
