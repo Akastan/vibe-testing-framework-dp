@@ -1,6 +1,7 @@
 """
 Fáze 4: Spuštění vygenerovaných testů.
-Spustí API server, pustí testy, zastaví server, vrátí log.
+Spustí API server, pustí testy, vrátí log.
+Server běží napříč iteracemi – restartuje se jen když přestane odpovídat.
 """
 import os
 import sys
@@ -10,9 +11,11 @@ import requests as req
 
 OUTPUTS_DIR = "outputs"
 
+# Globální reference na běžící servery (sdílené napříč iteracemi)
+_managed_servers: dict[str, subprocess.Popen] = {}
+
 
 def _resolve_python(api_cfg: dict) -> str:
-    """Najde Python executable pro API server."""
     abs_api = os.path.abspath(api_cfg["source_dir"])
     candidates = [
         os.path.join(abs_api, ".venv", "Scripts", "python.exe"),
@@ -75,24 +78,40 @@ def _stop_server(proc):
         print(f"    [Server] Zastaven.")
 
 
+def stop_managed_server(api_cfg: dict):
+    """Zastaví server pro dané API. Volej po dokončení všech úrovní."""
+    key = api_cfg["base_url"]
+    proc = _managed_servers.pop(key, None)
+    if proc:
+        _stop_server(proc)
+
+
 def run_tests_and_validate(
     test_code: str,
     output_filename: str,
     api_cfg: dict,
 ) -> tuple[bool, str]:
-    """Uloží kód, spustí server, spustí pytest, vrátí (success, log)."""
+    """Uloží kód, zajistí server, spustí pytest, vrátí (success, log)."""
     os.makedirs(OUTPUTS_DIR, exist_ok=True)
     file_path = os.path.join(OUTPUTS_DIR, output_filename)
 
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(test_code)
 
-    # Server
-    server_proc = None
-    if not _is_server_running(api_cfg["base_url"]):
-        server_proc = _start_server(api_cfg)
-        if server_proc is None:
+    # Server – spustit pokud neběží, restartovat pokud nereaguje
+    key = api_cfg["base_url"]
+    if not _is_server_running(key):
+        # Zabij starý proces co přestal odpovídat
+        old_proc = _managed_servers.pop(key, None)
+        if old_proc:
+            print(f"    [Server] ⚠️ Server přestal odpovídat, restartuji...")
+            _stop_server(old_proc)
+            time.sleep(2)
+
+        proc = _start_server(api_cfg)
+        if proc is None:
             return False, "SERVER_ERROR: Nepodařilo se spustit API server.\n"
+        _managed_servers[key] = proc
 
     try:
         result = subprocess.run(
@@ -114,9 +133,4 @@ def run_tests_and_validate(
         return (result.returncode == 0), full_log
 
     except subprocess.TimeoutExpired:
-        msg = "TIMEOUT: pytest překročil 600s limit.\n"
-        return False, msg
-
-    finally:
-        if server_proc:
-            _stop_server(server_proc)
+        return False, "TIMEOUT: pytest překročil 600s limit.\n"

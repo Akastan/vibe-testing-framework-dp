@@ -1,6 +1,25 @@
+
 """
 Vibe Testing Framework – Experiment Runner.
 Čte experiment.yaml a spouští všechny kombinace: LLM × API × Level × Run.
+
+Použití:
+    1. Uprav experiment.yaml (LLM modely, API, úrovně, počet runů)
+    2. Nastav API klíče v .env (GEMINI_API_KEY, OPENAI_API_KEY, ...)
+    3. Ujisti se, že na portu 8000 NEBĚŽÍ žádný server (framework si ho spouští sám)
+    4. Spusť:
+         taskkill /IM python.exe /F          # Windows: zabij staré procesy
+         .venv\\Scripts\\Activate.ps1
+         python main.py
+
+    Server se spustí automaticky a zůstává běžet napříč iteracemi i úrovněmi.
+    Po dokončení všech úrovní pro dané API se server automaticky zastaví.
+
+Výstupy:
+    outputs/test_generated_{llm}__{api}__{level}__run{N}.py   – vygenerované testy
+    outputs/test_plan_{llm}__{api}__{level}__run{N}.json      – testovací plán
+    outputs/..._log.txt                                        – pytest log
+    results/experiment_{name}_{timestamp}.json                 – souhrnné metriky
 """
 import os
 import sys
