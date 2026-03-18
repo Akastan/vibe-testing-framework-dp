@@ -22,9 +22,9 @@ KONTEXT:
 TECHNICKÉ POŽADAVKY (aby testy šly spustit):
 - import pytest, requests, uuid na začátku
 - Každý test začíná test_, používá timeout=30 na každém HTTP volání
-- Nepoužívej fixtures ani conftest
+- Nepoužívej fixtures, conftest, setup_module, setup_function ani žádné pytest hooks.
 - Databáze se resetuje automaticky PŘED spuštěním testů (framework to zajistí).
-  Negeneruj test na reset databáze.
+  Negeneruj test na reset databáze a NEVOLEJ /reset endpoint nikde v kódu.
 - Každý test musí být self-contained – vytvoří si vlastní data přes helper funkce.
 
 UNIKÁTNÍ NÁZVY (povinné, jinak testy kolidují):

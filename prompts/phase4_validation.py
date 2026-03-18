@@ -182,8 +182,12 @@ def _detect_single_root_cause(pytest_output: str) -> tuple[bool, str | None]:
 def _run_pytest(file_path: str) -> tuple[int, str]:
     """Spustí pytest a vrátí (returncode, combined_output)."""
     result = subprocess.run(
-        ["pytest", file_path, "-v", "--tb=short", "--disable-warnings"],
-        capture_output=True, text=True, timeout=600,
+        [
+            "pytest", file_path, "-v", "--tb=short", "--disable-warnings",
+            "--timeout=30",
+            "--timeout-method=thread",
+        ],
+        capture_output=True, text=True, timeout=900,
     )
     return result.returncode, result.stdout + "\n" + result.stderr
 

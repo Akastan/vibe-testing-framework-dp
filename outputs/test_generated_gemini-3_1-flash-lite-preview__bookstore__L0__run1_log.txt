@@ -1,0 +1,240 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 48 items
+
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_health_check_success PASSED [  2%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_author_valid PASSED [  4%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_author_invalid_name PASSED [  6%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_author_long_name PASSED [  8%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_author_invalid_year PASSED [ 10%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_list_authors_default PASSED [ 12%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_list_authors_pagination PASSED [ 14%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_get_author_existing PASSED [ 16%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_get_author_nonexistent PASSED [ 18%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_author_success PASSED [ 20%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_delete_author_success PASSED [ 22%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_book_valid PASSED [ 25%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_book_negative_price PASSED [ 27%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_book_invalid_year PASSED [ 29%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_book_missing_isbn PASSED [ 31%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_list_books_search PASSED [ 33%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_list_books_price_range PASSED [ 35%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_list_books_invalid_page PASSED [ 37%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_get_book_details PASSED [ 39%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_book_stock FAILED [ 41%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_book_invalid_data FAILED [ 43%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_delete_book_success FAILED [ 45%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_add_review_success FAILED [ 47%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_add_review_invalid_rating FAILED [ 50%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_list_reviews_success FAILED [ 52%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_get_rating_calculation FAILED [ 54%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_apply_discount_valid FAILED [ 56%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_apply_discount_too_high FAILED [ 58%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_stock_success FAILED [ 60%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_add_tags_to_book_success FAILED [ 62%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_remove_tags_from_book FAILED [ 64%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_category_valid PASSED [ 66%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_category_duplicate_name FAILED [ 68%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_list_categories_all PASSED [ 70%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_category_name PASSED [ 72%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_delete_category_success PASSED [ 75%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_tag_valid PASSED [ 77%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_list_tags_all PASSED [ 79%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_tag_name PASSED [ 81%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_delete_tag_success PASSED [ 83%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_order_valid FAILED [ 85%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_order_insufficient_stock FAILED [ 87%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_list_orders_filtering PASSED [ 89%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_get_order_details FAILED [ 91%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_delete_pending_order FAILED [ 93%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_delete_shipped_order_fail FAILED [ 95%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_status_to_shipped FAILED [ 97%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_status_invalid_transition FAILED [100%]
+
+================================== FAILURES ===================================
+___________________________ test_update_book_stock ____________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:136: in test_update_book_stock
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+________________________ test_update_book_invalid_data ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:143: in test_update_book_invalid_data
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+__________________________ test_delete_book_success ___________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:150: in test_delete_book_success
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+___________________________ test_add_review_success ___________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:157: in test_add_review_success
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_add_review_invalid_rating ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:164: in test_add_review_invalid_rating
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+__________________________ test_list_reviews_success __________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:171: in test_list_reviews_success
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_________________________ test_get_rating_calculation _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:178: in test_get_rating_calculation
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+__________________________ test_apply_discount_valid __________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:185: in test_apply_discount_valid
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+________________________ test_apply_discount_too_high _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:192: in test_apply_discount_too_high
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+__________________________ test_update_stock_success __________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:199: in test_update_stock_success
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+________________________ test_add_tags_to_book_success ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:206: in test_add_tags_to_book_success
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_________________________ test_remove_tags_from_book __________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:214: in test_remove_tags_from_book
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_____________________ test_create_category_duplicate_name _____________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:228: in test_create_category_duplicate_name
+    assert r.status_code == 422
+E   assert 409 == 422
+E    +  where 409 = <Response [409]>.status_code
+___________________________ test_create_order_valid ___________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:265: in test_create_order_valid
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+____________________ test_create_order_insufficient_stock _____________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:272: in test_create_order_insufficient_stock
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+___________________________ test_get_order_details ____________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:283: in test_get_order_details
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+__________________________ test_delete_pending_order __________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:291: in test_delete_pending_order
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_delete_shipped_order_fail ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:299: in test_delete_shipped_order_fail
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+________________________ test_update_status_to_shipped ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:308: in test_update_status_to_shipped
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+____________________ test_update_status_invalid_transition ____________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:316: in test_update_status_invalid_transition
+    book = create_book(auth['id'], cat['id'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py:40: in create_book
+    assert r.status_code == 201
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_book_stock
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_book_invalid_data
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_delete_book_success
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_add_review_success
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_add_review_invalid_rating
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_list_reviews_success
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_get_rating_calculation
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_apply_discount_valid
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_apply_discount_too_high
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_stock_success
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_add_tags_to_book_success
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_remove_tags_from_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_category_duplicate_name
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_order_valid
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_create_order_insufficient_stock
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_get_order_details
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_delete_pending_order
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_delete_shipped_order_fail
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_status_to_shipped
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py::test_update_status_invalid_transition
+================== 20 failed, 28 passed in 216.82s (0:03:36) ==================
+
