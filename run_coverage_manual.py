@@ -32,9 +32,10 @@ def main():
         print(f"❌ Soubor {test_file} nenalezen.")
         sys.exit(1)
 
+    import requests
+
     # Ověř, že server běží
     try:
-        import requests
         r = requests.get("http://localhost:8000/health", timeout=2)
         if r.status_code != 200:
             raise Exception()
@@ -45,6 +46,17 @@ def main():
         print("   .venv\\Scripts\\Activate.ps1")
         print("   coverage run --source app -m uvicorn app.main:app --host 127.0.0.1 --port 8000")
         sys.exit(1)
+
+    # Reset databáze před testy
+    print("🔄 Resetuji databázi (POST /reset)...")
+    try:
+        r = requests.post("http://localhost:8000/reset", timeout=5)
+        if r.status_code == 200:
+            print("✅ Databáze resetována")
+        else:
+            print(f"⚠️  Reset vrátil {r.status_code} – pokračuji, ale výsledky nemusí odpovídat pipeline runu")
+    except Exception as e:
+        print(f"⚠️  Reset selhal ({e}) – pokračuji, ale výsledky nemusí odpovídat pipeline runu")
 
     # Spusť testy
     print(f"\nSpouštím testy: {test_file}")
