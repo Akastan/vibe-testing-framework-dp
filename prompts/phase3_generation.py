@@ -21,7 +21,7 @@ KONTEXT:
 
 TECHNICKÉ POŽADAVKY (aby testy šly spustit):
 - import pytest, requests, uuid na začátku
-- Každý test začíná test_, používá timeout=10 na každém HTTP volání
+- Každý test začíná test_, používá timeout=30 na každém HTTP volání
 - Nepoužívej fixtures ani conftest
 - Databáze se resetuje automaticky PŘED spuštěním testů (framework to zajistí).
   Negeneruj test na reset databáze.
@@ -34,7 +34,7 @@ UNIKÁTNÍ NÁZVY (povinné, jinak testy kolidují):
 - V KAŽDÉM helper volání generuj unikátní názvy:
     def create_author(name=None):
         name = name or unique("Author")
-        r = requests.post(f"{{BASE_URL}}/authors", json={{"name": name}}, timeout=10)
+        r = requests.post(f"{{BASE_URL}}/authors", json={{"name": name}}, timeout=30)
         assert r.status_code == 201
         return r.json()
 
