@@ -126,6 +126,7 @@ def run_pipeline(
             test_code,
             output_filename=output_filename,
             api_cfg=api_cfg,
+            iteration=iteration,
         )
 
         tracker.record_iteration(iteration, output_log, output_path)
