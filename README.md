@@ -159,4 +159,84 @@
 
 ## Code Coverage
 
-⏳ Ruční měření code coverage zatím neproběhlo pro tento run. Bude doplněno.
+Měřeno pomocí `coverage.py` (v7.13.4) nad celým `app/` balíčkem (635 statements). Před každým měřením byl proveden `POST /reset` pro čistý stav DB.
+
+### L0
+
+| Soubor | Statements | Miss | Coverage |
+|---|---|---|---|
+| `app/__init__.py` | 0 | 0 | 100% |
+| `app/crud.py` | 272 | 125 | 54% |
+| `app/database.py` | 17 | 0 | 100% |
+| `app/main.py` | 122 | 18 | 85% |
+| `app/models.py` | 70 | 0 | 100% |
+| `app/schemas.py` | 154 | 0 | 100% |
+| **TOTAL** | **635** | **143** | **77%** |
+
+Nepokryté CRUD funkce: `update_book`, `delete_book`, `create_review`, `get_reviews`, `get_book_average_rating`, `apply_discount`, `update_stock`, `add_tags_to_book`, `remove_tags_from_book`, `create_order`, `get_order`, `update_order_status`, `delete_order` — vše důsledek hardcoded ISBN bugu, který zablokoval vytváření knih.
+
+### L1
+
+| Soubor | Statements | Miss | Coverage |
+|---|---|---|---|
+| `app/__init__.py` | 0 | 0 | 100% |
+| `app/crud.py` | 272 | 52 | 81% |
+| `app/database.py` | 17 | 0 | 100% |
+| `app/main.py` | 122 | 2 | 98% |
+| `app/models.py` | 70 | 0 | 100% |
+| `app/schemas.py` | 154 | 0 | 100% |
+| **TOTAL** | **635** | **54** | **91%** |
+
+Nepokryté: `update_category`, `update_book` (celé), částečně `remove_tags_from_book`, `update_order_status`. main.py na 98% — chybí jen `update_category` a `update_book` endpointy.
+
+### L2
+
+| Soubor | Statements | Miss | Coverage |
+|---|---|---|---|
+| `app/__init__.py` | 0 | 0 | 100% |
+| `app/crud.py` | 272 | 45 | 83% |
+| `app/database.py` | 17 | 0 | 100% |
+| `app/main.py` | 122 | 9 | 93% |
+| `app/models.py` | 70 | 0 | 100% |
+| `app/schemas.py` | 154 | 0 | 100% |
+| **TOTAL** | **635** | **54** | **91%** |
+
+Nepokryté: `update_author`, `get_categories`, `update_category`, `delete_category`, `get_reviews`, `get_tags`. Stejné celkové coverage jako L1 (91%), ale s jiným rozložením — L2 pokrývá lépe order logiku a update_book, ale chybí jednoduché GET/CRUD endpointy pro kategorie a tagy.
+
+### L3
+
+| Soubor | Statements | Miss | Coverage |
+|---|---|---|---|
+| `app/__init__.py` | 0 | 0 | 100% |
+| `app/crud.py` | 272 | 99 | 64% |
+| `app/database.py` | 17 | 0 | 100% |
+| `app/main.py` | 122 | 14 | 89% |
+| `app/models.py` | 70 | 0 | 100% |
+| `app/schemas.py` | 154 | 0 | 100% |
+| **TOTAL** | **635** | **113** | **82%** |
+
+Výrazný pokles crud.py coverage (64%) — nepokryté: `update_author`, `update_book`, `delete_book`, `update_tag`, `get_order`, `update_order_status`, `delete_order`. Selhání `create_order` helperu zablokovalo celý order modul.
+
+### L4
+
+| Soubor | Statements | Miss | Coverage |
+|---|---|---|---|
+| `app/__init__.py` | 0 | 0 | 100% |
+| `app/crud.py` | 272 | 45 | 83% |
+| `app/database.py` | 17 | 0 | 100% |
+| `app/main.py` | 122 | 6 | 95% |
+| `app/models.py` | 70 | 0 | 100% |
+| `app/schemas.py` | 154 | 0 | 100% |
+| **TOTAL** | **635** | **51** | **92%** |
+
+Nejlepší celkové coverage ze všech úrovní (92%, 584/635). Nepokryté: `update_author`, `delete_category`, `get_reviews`, `update_tag`.
+
+### Souhrn Code Coverage
+
+| Úroveň | crud.py | main.py | TOTAL |
+|---|---|---|---|
+| **L0** | 54% | 85% | **77%** |
+| **L1** | 81% | 98% | **91%** |
+| **L2** | 83% | 93% | **91%** |
+| **L3** | 64% | 89% | **82%** |
+| **L4** | 83% | 95% | **92%** |
