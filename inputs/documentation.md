@@ -42,7 +42,7 @@ Base URL: `http://localhost:8000`
 ### Slevy (Discount)
 - Sleva se aplikuje přes POST `/books/{id}/discount`.
 - **Maximální povolená sleva je 50 %** (validováno na úrovni schématu, `gt=0, le=50`).
-- **Sleva je povolena pouze u knih vydaných před více než 1 rokem.**
+- **Sleva je povolena pouze u knih vydaných před více nebo rovno 1 rokem.**
   Pokud je kniha novější, server vrátí 400 Bad Request.
 - Sleva NEMĚNÍ cenu v databázi – vrací jen vypočítanou zlevněnou cenu.
 
