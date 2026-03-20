@@ -32,7 +32,7 @@ from dotenv import load_dotenv
 from llm_provider import create_llm
 from prompts.phase1_context import analyze_context
 from prompts.phase2_planning import generate_test_plan
-from prompts.phase3_generation import generate_test_code
+from prompts.phase3_generation import generate_test_code, repair_failing_tests, validate_test_count, count_test_functions
 from prompts.phase4_validation import run_tests_and_validate, stop_managed_server
 from prompts.phase5_metrics import (
     calculate_assertion_depth,
@@ -113,6 +113,17 @@ def run_pipeline(
         base_url=api_cfg["base_url"],
     )
 
+    expected_count = plan_test_count
+    test_code = validate_test_count(test_code, expected_count)
+    actual_count = count_test_functions(test_code)
+    if plan_test_count > 0:
+        test_code = validate_test_count(
+            test_code, plan_test_count, llm=llm,
+            base_url=api_cfg["base_url"], context=context,
+        )
+        actual_count = count_test_functions(test_code)
+    print(f"  Testů v kódu: {actual_count} (plán: {plan_test_count})")
+
     tracker = IterationTracker()
     iteration = 0
     success = False
@@ -135,10 +146,9 @@ def run_pipeline(
             print("  ✅ Všechny testy prošly!")
         elif iteration < max_iterations:
             print("  ❌ Testy selhaly. Opravuji...")
-            test_code = generate_test_code(
-                test_plan, context, llm,
+            test_code = repair_failing_tests(
+                test_code, output_log, context, llm,
                 base_url=api_cfg["base_url"],
-                feedback=output_log,
             )
         else:
             print(f"  ⚠️ Max iterací dosaženo.")
