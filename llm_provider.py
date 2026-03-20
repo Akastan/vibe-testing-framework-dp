@@ -18,6 +18,7 @@ class RetryMixin:
     """Sdílená retry logika pro všechny providery."""
     max_retries: int = 5
     base_delay: float = 10.0
+    time.sleep(15) # Pro free Gemini API - max 15 RPM (requests per minute)
 
     def _retry_call(self, func, retryable_codes=("503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED", "high demand", "rate_limit")):
         for attempt in range(1, self.max_retries + 1):
