@@ -1,8 +1,9 @@
 """
 Abstrakce nad LLM providery.
 Podporuje: Gemini, OpenAI, Claude, DeepSeek.
+
+Model se vždy nastavuje přes experiment.yaml → create_llm().
 """
-import os
 import time
 from abc import ABC, abstractmethod
 
@@ -34,7 +35,7 @@ class RetryMixin:
 
 
 class GeminiProvider(LLMProvider, RetryMixin):
-    def __init__(self, api_key: str, model_name: str = "gemini-2.5-flash",
+    def __init__(self, api_key: str, model_name: str,
                  max_retries: int = 5, base_delay: float = 10.0):
         from google import genai
         self.client = genai.Client(api_key=api_key)
@@ -51,7 +52,7 @@ class GeminiProvider(LLMProvider, RetryMixin):
 
 
 class OpenAIProvider(LLMProvider, RetryMixin):
-    def __init__(self, api_key: str, model_name: str = "gpt-4o-mini",
+    def __init__(self, api_key: str, model_name: str,
                  max_retries: int = 5, base_delay: float = 10.0):
         from openai import OpenAI
         self.client = OpenAI(api_key=api_key)
@@ -71,7 +72,7 @@ class OpenAIProvider(LLMProvider, RetryMixin):
 
 
 class ClaudeProvider(LLMProvider, RetryMixin):
-    def __init__(self, api_key: str, model_name: str = "claude-sonnet-4-20250514",
+    def __init__(self, api_key: str, model_name: str,
                  max_retries: int = 5, base_delay: float = 10.0):
         from anthropic import Anthropic
         self.client = Anthropic(api_key=api_key)
@@ -92,7 +93,7 @@ class ClaudeProvider(LLMProvider, RetryMixin):
 
 class DeepSeekProvider(LLMProvider, RetryMixin):
     """DeepSeek používá OpenAI-kompatibilní API."""
-    def __init__(self, api_key: str, model_name: str = "deepseek-chat",
+    def __init__(self, api_key: str, model_name: str,
                  max_retries: int = 5, base_delay: float = 10.0):
         from openai import OpenAI
         self.client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
@@ -121,7 +122,7 @@ PROVIDERS = {
 }
 
 def create_llm(provider: str, api_key: str, model: str) -> LLMProvider:
-    """Vytvoří LLM provider podle názvu."""
+    """Vytvoří LLM provider podle názvu. Model se bere z experiment.yaml."""
     cls = PROVIDERS.get(provider)
     if not cls:
         raise ValueError(f"Neznámý provider: {provider}. Dostupné: {list(PROVIDERS.keys())}")
