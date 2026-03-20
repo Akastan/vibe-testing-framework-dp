@@ -113,8 +113,6 @@ def run_pipeline(
         base_url=api_cfg["base_url"],
     )
 
-    expected_count = plan_test_count
-    test_code = validate_test_count(test_code, expected_count)
     actual_count = count_test_functions(test_code)
     if plan_test_count > 0:
         test_code = validate_test_count(
