@@ -34,12 +34,7 @@ from prompts.phase1_context import analyze_context
 from prompts.phase2_planning import generate_test_plan
 from prompts.phase3_generation import generate_test_code, repair_failing_tests, validate_test_count, count_test_functions
 from prompts.phase4_validation import run_tests_and_validate, stop_managed_server
-from prompts.phase5_metrics import (
-    calculate_assertion_depth,
-    calculate_endpoint_coverage,
-    parse_test_validity_rate,
-    IterationTracker,
-)
+from prompts.phase5_metrics import calculate_all_metrics, parse_test_validity_rate
 
 OUTPUTS_DIR = "outputs"
 RESULTS_DIR = "results"
@@ -122,7 +117,6 @@ def run_pipeline(
         actual_count = count_test_functions(test_code)
     print(f"  Testů v kódu: {actual_count} (plán: {plan_test_count})")
 
-    tracker = IterationTracker()
     iteration = 0
     success = False
     output_log = ""
@@ -138,8 +132,6 @@ def run_pipeline(
             iteration=iteration,
         )
 
-        tracker.record_iteration(iteration, output_log, output_path)
-
         if success:
             print("  ✅ Všechny testy prošly!")
         elif iteration < max_iterations:
@@ -154,22 +146,28 @@ def run_pipeline(
     elapsed = round(time.time() - start_time, 2)
 
     # ── FÁZE 5: Metriky ─────────────────────────────────
-    ad = calculate_assertion_depth(output_path)
-    ec = calculate_endpoint_coverage(inputs["openapi"], test_plan)
     tv = parse_test_validity_rate(output_log)
-    delta = tracker.get_delta()
+    metrics = calculate_all_metrics(
+        file_path=output_path,
+        pytest_output=output_log,
+        openapi_path=inputs["openapi"],
+        test_plan=test_plan,
+    )
 
-    # Výpis
+    ec = metrics["endpoint_coverage"]
+    ad = metrics["assertion_depth"]
+    rv = metrics["response_validation"]
+    et = metrics["empty_tests"]
+
     print(f"\n  {'─' * 50}")
-    print(f"  Validity: {tv['validity_rate_pct']}% ({tv['tests_passed']}/{tv['total_executed']})")
-    print(f"  Endpoint: {ec['endpoint_coverage_pct']}% ({ec['covered_endpoints']}/{ec['total_api_endpoints']})")
-    print(f"  Assert:   {ad['assertion_depth']} avg ({ad['total_assertions']} total)")
-    print(f"  Čas:      {elapsed}s | Iterací: {iteration}")
-
-    d = delta.get("delta", {})
-    if d:
-        print(f"  Delta:    validity {d.get('validity_rate_delta', 0):+.1f}pp, "
-              f"assert {d.get('assertion_depth_delta', 0):+.2f}")
+    print(f"  Validity:   {tv['validity_rate_pct']}% ({tv['tests_passed']}/{tv['total_executed']})")
+    print(f"  Endpoint:   {ec['endpoint_coverage_pct']}% ({ec['covered_endpoints']}/{ec['total_api_endpoints']})")
+    print(f"  Assert:     {ad['assertion_depth']} avg ({ad['total_assertions']} total)")
+    print(
+        f"  Body check: {rv['response_validation_pct']}% ({rv['tests_with_body_check']}/{rv['total_test_functions']})")
+    print(f"  Status codes: {metrics['status_code_diversity']['diversity_count']} unique")
+    print(f"  Empty tests: {et['empty_count']}")
+    print(f"  Čas:        {elapsed}s | Iterací: {iteration}")
 
     return {
         "timestamp": datetime.now().isoformat(),
@@ -183,12 +181,7 @@ def run_pipeline(
         "plan_test_count": plan_test_count,
         "output_filename": output_filename,
         "plan_filename": plan_filename,
-        "metrics": {
-            "test_validity": tv,
-            "endpoint_coverage": ec,
-            "assertion_depth": ad,
-            "iteration_delta": delta,
-        },
+        "metrics": metrics,
     }
 
 
