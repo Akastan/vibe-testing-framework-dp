@@ -12,9 +12,10 @@ import ast
 import json
 import re
 import textwrap
+import time
 
 # Nad tímto limitem failing testů → oprava helperů místo izolované opravy
-MAX_INDIVIDUAL_REPAIRS = 15
+MAX_INDIVIDUAL_REPAIRS = 10
 
 
 # ═══════════════════════════════════════════════════════════
@@ -154,12 +155,28 @@ def _extract_error_for_test(pytest_log: str, test_name: str) -> str:
 
 
 def _detect_helper_root_cause(pytest_log: str, failing_names: list[str]) -> bool:
-    """Zjistí, zda většina selhání má stejnou root cause (= bug v helperu)."""
+    """Zjistí, zda většina selhání má stejnou root cause (= bug v helperu).
+
+    Bere pouze PRVNÍ E-řádek per test, aby se vyhnul zdvojení
+    (každý assert produkuje i '+ where ...' řádek).
+    """
     if len(failing_names) < 4:
         return False
 
-    error_lines = re.findall(r'E\s+(.+)$', pytest_log, re.MULTILINE)
-    if len(error_lines) < 3:
+    # Extrahuj první E-řádek z každého failing testu
+    first_errors = []
+    for name in failing_names:
+        error_block = _extract_error_for_test(pytest_log, name)
+        if not error_block:
+            continue
+        # První řádek začínající "E " v bloku daného testu
+        for line in error_block.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("E "):
+                first_errors.append(stripped)
+                break
+
+    if len(first_errors) < 3:
         return False
 
     def normalize(line):
@@ -167,7 +184,7 @@ def _detect_helper_root_cause(pytest_log: str, failing_names: list[str]) -> bool
         line = re.sub(r'["\'].*?["\']', 'STR', line)
         return line.strip()
 
-    normalized = [normalize(l) for l in error_lines]
+    normalized = [normalize(e) for e in first_errors]
     most_common = max(set(normalized), key=normalized.count)
     ratio = normalized.count(most_common) / len(normalized)
     return ratio >= 0.7
@@ -210,11 +227,26 @@ UNIKÁTNÍ NÁZVY (povinné, jinak testy kolidují):
         assert r.status_code == 201
         return r.json()
 
+KVALITA ASERCÍ (důležité pro kvalitu testů):
+- Nekontroluj POUZE status kód. Každý test by měl ověřit i odpověď:
+  - Happy path (201/200): ověř klíče v response body (assert "id" in data, assert data["name"] == ...)
+  - Error (400/404/409/422): ověř assert "detail" in r.json()
+  - GET seznam: ověř strukturu (assert "items" in data nebo assert isinstance(data, list))
+  - Side effects: po vytvoření objednávky ověř snížení skladu, po smazání ověř 404 na GET
+- Příklad dobrého testu:
+    def test_create_author_valid():
+        name = unique("Author")
+        r = requests.post(f"{{BASE_URL}}/authors", json={{"name": name}}, timeout=30)
+        assert r.status_code == 201
+        data = r.json()
+        assert data["name"] == name
+        assert "id" in data
+
 SPECIFIKA TOHOTO API (bez tohoto testy spadnou):
 - DELETE endpointy vracejí 204 s PRÁZDNÝM tělem. Nevolej .json() na 204 odpovědích.
 - DELETE /books/{{id}}/tags používá REQUEST BODY: requests.delete(..., json={{"tag_ids": [...]}})
 - PATCH /books/{{id}}/stock používá QUERY parametr: params={{"quantity": N}}, ne JSON body.
-- Neověřuj přesný text chybových hlášek, ověřuj status kód a přítomnost klíče "detail".
+- Neověřuj přesný text chybových hlášek, ověřuj jen přítomnost klíče "detail".
 
 Vrať POUZE Python kód, žádný markdown.
 """
@@ -277,6 +309,7 @@ PRAVIDLA:
 - Žádné importy, žádné helpery, žádný markdown.
 - Každý test musí být self-contained, používat timeout=30, unique() helper.
 - Zaměř se na scénáře které existující testy nepokrývají (edge cases, error handling).
+- Nekontroluj jen status kód — ověřuj i response body (klíče, hodnoty, strukturu).
 - DELETE endpointy → 204, prázdné tělo.
 - PATCH /books/{{id}}/stock → params={{"quantity": N}}.
 - DELETE /books/{{id}}/tags → json={{"tag_ids": [...]}}.
@@ -348,6 +381,7 @@ PRAVIDLA:
 - DELETE endpointy → 204, prázdné tělo, nevolej .json().
 - PATCH /books/{{id}}/stock → params={{"quantity": N}}.
 - DELETE /books/{{id}}/tags → json={{"tag_ids": [...]}}.
+- Pokud test ověřuje jen status kód, přidej i kontrolu response body (assert "id" in data apod.).
 """
 
     try:
@@ -486,6 +520,9 @@ def repair_failing_tests(master_code: str, pytest_log: str,
     repaired = 0
 
     for i, test_name in enumerate(failing, 1):
+        # Rate limit: pauza mezi LLM cally (Gemini free tier = 15 RPM)
+        if i > 1:
+            time.sleep(5)
         test_code = _extract_function_code(master_code, test_name)
         if not test_code:
             print(f"      ⚠️ {test_name} nenalezen v kódu")
