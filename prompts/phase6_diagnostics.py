@@ -553,6 +553,9 @@ def _classify_single_failure(error: str, test_name: str, code: str) -> str:
     if re.search(r'\d{3}\s*==\s*\d{3}', error):
         return "wrong_status_code"
 
+    if re.search(r'status_code\s*==\s*\d{3}', error):
+        return "wrong_status_code"
+
     # Helper cascade: chyba je v helperu, ne v testu
     if re.search(r'in create_\w+|in unique\b', error):
         return "helper_cascade"

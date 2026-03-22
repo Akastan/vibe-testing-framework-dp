@@ -116,7 +116,7 @@ def run_pipeline(
     print(f"  Testů v kódu: {actual_count} (plán: {plan_test_count})")
 
     # Stale tracker per run
-    stale_tracker = StaleTracker(threshold=3)
+    stale_tracker = StaleTracker(threshold=2)
     # Diagnostický repair tracker
     diag_repair_tracker = DiagRepairTracker()
 
