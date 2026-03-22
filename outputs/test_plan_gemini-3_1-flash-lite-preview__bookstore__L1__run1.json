@@ -5,10 +5,10 @@
       "method": "GET",
       "test_cases": [
         {
-          "name": "check_api_health",
+          "name": "health_check_success",
           "type": "happy_path",
           "expected_status": 200,
-          "description": "Ověření dostupnosti API"
+          "description": "Overeni dostupnosti API"
         }
       ]
     },
@@ -17,16 +17,28 @@
       "method": "POST",
       "test_cases": [
         {
-          "name": "create_valid_author",
+          "name": "create_author_valid",
           "type": "happy_path",
           "expected_status": 201,
-          "description": "Úspěšné vytvoření autora"
+          "description": "Vytvoreni noveho autora"
         },
         {
-          "name": "create_invalid_author_missing_name",
+          "name": "create_author_invalid_data",
           "type": "error",
           "expected_status": 422,
-          "description": "Chyba při absenci povinného jména"
+          "description": "Chyba pri prazdnem jmene"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_default",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Seznam autoru"
         }
       ]
     },
@@ -35,10 +47,10 @@
       "method": "DELETE",
       "test_cases": [
         {
-          "name": "delete_author_with_books_fails",
+          "name": "delete_author_with_books_error",
           "type": "error",
           "expected_status": 409,
-          "description": "Nelze smazat autora s knihami"
+          "description": "Smazani autora, ktery ma knihy"
         }
       ]
     },
@@ -47,10 +59,10 @@
       "method": "POST",
       "test_cases": [
         {
-          "name": "create_duplicate_category_fails",
+          "name": "create_category_duplicate_error",
           "type": "error",
           "expected_status": 409,
-          "description": "Duplicitní název kategorie vrací konflikt"
+          "description": "Duplicitni nazev kategorie"
         }
       ]
     },
@@ -59,10 +71,52 @@
       "method": "POST",
       "test_cases": [
         {
-          "name": "create_book_with_nonexistent_author",
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni knihy se stock 10"
+        },
+        {
+          "name": "create_book_missing_author",
           "type": "error",
           "expected_status": 404,
-          "description": "Vytvoření knihy s neexistujícím autorem"
+          "description": "Vytvoreni s neexistujicim autorem"
+        },
+        {
+          "name": "create_book_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Duplicitni ISBN"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Strankovani knih"
+        },
+        {
+          "name": "list_books_search_filter",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Vyhledavani knihy podle titulu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Kniha neexistuje"
         }
       ]
     },
@@ -71,28 +125,10 @@
       "method": "DELETE",
       "test_cases": [
         {
-          "name": "delete_book_success",
+          "name": "delete_book_cascade_reviews",
           "type": "happy_path",
           "expected_status": 204,
-          "description": "Úspěšné smazání knihy"
-        }
-      ]
-    },
-    {
-      "endpoint": "/books/{book_id}/stock",
-      "method": "PATCH",
-      "test_cases": [
-        {
-          "name": "update_stock_negative_results_error",
-          "type": "error",
-          "expected_status": 400,
-          "description": "Odečtení skladu pod nulu vrací 400"
-        },
-        {
-          "name": "update_stock_invalid_format",
-          "type": "error",
-          "expected_status": 422,
-          "description": "Nevalidní datový typ pro quantity"
+          "description": "Smazani knihy kaskadove smaze recenze"
         }
       ]
     },
@@ -101,16 +137,16 @@
       "method": "POST",
       "test_cases": [
         {
-          "name": "create_review_out_of_range_rating",
-          "type": "error",
-          "expected_status": 422,
-          "description": "Hodnocení mimo rozsah 1-5"
-        },
-        {
           "name": "create_review_success",
           "type": "happy_path",
           "expected_status": 201,
-          "description": "Úspěšné vložení recenze"
+          "description": "Pridani recenze"
+        },
+        {
+          "name": "create_review_invalid_rating",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Rating mimo rozsah 1-5"
         }
       ]
     },
@@ -119,10 +155,10 @@
       "method": "GET",
       "test_cases": [
         {
-          "name": "get_rating_no_reviews",
+          "name": "get_rating_empty",
           "type": "happy_path",
           "expected_status": 200,
-          "description": "Kniha bez recenzí vrací null"
+          "description": "Kniha bez recenzi vraci null"
         }
       ]
     },
@@ -131,46 +167,40 @@
       "method": "POST",
       "test_cases": [
         {
-          "name": "apply_discount_too_high",
-          "type": "error",
-          "expected_status": 422,
-          "description": "Sleva vyšší než 50 procent"
-        },
-        {
-          "name": "apply_discount_new_book_fails",
+          "name": "discount_new_book_error",
           "type": "error",
           "expected_status": 400,
-          "description": "Nelze slevit knihu mladší než 1 rok"
-        }
-      ]
-    },
-    {
-      "endpoint": "/books/{book_id}/tags",
-      "method": "POST",
-      "test_cases": [
-        {
-          "name": "add_nonexistent_tag_to_book",
-          "type": "error",
-          "expected_status": 404,
-          "description": "Přidání neexistujícího tagu"
+          "description": "Sleva na knihu mlatsi 1 rok"
         },
         {
-          "name": "add_duplicate_tag_idempotency",
+          "name": "discount_old_book_success",
           "type": "happy_path",
           "expected_status": 200,
-          "description": "Opakované přidání stejného tagu ignorováno"
+          "description": "Sleva na starou knihu"
+        },
+        {
+          "name": "discount_over_limit_error",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Sleva nad 50 procent"
         }
       ]
     },
     {
-      "endpoint": "/books/{book_id}/tags",
-      "method": "DELETE",
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
       "test_cases": [
         {
-          "name": "remove_tag_from_book",
+          "name": "increase_stock_success",
           "type": "happy_path",
           "expected_status": 200,
-          "description": "Úspěšné odstranění tagu z knihy"
+          "description": "Navyseni skladu"
+        },
+        {
+          "name": "decrease_stock_too_much_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Zaporny vysledny sklad"
         }
       ]
     },
@@ -179,22 +209,40 @@
       "method": "POST",
       "test_cases": [
         {
-          "name": "create_tag_too_long",
+          "name": "create_tag_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni tagu"
+        },
+        {
+          "name": "create_tag_duplicate_error",
           "type": "error",
-          "expected_status": 422,
-          "description": "Název tagu delší než 30 znaků"
+          "expected_status": 409,
+          "description": "Duplicitni nazev tagu"
         }
       ]
     },
     {
-      "endpoint": "/tags/{tag_id}",
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_idempotent",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Pridani existujiciho tagu je ignorovano"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
       "method": "DELETE",
       "test_cases": [
         {
-          "name": "delete_assigned_tag_fails",
-          "type": "error",
-          "expected_status": 409,
-          "description": "Nelze smazat tag přiřazený ke knize"
+          "name": "remove_tag_nonexistent_ignored",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Odebrani neexistujici vazby je ignorovano"
         }
       ]
     },
@@ -203,22 +251,28 @@
       "method": "POST",
       "test_cases": [
         {
-          "name": "create_order_empty_items",
-          "type": "error",
-          "expected_status": 422,
-          "description": "Objednávka bez položek"
-        },
-        {
-          "name": "create_order_duplicate_books",
-          "type": "error",
-          "expected_status": 400,
-          "description": "Duplicitní book_id v položkách"
-        },
-        {
           "name": "create_order_insufficient_stock",
           "type": "error",
           "expected_status": 400,
-          "description": "Nedostatek skladu pro objednávku"
+          "description": "Objednavka pri nedostatku skladu"
+        },
+        {
+          "name": "create_order_duplicate_book_id",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Duplicitni kniha v objednavce"
+        },
+        {
+          "name": "create_order_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Validni objednavka"
+        },
+        {
+          "name": "create_order_no_items",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Prazdne pole polozek"
         }
       ]
     },
@@ -227,10 +281,16 @@
       "method": "DELETE",
       "test_cases": [
         {
-          "name": "delete_confirmed_order_fails",
+          "name": "delete_shipped_order_error",
           "type": "error",
           "expected_status": 400,
-          "description": "Nelze smazat potvrzenou objednávku"
+          "description": "Nelze smazat odeslanou objednavku"
+        },
+        {
+          "name": "delete_pending_order_restocks",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Smazani pending vraci sklad"
         }
       ]
     },
@@ -239,34 +299,88 @@
       "method": "PATCH",
       "test_cases": [
         {
-          "name": "update_status_illegal_transition",
-          "type": "error",
-          "expected_status": 400,
-          "description": "Nepovolený přechod stavu objednávky"
+          "name": "transition_pending_to_confirmed",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Validni prechod stavu"
         },
         {
-          "name": "update_status_invalid_value",
+          "name": "transition_invalid_path",
           "type": "error",
-          "expected_status": 422,
-          "description": "Stav mimo povolený regex"
+          "expected_status": 400,
+          "description": "Nepovoleny prechod stavu"
+        },
+        {
+          "name": "cancel_order_restocks",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Zruseni objednavky vraci sklad"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/1/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "tag_bulk_add_limit",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Hromadne pridani tagu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/1/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "stock_boundary_zero",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Nastaveni skladu na nulu"
+        },
+        {
+          "name": "stock_large_delta",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Velky prirustek skladu"
         }
       ]
     },
     {
       "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_min_price",
+          "type": "edge_case",
+          "expected_status": 201,
+          "description": "Kniha s cenou nula"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags/1",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_assigned_tag_error",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Smazani tagu pouziteho u knihy"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/1/reviews",
       "method": "GET",
       "test_cases": [
         {
-          "name": "list_books_pagination_params",
-          "type": "happy_path",
+          "name": "list_reviews_pagination_test",
+          "type": "edge_case",
           "expected_status": 200,
-          "description": "Výpis knih s parametry stránkování"
-        },
-        {
-          "name": "list_books_invalid_page",
-          "type": "error",
-          "expected_status": 422,
-          "description": "Nevalidní hodnota pro stránku"
+          "description": "Seznam recenzi pro knihu"
         }
       ]
     },
@@ -275,22 +389,106 @@
       "method": "GET",
       "test_cases": [
         {
-          "name": "list_orders_filtering",
+          "name": "filter_orders_by_customer_name",
           "type": "happy_path",
           "expected_status": 200,
-          "description": "Filtrování objednávek dle jména"
+          "description": "Filtrovani dle jmena"
         },
         {
-          "name": "list_orders_page_size_edge_case",
-          "type": "edge_case",
+          "name": "filter_orders_by_status",
+          "type": "happy_path",
           "expected_status": 200,
-          "description": "Maximální velikost stránky 100"
+          "description": "Filtrovani dle stavu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/9999",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Nenalezeny autor"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories/1",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_category_name_empty",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Validace prazdneho jmena"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/1/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "discount_boundary_50",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Presne 50 procent sleva"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/1/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "stock_decrement_to_zero",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Odecteni skladu na nulu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/1/tags",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_tags_invalid_body",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Chybne telo pri smazani tagu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/1",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_order_detail",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Detail objednavky"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_invalid_page",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Strana mensi nez 1"
         },
         {
-          "name": "list_orders_empty_results",
-          "type": "edge_case",
-          "expected_status": 200,
-          "description": "Dotaz na prázdný seznam"
+          "name": "list_books_negative_limit",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Limit na stranku nesmi byt zaporny"
         }
       ]
     }

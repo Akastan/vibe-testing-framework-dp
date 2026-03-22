@@ -123,6 +123,7 @@ def run_pipeline(
     iteration = 0
     success = False
     output_log = ""
+    last_repair_type = None
 
     while iteration < max_iterations and not success:
         iteration += 1
@@ -146,7 +147,9 @@ def run_pipeline(
                 prompt_builder=prompt_builder,
                 base_url=api_cfg["base_url"],
                 stale_tracker=stale_tracker,
+                previous_repair_type=last_repair_type,  # ← NOVÉ
             )
+            last_repair_type = repair_info["repair_type"]  # ← NOVÉ
             # Zapiš repair metadata do DALŠÍ iterace (ta co poběží s opraveným kódem)
             diag_repair_tracker.annotate_last(
                 repair_type=repair_info["repair_type"],

@@ -1,0 +1,6193 @@
+[
+  {
+    "timestamp": "2026-03-22T15:32:17.065382",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L0",
+    "run_id": 1,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 83.96,
+    "plan_test_count": 50,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L0__run1.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 45,
+        "tests_failed": 5,
+        "tests_errors": 0,
+        "total_executed": 50,
+        "validity_rate_pct": 90.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 31,
+        "uncovered_endpoints": [
+          "DELETE /orders/{order_id}",
+          "PATCH /orders/{order_id}/status",
+          "POST /reset"
+        ],
+        "endpoint_coverage_pct": 91.18
+      },
+      "assertion_depth": {
+        "total_test_functions": 50,
+        "total_assertions": 78,
+        "assertion_depth": 1.56,
+        "per_test_assertions": {
+          "test_health_check_ok": 1,
+          "test_create_author_success": 3,
+          "test_create_author_invalid_name": 2,
+          "test_list_authors_default": 2,
+          "test_list_authors_custom_pagination": 2,
+          "test_get_author_by_id": 2,
+          "test_get_author_invalid_id": 1,
+          "test_update_author_success": 2,
+          "test_update_author_invalid_data": 1,
+          "test_delete_author_success": 3,
+          "test_create_category_success": 2,
+          "test_create_category_empty": 1,
+          "test_list_categories_success": 2,
+          "test_get_category_success": 2,
+          "test_update_category_success": 2,
+          "test_delete_category_success": 1,
+          "test_create_book_success": 2,
+          "test_create_book_invalid_isbn": 1,
+          "test_create_book_negative_price": 1,
+          "test_list_books_all": 2,
+          "test_list_books_filter_price": 1,
+          "test_list_books_invalid_page": 1,
+          "test_get_book_success": 2,
+          "test_update_book_success": 2,
+          "test_update_book_invalid_year": 1,
+          "test_delete_book_success": 1,
+          "test_create_review_success": 1,
+          "test_create_review_invalid_rating": 1,
+          "test_list_reviews_success": 2,
+          "test_get_rating_success": 1,
+          "test_apply_discount_success": 2,
+          "test_apply_discount_too_high": 1,
+          "test_update_stock_success": 2,
+          "test_update_stock_negative": 2,
+          "test_create_tag_success": 1,
+          "test_create_tag_too_long": 1,
+          "test_list_tags_success": 2,
+          "test_get_tag_success": 1,
+          "test_update_tag_success": 1,
+          "test_delete_tag_success": 1,
+          "test_add_tags_success": 1,
+          "test_add_tags_empty_list": 1,
+          "test_remove_tags_success": 1,
+          "test_create_order_success": 3,
+          "test_create_order_empty_items": 1,
+          "test_create_order_invalid_email": 2,
+          "test_list_orders_success": 2,
+          "test_list_orders_filter_status": 1,
+          "test_get_order_success": 2,
+          "test_get_order_not_found": 2
+        }
+      },
+      "response_validation": {
+        "tests_with_body_check": 25,
+        "tests_status_only": 25,
+        "total_test_functions": 50,
+        "response_validation_pct": 50.0,
+        "per_test_body_check": {
+          "test_health_check_ok": false,
+          "test_create_author_success": true,
+          "test_create_author_invalid_name": true,
+          "test_list_authors_default": true,
+          "test_list_authors_custom_pagination": true,
+          "test_get_author_by_id": true,
+          "test_get_author_invalid_id": false,
+          "test_update_author_success": true,
+          "test_update_author_invalid_data": false,
+          "test_delete_author_success": true,
+          "test_create_category_success": true,
+          "test_create_category_empty": false,
+          "test_list_categories_success": true,
+          "test_get_category_success": true,
+          "test_update_category_success": true,
+          "test_delete_category_success": false,
+          "test_create_book_success": true,
+          "test_create_book_invalid_isbn": false,
+          "test_create_book_negative_price": false,
+          "test_list_books_all": true,
+          "test_list_books_filter_price": false,
+          "test_list_books_invalid_page": false,
+          "test_get_book_success": true,
+          "test_update_book_success": true,
+          "test_update_book_invalid_year": false,
+          "test_delete_book_success": false,
+          "test_create_review_success": false,
+          "test_create_review_invalid_rating": false,
+          "test_list_reviews_success": true,
+          "test_get_rating_success": false,
+          "test_apply_discount_success": true,
+          "test_apply_discount_too_high": false,
+          "test_update_stock_success": true,
+          "test_update_stock_negative": true,
+          "test_create_tag_success": false,
+          "test_create_tag_too_long": false,
+          "test_list_tags_success": true,
+          "test_get_tag_success": false,
+          "test_update_tag_success": false,
+          "test_delete_tag_success": false,
+          "test_add_tags_success": false,
+          "test_add_tags_empty_list": false,
+          "test_remove_tags_success": false,
+          "test_create_order_success": true,
+          "test_create_order_empty_items": false,
+          "test_create_order_invalid_email": true,
+          "test_list_orders_success": true,
+          "test_list_orders_filter_status": false,
+          "test_get_order_success": true,
+          "test_get_order_not_found": true
+        }
+      },
+      "test_type_distribution": {
+        "total_planned": 50,
+        "distribution": {
+          "happy_path": {
+            "count": 34,
+            "pct": 68.0
+          },
+          "error": {
+            "count": 15,
+            "pct": 30.0
+          },
+          "edge_case": {
+            "count": 1,
+            "pct": 2.0
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          404,
+          422
+        ],
+        "diversity_count": 5,
+        "code_distribution": {
+          "200": 24,
+          "201": 6,
+          "204": 4,
+          "404": 2,
+          "422": 15
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0,
+        "total_test_functions": 50
+      },
+      "avg_test_length": {
+        "avg_lines": 4.88,
+        "min_lines": 3,
+        "max_lines": 14,
+        "total_test_functions": 50,
+        "per_test_lines": {
+          "test_health_check_ok": 3,
+          "test_create_author_success": 7,
+          "test_create_author_invalid_name": 4,
+          "test_list_authors_default": 4,
+          "test_list_authors_custom_pagination": 4,
+          "test_get_author_by_id": 6,
+          "test_get_author_invalid_id": 3,
+          "test_update_author_success": 7,
+          "test_update_author_invalid_data": 3,
+          "test_delete_author_success": 7,
+          "test_create_category_success": 5,
+          "test_create_category_empty": 3,
+          "test_list_categories_success": 4,
+          "test_get_category_success": 5,
+          "test_update_category_success": 6,
+          "test_delete_category_success": 4,
+          "test_create_book_success": 14,
+          "test_create_book_invalid_isbn": 3,
+          "test_create_book_negative_price": 3,
+          "test_list_books_all": 4,
+          "test_list_books_filter_price": 3,
+          "test_list_books_invalid_page": 3,
+          "test_get_book_success": 7,
+          "test_update_book_success": 7,
+          "test_update_book_invalid_year": 3,
+          "test_delete_book_success": 6,
+          "test_create_review_success": 6,
+          "test_create_review_invalid_rating": 3,
+          "test_list_reviews_success": 4,
+          "test_get_rating_success": 3,
+          "test_apply_discount_success": 7,
+          "test_apply_discount_too_high": 3,
+          "test_update_stock_success": 7,
+          "test_update_stock_negative": 8,
+          "test_create_tag_success": 3,
+          "test_create_tag_too_long": 3,
+          "test_list_tags_success": 4,
+          "test_get_tag_success": 4,
+          "test_update_tag_success": 4,
+          "test_delete_tag_success": 4,
+          "test_add_tags_success": 7,
+          "test_add_tags_empty_list": 3,
+          "test_remove_tags_success": 3,
+          "test_create_order_success": 14,
+          "test_create_order_empty_items": 3,
+          "test_create_order_invalid_email": 4,
+          "test_list_orders_success": 4,
+          "test_list_orders_filter_status": 3,
+          "test_get_order_success": 8,
+          "test_get_order_not_found": 4
+        }
+      },
+      "method_coverage": {
+        "total_planned": 50,
+        "method_distribution": {
+          "DELETE": {
+            "count": 5,
+            "pct": 10.0
+          },
+          "GET": {
+            "count": 19,
+            "pct": 38.0
+          },
+          "PATCH": {
+            "count": 2,
+            "pct": 4.0
+          },
+          "POST": {
+            "count": 18,
+            "pct": 36.0
+          },
+          "PUT": {
+            "count": 6,
+            "pct": 12.0
+          }
+        }
+      },
+      "plan_adherence": {
+        "planned": 50,
+        "found_in_code": 50,
+        "extra_in_code": 0,
+        "missing_from_code": [],
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 5,
+        "stale_names": [
+          "test_create_order_invalid_email",
+          "test_create_order_success",
+          "test_delete_author_success",
+          "test_get_order_not_found",
+          "test_get_order_success"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 62211,
+        "total_lines": 2535,
+        "total_est_tokens": 20737,
+        "section_count": 1,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 50,
+        "unique_endpoints_in_plan": 31,
+        "total_api_endpoints": 34,
+        "tests_per_endpoint": {
+          "GET /health": 1,
+          "POST /authors": 2,
+          "GET /authors": 2,
+          "GET /authors/{author_id}": 2,
+          "PUT /authors/{author_id}": 2,
+          "DELETE /authors/{author_id}": 1,
+          "POST /categories": 2,
+          "GET /categories": 1,
+          "GET /categories/{category_id}": 1,
+          "PUT /categories/{category_id}": 1,
+          "DELETE /categories/{category_id}": 1,
+          "POST /books": 3,
+          "GET /books": 3,
+          "GET /books/{book_id}": 1,
+          "PUT /books/{book_id}": 2,
+          "DELETE /books/{book_id}": 1,
+          "POST /books/{book_id}/reviews": 2,
+          "GET /books/{book_id}/reviews": 1,
+          "GET /books/{book_id}/rating": 1,
+          "POST /books/{book_id}/discount": 2,
+          "PATCH /books/{book_id}/stock": 2,
+          "POST /tags": 2,
+          "GET /tags": 1,
+          "GET /tags/{tag_id}": 1,
+          "PUT /tags/{tag_id}": 1,
+          "DELETE /tags/{tag_id}": 1,
+          "POST /books/{book_id}/tags": 2,
+          "DELETE /books/{book_id}/tags": 1,
+          "POST /orders": 3,
+          "GET /orders": 2,
+          "GET /orders/{order_id}": 2
+        },
+        "type_per_endpoint": {
+          "GET /health": {
+            "happy_path": 1
+          },
+          "POST /authors": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "GET /authors": {
+            "happy_path": 2
+          },
+          "GET /authors/{author_id}": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "PUT /authors/{author_id}": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "DELETE /authors/{author_id}": {
+            "happy_path": 1
+          },
+          "POST /categories": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "GET /categories": {
+            "happy_path": 1
+          },
+          "GET /categories/{category_id}": {
+            "happy_path": 1
+          },
+          "PUT /categories/{category_id}": {
+            "happy_path": 1
+          },
+          "DELETE /categories/{category_id}": {
+            "happy_path": 1
+          },
+          "POST /books": {
+            "happy_path": 1,
+            "error": 2
+          },
+          "GET /books": {
+            "happy_path": 2,
+            "error": 1
+          },
+          "GET /books/{book_id}": {
+            "happy_path": 1
+          },
+          "PUT /books/{book_id}": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "DELETE /books/{book_id}": {
+            "happy_path": 1
+          },
+          "POST /books/{book_id}/reviews": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "GET /books/{book_id}/reviews": {
+            "happy_path": 1
+          },
+          "GET /books/{book_id}/rating": {
+            "happy_path": 1
+          },
+          "POST /books/{book_id}/discount": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "PATCH /books/{book_id}/stock": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "POST /tags": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "GET /tags": {
+            "happy_path": 1
+          },
+          "GET /tags/{tag_id}": {
+            "happy_path": 1
+          },
+          "PUT /tags/{tag_id}": {
+            "happy_path": 1
+          },
+          "DELETE /tags/{tag_id}": {
+            "happy_path": 1
+          },
+          "POST /books/{book_id}/tags": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "DELETE /books/{book_id}/tags": {
+            "happy_path": 1
+          },
+          "POST /orders": {
+            "happy_path": 1,
+            "error": 2
+          },
+          "GET /orders": {
+            "happy_path": 2
+          },
+          "GET /orders/{order_id}": {
+            "happy_path": 1,
+            "edge_case": 1
+          }
+        },
+        "top_tested": [
+          [
+            "POST /books",
+            3
+          ],
+          [
+            "GET /books",
+            3
+          ],
+          [
+            "POST /orders",
+            3
+          ],
+          [
+            "POST /authors",
+            2
+          ],
+          [
+            "GET /authors",
+            2
+          ]
+        ],
+        "error_focused_endpoints": {
+          "POST /books": 2,
+          "POST /orders": 2,
+          "POST /authors": 1,
+          "GET /authors/{author_id}": 1,
+          "PUT /authors/{author_id}": 1,
+          "POST /categories": 1,
+          "GET /books": 1,
+          "PUT /books/{book_id}": 1,
+          "POST /books/{book_id}/reviews": 1,
+          "POST /books/{book_id}/discount": 1,
+          "PATCH /books/{book_id}/stock": 1,
+          "POST /tags": 1,
+          "POST /books/{book_id}/tags": 1,
+          "GET /orders/{order_id}": 1
+        },
+        "top3_concentration_pct": 18.0,
+        "skipped_endpoints": [
+          "DELETE /orders/{order_id}",
+          "PATCH /orders/{order_id}/status",
+          "POST /reset"
+        ],
+        "domain_distribution": {
+          "authors": 9,
+          "categories": 6,
+          "books": 21,
+          "tags": 6,
+          "orders": 7,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [],
+            "default_published_year": null
+          }
+        },
+        "helper_count": 1
+      },
+      "prompt_budget": {
+        "context_tokens_est": 20737,
+        "plan_tokens_est": 4083,
+        "instruction_tokens_est": 800,
+        "total_prompt_tokens_est": 25620,
+        "remaining_for_output_est": 102380,
+        "prompt_budget_pct": 20.0,
+        "model_context_window": 128000
+      },
+      "instruction_compliance": {
+        "total_http_calls": 89,
+        "missing_timeout": 89,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "json_after_204_risk": false,
+        "helper_between_tests": [],
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 5,
+        "categories": {
+          "other": 5
+        },
+        "category_pct": {
+          "other": 100.0
+        },
+        "per_test": {
+          "test_delete_author_success": {
+            "category": "other",
+            "error_summary": ""
+          },
+          "test_create_order_success": {
+            "category": "other",
+            "error_summary": ""
+          },
+          "test_create_order_invalid_email": {
+            "category": "other",
+            "error_summary": ""
+          },
+          "test_get_order_success": {
+            "category": "other",
+            "error_summary": ""
+          },
+          "test_get_order_not_found": {
+            "category": "other",
+            "error_summary": ""
+          }
+        },
+        "category_details": {
+          "other": [
+            "test_delete_author_success",
+            "test_create_order_success",
+            "test_create_order_invalid_email",
+            "test_get_order_success",
+            "test_get_order_not_found"
+          ]
+        }
+      },
+      "code_patterns": {
+        "total_tests": 50,
+        "per_test": {
+          "test_health_check_ok": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_author_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 3,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_create_author_invalid_name": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_authors_default": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_authors_custom_pagination": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_get_author_by_id": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": true,
+            "uses_chaining": true,
+            "lines": 6
+          },
+          "test_get_author_invalid_id": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_update_author_success": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_update_author_invalid_data": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_delete_author_success": {
+            "http_calls": 3,
+            "helper_calls": 0,
+            "total_calls": 3,
+            "asserts": 3,
+            "side_effect_check": true,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_create_category_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 5
+          },
+          "test_create_category_empty": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_categories_success": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_get_category_success": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": true,
+            "uses_chaining": true,
+            "lines": 5
+          },
+          "test_update_category_success": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 6
+          },
+          "test_delete_category_success": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_create_book_success": {
+            "http_calls": 3,
+            "helper_calls": 1,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 14
+          },
+          "test_create_book_invalid_isbn": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_book_negative_price": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_books_all": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_books_filter_price": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_books_invalid_page": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_get_book_success": {
+            "http_calls": 4,
+            "helper_calls": 0,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": true,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_update_book_success": {
+            "http_calls": 4,
+            "helper_calls": 0,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_update_book_invalid_year": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_delete_book_success": {
+            "http_calls": 4,
+            "helper_calls": 0,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_create_review_success": {
+            "http_calls": 4,
+            "helper_calls": 1,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_create_review_invalid_rating": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_reviews_success": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_get_rating_success": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_apply_discount_success": {
+            "http_calls": 4,
+            "helper_calls": 0,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_apply_discount_too_high": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_update_stock_success": {
+            "http_calls": 4,
+            "helper_calls": 0,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_update_stock_negative": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_create_tag_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_tag_too_long": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_tags_success": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_get_tag_success": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": true,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_update_tag_success": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_delete_tag_success": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_add_tags_success": {
+            "http_calls": 5,
+            "helper_calls": 0,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_add_tags_empty_list": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_remove_tags_success": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_order_success": {
+            "http_calls": 4,
+            "helper_calls": 1,
+            "total_calls": 5,
+            "asserts": 3,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 14
+          },
+          "test_create_order_empty_items": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_order_invalid_email": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_orders_success": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_orders_filter_status": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_get_order_success": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": true,
+            "uses_chaining": true,
+            "lines": 8
+          },
+          "test_get_order_not_found": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          }
+        },
+        "summary": {
+          "avg_http_calls": 1.78,
+          "avg_helper_calls": 0.28,
+          "avg_total_calls": 2.06,
+          "avg_asserts": 1.56,
+          "pct_side_effect_checks": 12.0,
+          "pct_chaining": 22.0,
+          "single_call_tests": 30,
+          "multi_step_tests": 10
+        }
+      },
+      "plan_code_drift": {
+        "planned_count": 50,
+        "actual_count": 50,
+        "matched": 50,
+        "only_in_plan": [],
+        "only_in_code": [],
+        "status_code_drift": {
+          "test_get_order_not_found": {
+            "planned": 422,
+            "actual_in_code": [
+              404
+            ]
+          }
+        },
+        "drift_count": 1
+      },
+      "context_utilization": {
+        "context_endpoints_found": 47,
+        "plan_endpoints_used": 16,
+        "endpoint_utilization_pct": 34.0,
+        "context_field_names": 181,
+        "code_field_names": 49,
+        "shared_nontrivial_fields": [
+          "author",
+          "author_id",
+          "book_id",
+          "category_id",
+          "customer_email",
+          "customer_name",
+          "discount_percent",
+          "discounted_price",
+          "isbn",
+          "price",
+          "published_year",
+          "quantity",
+          "rating",
+          "reviewer_name",
+          "stock",
+          "tag_ids",
+          "title"
+        ],
+        "context_status_codes": [
+          "200",
+          "201",
+          "204",
+          "422"
+        ],
+        "code_status_codes": [
+          "200",
+          "201",
+          "204",
+          "404",
+          "422"
+        ],
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "422"
+        ],
+        "status_codes_hallucinated": [
+          "404"
+        ]
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 44,
+            "failed": 6,
+            "failing_tests": [
+              "test_delete_author_success",
+              "test_update_stock_negative",
+              "test_create_order_success",
+              "test_create_order_invalid_email",
+              "test_get_order_success",
+              "test_get_order_not_found"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 45,
+            "failed": 5,
+            "failing_tests": [
+              "test_delete_author_success",
+              "test_create_order_success",
+              "test_create_order_invalid_email",
+              "test_get_order_success",
+              "test_get_order_not_found"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 45,
+            "failed": 5,
+            "failing_tests": [
+              "test_delete_author_success",
+              "test_create_order_success",
+              "test_create_order_invalid_email",
+              "test_get_order_success",
+              "test_get_order_not_found"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 4,
+            "passed": 45,
+            "failed": 5,
+            "failing_tests": [
+              "test_delete_author_success",
+              "test_create_order_success",
+              "test_create_order_invalid_email",
+              "test_get_order_success",
+              "test_get_order_not_found"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 5,
+            "passed": 45,
+            "failed": 5,
+            "failing_tests": [
+              "test_delete_author_success",
+              "test_create_order_success",
+              "test_create_order_invalid_email",
+              "test_get_order_success",
+              "test_get_order_not_found"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 3,
+        "deltas": [
+          {
+            "from_iter": 1,
+            "to_iter": 2,
+            "delta": 1,
+            "repair_type": null
+          },
+          {
+            "from_iter": 2,
+            "to_iter": 3,
+            "delta": 0,
+            "repair_type": null
+          },
+          {
+            "from_iter": 3,
+            "to_iter": 4,
+            "delta": 0,
+            "repair_type": null
+          },
+          {
+            "from_iter": 4,
+            "to_iter": 5,
+            "delta": 0,
+            "repair_type": null
+          }
+        ],
+        "never_fixed_tests": [
+          "test_create_order_invalid_email",
+          "test_create_order_success",
+          "test_delete_author_success",
+          "test_get_order_not_found",
+          "test_get_order_success"
+        ],
+        "fixed_tests": [
+          "test_update_stock_negative"
+        ],
+        "total_repair_calls": 0,
+        "total_stale_skipped": 0
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-22T15:33:23.067869",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L1",
+    "run_id": 1,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 65.65,
+    "plan_test_count": 50,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L1__run1.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L1__run1.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 48,
+        "tests_failed": 2,
+        "tests_errors": 0,
+        "total_executed": 50,
+        "validity_rate_pct": 96.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 33,
+        "uncovered_endpoints": [
+          "POST /reset"
+        ],
+        "endpoint_coverage_pct": 97.06
+      },
+      "assertion_depth": {
+        "total_test_functions": 50,
+        "total_assertions": 62,
+        "assertion_depth": 1.24,
+        "per_test_assertions": {
+          "test_check_health_status": 1,
+          "test_create_author_success": 3,
+          "test_create_author_invalid_name": 2,
+          "test_delete_author_with_books_fails": 1,
+          "test_create_category_duplicate_fails": 1,
+          "test_create_book_success": 2,
+          "test_create_book_invalid_isbn": 1,
+          "test_create_book_duplicate_isbn_fails": 1,
+          "test_get_nonexistent_book_returns_404": 1,
+          "test_discount_new_book_fails": 1,
+          "test_discount_valid_book_success": 2,
+          "test_discount_over_limit_fails": 1,
+          "test_increase_stock_success": 2,
+          "test_decrease_stock_negative_result_fails": 1,
+          "test_add_tags_idempotent": 1,
+          "test_remove_tag_success": 1,
+          "test_create_tag_success": 1,
+          "test_delete_assigned_tag_fails": 1,
+          "test_create_order_success": 1,
+          "test_create_order_insufficient_stock_fails": 1,
+          "test_create_order_duplicate_items_fails": 1,
+          "test_status_transition_pending_to_confirmed": 1,
+          "test_status_transition_invalid_fails": 1,
+          "test_cancel_order_restores_stock": 1,
+          "test_delete_shipped_order_fails": 1,
+          "test_create_review_success": 1,
+          "test_review_rating_out_of_bounds": 1,
+          "test_rating_no_reviews_returns_null": 2,
+          "test_list_authors_paginated": 2,
+          "test_search_books_by_title": 2,
+          "test_list_books_default_pagination": 3,
+          "test_filter_orders_by_name": 1,
+          "test_filter_orders_by_status": 1,
+          "test_update_category_name_success": 1,
+          "test_update_tag_name_success": 1,
+          "test_update_book_price_success": 1,
+          "test_delete_book_cascades_reviews": 1,
+          "test_get_author_details_success": 1,
+          "test_get_category_success": 1,
+          "test_get_tag_success": 1,
+          "test_list_book_reviews_success": 1,
+          "test_get_order_details_success": 1,
+          "test_delete_category_fails_on_usage": 1,
+          "test_update_author_success": 1,
+          "test_filter_books_min_price": 1,
+          "test_filter_books_invalid_author_id": 1,
+          "test_list_tags_success": 1,
+          "test_list_categories_success": 1,
+          "test_create_order_empty_items_fails": 1,
+          "test_update_stock_invalid_format": 2
+        }
+      },
+      "response_validation": {
+        "tests_with_body_check": 10,
+        "tests_status_only": 40,
+        "total_test_functions": 50,
+        "response_validation_pct": 20.0,
+        "per_test_body_check": {
+          "test_check_health_status": false,
+          "test_create_author_success": true,
+          "test_create_author_invalid_name": true,
+          "test_delete_author_with_books_fails": false,
+          "test_create_category_duplicate_fails": false,
+          "test_create_book_success": true,
+          "test_create_book_invalid_isbn": false,
+          "test_create_book_duplicate_isbn_fails": false,
+          "test_get_nonexistent_book_returns_404": false,
+          "test_discount_new_book_fails": false,
+          "test_discount_valid_book_success": true,
+          "test_discount_over_limit_fails": false,
+          "test_increase_stock_success": true,
+          "test_decrease_stock_negative_result_fails": false,
+          "test_add_tags_idempotent": false,
+          "test_remove_tag_success": false,
+          "test_create_tag_success": false,
+          "test_delete_assigned_tag_fails": false,
+          "test_create_order_success": false,
+          "test_create_order_insufficient_stock_fails": false,
+          "test_create_order_duplicate_items_fails": false,
+          "test_status_transition_pending_to_confirmed": false,
+          "test_status_transition_invalid_fails": false,
+          "test_cancel_order_restores_stock": false,
+          "test_delete_shipped_order_fails": false,
+          "test_create_review_success": false,
+          "test_review_rating_out_of_bounds": false,
+          "test_rating_no_reviews_returns_null": true,
+          "test_list_authors_paginated": true,
+          "test_search_books_by_title": true,
+          "test_list_books_default_pagination": true,
+          "test_filter_orders_by_name": false,
+          "test_filter_orders_by_status": false,
+          "test_update_category_name_success": false,
+          "test_update_tag_name_success": false,
+          "test_update_book_price_success": false,
+          "test_delete_book_cascades_reviews": false,
+          "test_get_author_details_success": false,
+          "test_get_category_success": false,
+          "test_get_tag_success": false,
+          "test_list_book_reviews_success": false,
+          "test_get_order_details_success": false,
+          "test_delete_category_fails_on_usage": false,
+          "test_update_author_success": false,
+          "test_filter_books_min_price": false,
+          "test_filter_books_invalid_author_id": false,
+          "test_list_tags_success": false,
+          "test_list_categories_success": false,
+          "test_create_order_empty_items_fails": false,
+          "test_update_stock_invalid_format": true
+        }
+      },
+      "test_type_distribution": {
+        "total_planned": 50,
+        "distribution": {
+          "happy_path": {
+            "count": 32,
+            "pct": 64.0
+          },
+          "error": {
+            "count": 18,
+            "pct": 36.0
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          400,
+          404,
+          409,
+          422
+        ],
+        "diversity_count": 7,
+        "code_distribution": {
+          "200": 25,
+          "201": 5,
+          "204": 1,
+          "400": 7,
+          "404": 1,
+          "409": 5,
+          "422": 5
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0,
+        "total_test_functions": 50
+      },
+      "avg_test_length": {
+        "avg_lines": 6.3,
+        "min_lines": 3,
+        "max_lines": 11,
+        "total_test_functions": 50,
+        "per_test_lines": {
+          "test_check_health_status": 3,
+          "test_create_author_success": 7,
+          "test_create_author_invalid_name": 4,
+          "test_delete_author_with_books_fails": 6,
+          "test_create_category_duplicate_fails": 5,
+          "test_create_book_success": 10,
+          "test_create_book_invalid_isbn": 9,
+          "test_create_book_duplicate_isbn_fails": 11,
+          "test_get_nonexistent_book_returns_404": 3,
+          "test_discount_new_book_fails": 7,
+          "test_discount_valid_book_success": 7,
+          "test_discount_over_limit_fails": 6,
+          "test_increase_stock_success": 7,
+          "test_decrease_stock_negative_result_fails": 6,
+          "test_add_tags_idempotent": 8,
+          "test_remove_tag_success": 8,
+          "test_create_tag_success": 3,
+          "test_delete_assigned_tag_fails": 8,
+          "test_create_order_success": 11,
+          "test_create_order_insufficient_stock_fails": 11,
+          "test_create_order_duplicate_items_fails": 11,
+          "test_status_transition_pending_to_confirmed": 9,
+          "test_status_transition_invalid_fails": 9,
+          "test_cancel_order_restores_stock": 10,
+          "test_delete_shipped_order_fails": 11,
+          "test_create_review_success": 8,
+          "test_review_rating_out_of_bounds": 8,
+          "test_rating_no_reviews_returns_null": 7,
+          "test_list_authors_paginated": 4,
+          "test_search_books_by_title": 4,
+          "test_list_books_default_pagination": 6,
+          "test_filter_orders_by_name": 3,
+          "test_filter_orders_by_status": 3,
+          "test_update_category_name_success": 4,
+          "test_update_tag_name_success": 4,
+          "test_update_book_price_success": 6,
+          "test_delete_book_cascades_reviews": 7,
+          "test_get_author_details_success": 4,
+          "test_get_category_success": 4,
+          "test_get_tag_success": 4,
+          "test_list_book_reviews_success": 6,
+          "test_get_order_details_success": 9,
+          "test_delete_category_fails_on_usage": 6,
+          "test_update_author_success": 4,
+          "test_filter_books_min_price": 3,
+          "test_filter_books_invalid_author_id": 3,
+          "test_list_tags_success": 3,
+          "test_list_categories_success": 3,
+          "test_create_order_empty_items_fails": 5,
+          "test_update_stock_invalid_format": 7
+        }
+      },
+      "method_coverage": {
+        "total_planned": 50,
+        "method_distribution": {
+          "DELETE": {
+            "count": 6,
+            "pct": 12.0
+          },
+          "GET": {
+            "count": 17,
+            "pct": 34.0
+          },
+          "PATCH": {
+            "count": 6,
+            "pct": 12.0
+          },
+          "POST": {
+            "count": 17,
+            "pct": 34.0
+          },
+          "PUT": {
+            "count": 4,
+            "pct": 8.0
+          }
+        }
+      },
+      "plan_adherence": {
+        "planned": 50,
+        "found_in_code": 50,
+        "extra_in_code": 0,
+        "missing_from_code": [],
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 2,
+        "stale_names": [
+          "test_rating_no_reviews_returns_null",
+          "test_update_stock_invalid_format"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 67615,
+        "total_lines": 2660,
+        "total_est_tokens": 22538,
+        "section_count": 2,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          },
+          "TECHNICKÁ A BYZNYS DOKUMENTACE": {
+            "chars": 5364,
+            "lines": 124,
+            "est_tokens": 1788
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 50,
+        "unique_endpoints_in_plan": 33,
+        "total_api_endpoints": 34,
+        "tests_per_endpoint": {
+          "GET /health": 1,
+          "POST /authors": 2,
+          "DELETE /authors/{author_id}": 1,
+          "POST /categories": 1,
+          "POST /books": 3,
+          "GET /books/{book_id}": 1,
+          "POST /books/{book_id}/discount": 3,
+          "PATCH /books/{book_id}/stock": 1,
+          "POST /books/{book_id}/tags": 1,
+          "DELETE /books/{book_id}/tags": 1,
+          "POST /tags": 1,
+          "DELETE /tags/{tag_id}": 1,
+          "POST /orders": 1,
+          "PATCH /orders/{order_id}/status": 3,
+          "DELETE /orders/{order_id}": 1,
+          "POST /books/{book_id}/reviews": 2,
+          "GET /books/{book_id}/rating": 1,
+          "GET /authors": 1,
+          "GET /books": 2,
+          "GET /orders": 2,
+          "PUT /categories/{category_id}": 1,
+          "PUT /tags/{tag_id}": 1,
+          "PUT /books/{book_id}": 1,
+          "DELETE /books/{book_id}": 1,
+          "GET /authors/{author_id}": 1,
+          "GET /categories/{category_id}": 1,
+          "GET /tags/{tag_id}": 1,
+          "GET /books/{book_id}/reviews": 1,
+          "GET /orders/{order_id}": 1,
+          "DELETE /categories/{category_id}": 1,
+          "PUT /authors/{author_id}": 1,
+          "GET /tags": 1,
+          "GET /categories": 1
+        },
+        "type_per_endpoint": {
+          "GET /health": {
+            "happy_path": 1
+          },
+          "POST /authors": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "DELETE /authors/{author_id}": {
+            "error": 1
+          },
+          "POST /categories": {
+            "error": 1
+          },
+          "POST /books": {
+            "happy_path": 1,
+            "error": 2
+          },
+          "GET /books/{book_id}": {
+            "error": 1
+          },
+          "POST /books/{book_id}/discount": {
+            "error": 2,
+            "happy_path": 1
+          },
+          "PATCH /books/{book_id}/stock": {
+            "error": 1
+          },
+          "POST /books/{book_id}/tags": {
+            "happy_path": 1
+          },
+          "DELETE /books/{book_id}/tags": {
+            "happy_path": 1
+          },
+          "POST /tags": {
+            "happy_path": 1
+          },
+          "DELETE /tags/{tag_id}": {
+            "error": 1
+          },
+          "POST /orders": {
+            "error": 1
+          },
+          "PATCH /orders/{order_id}/status": {
+            "happy_path": 2,
+            "error": 1
+          },
+          "DELETE /orders/{order_id}": {
+            "error": 1
+          },
+          "POST /books/{book_id}/reviews": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "GET /books/{book_id}/rating": {
+            "happy_path": 1
+          },
+          "GET /authors": {
+            "happy_path": 1
+          },
+          "GET /books": {
+            "happy_path": 2
+          },
+          "GET /orders": {
+            "happy_path": 2
+          },
+          "PUT /categories/{category_id}": {
+            "happy_path": 1
+          },
+          "PUT /tags/{tag_id}": {
+            "happy_path": 1
+          },
+          "PUT /books/{book_id}": {
+            "happy_path": 1
+          },
+          "DELETE /books/{book_id}": {
+            "happy_path": 1
+          },
+          "GET /authors/{author_id}": {
+            "happy_path": 1
+          },
+          "GET /categories/{category_id}": {
+            "happy_path": 1
+          },
+          "GET /tags/{tag_id}": {
+            "happy_path": 1
+          },
+          "GET /books/{book_id}/reviews": {
+            "happy_path": 1
+          },
+          "GET /orders/{order_id}": {
+            "happy_path": 1
+          },
+          "DELETE /categories/{category_id}": {
+            "error": 1
+          },
+          "PUT /authors/{author_id}": {
+            "happy_path": 1
+          },
+          "GET /tags": {
+            "happy_path": 1
+          },
+          "GET /categories": {
+            "happy_path": 1
+          }
+        },
+        "top_tested": [
+          [
+            "POST /books",
+            3
+          ],
+          [
+            "POST /books/{book_id}/discount",
+            3
+          ],
+          [
+            "PATCH /orders/{order_id}/status",
+            3
+          ],
+          [
+            "POST /authors",
+            2
+          ],
+          [
+            "POST /books/{book_id}/reviews",
+            2
+          ]
+        ],
+        "error_focused_endpoints": {
+          "POST /books": 2,
+          "POST /books/{book_id}/discount": 2,
+          "POST /authors": 1,
+          "DELETE /authors/{author_id}": 1,
+          "POST /categories": 1,
+          "GET /books/{book_id}": 1,
+          "PATCH /books/{book_id}/stock": 1,
+          "DELETE /tags/{tag_id}": 1,
+          "POST /orders": 1,
+          "PATCH /orders/{order_id}/status": 1,
+          "DELETE /orders/{order_id}": 1,
+          "POST /books/{book_id}/reviews": 1,
+          "DELETE /categories/{category_id}": 1
+        },
+        "top3_concentration_pct": 18.0,
+        "skipped_endpoints": [
+          "POST /reset"
+        ],
+        "domain_distribution": {
+          "authors": 6,
+          "categories": 5,
+          "books": 18,
+          "tags": 5,
+          "orders": 8,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [],
+            "default_published_year": null
+          },
+          "create_author": {
+            "signature": "create_author()",
+            "lines": 3,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [
+              "name"
+            ],
+            "default_published_year": null
+          },
+          "create_category": {
+            "signature": "create_category()",
+            "lines": 3,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [
+              "name",
+              "description"
+            ],
+            "default_published_year": null
+          },
+          "create_book": {
+            "signature": "create_book(author_id, category_id, isbn=None)",
+            "lines": 11,
+            "has_stock_field": true,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [
+              "title",
+              "isbn",
+              "price",
+              "published_year",
+              "stock",
+              "author_id",
+              "category_id"
+            ],
+            "default_published_year": 2020
+          }
+        },
+        "helper_count": 4
+      },
+      "prompt_budget": {
+        "context_tokens_est": 22538,
+        "plan_tokens_est": 4441,
+        "instruction_tokens_est": 800,
+        "total_prompt_tokens_est": 27779,
+        "remaining_for_output_est": 100221,
+        "prompt_budget_pct": 21.7,
+        "model_context_window": 128000
+      },
+      "instruction_compliance": {
+        "total_http_calls": 72,
+        "missing_timeout": 72,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "json_after_204_risk": false,
+        "helper_between_tests": [],
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 2,
+        "categories": {
+          "other": 2
+        },
+        "category_pct": {
+          "other": 100.0
+        },
+        "per_test": {
+          "test_rating_no_reviews_returns_null": {
+            "category": "other",
+            "error_summary": ""
+          },
+          "test_update_stock_invalid_format": {
+            "category": "other",
+            "error_summary": ""
+          }
+        },
+        "category_details": {
+          "other": [
+            "test_rating_no_reviews_returns_null",
+            "test_update_stock_invalid_format"
+          ]
+        }
+      },
+      "code_patterns": {
+        "total_tests": 50,
+        "per_test": {
+          "test_check_health_status": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_author_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 3,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_create_author_invalid_name": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_delete_author_with_books_fails": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_create_category_duplicate_fails": {
+            "http_calls": 2,
+            "helper_calls": 1,
+            "total_calls": 3,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 5
+          },
+          "test_create_book_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 10
+          },
+          "test_create_book_invalid_isbn": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_create_book_duplicate_isbn_fails": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 11
+          },
+          "test_get_nonexistent_book_returns_404": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_discount_new_book_fails": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_discount_valid_book_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_discount_over_limit_fails": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_increase_stock_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_decrease_stock_negative_result_fails": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_add_tags_idempotent": {
+            "http_calls": 3,
+            "helper_calls": 3,
+            "total_calls": 6,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_remove_tag_success": {
+            "http_calls": 3,
+            "helper_calls": 3,
+            "total_calls": 6,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_create_tag_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_delete_assigned_tag_fails": {
+            "http_calls": 3,
+            "helper_calls": 3,
+            "total_calls": 6,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_create_order_success": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 11
+          },
+          "test_create_order_insufficient_stock_fails": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 11
+          },
+          "test_create_order_duplicate_items_fails": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 11
+          },
+          "test_status_transition_pending_to_confirmed": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_status_transition_invalid_fails": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_cancel_order_restores_stock": {
+            "http_calls": 3,
+            "helper_calls": 3,
+            "total_calls": 6,
+            "asserts": 1,
+            "side_effect_check": true,
+            "uses_chaining": false,
+            "lines": 10
+          },
+          "test_delete_shipped_order_fails": {
+            "http_calls": 4,
+            "helper_calls": 3,
+            "total_calls": 7,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 11
+          },
+          "test_create_review_success": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_review_rating_out_of_bounds": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_rating_no_reviews_returns_null": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_list_authors_paginated": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_search_books_by_title": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_books_default_pagination": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 3,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_filter_orders_by_name": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_filter_orders_by_status": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_update_category_name_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_update_tag_name_success": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_update_book_price_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_delete_book_cascades_reviews": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_get_author_details_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_get_category_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_get_tag_success": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": true,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_book_reviews_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_get_order_details_success": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": true,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_delete_category_fails_on_usage": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_update_author_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_filter_books_min_price": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_filter_books_invalid_author_id": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_tags_success": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_categories_success": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_order_empty_items_fails": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 5
+          },
+          "test_update_stock_invalid_format": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          }
+        },
+        "summary": {
+          "avg_http_calls": 1.38,
+          "avg_helper_calls": 1.96,
+          "avg_total_calls": 3.34,
+          "avg_asserts": 1.24,
+          "pct_side_effect_checks": 6.0,
+          "pct_chaining": 4.0,
+          "single_call_tests": 37,
+          "multi_step_tests": 5
+        }
+      },
+      "plan_code_drift": {
+        "planned_count": 50,
+        "actual_count": 50,
+        "matched": 50,
+        "only_in_plan": [],
+        "only_in_code": [],
+        "status_code_drift": {
+          "test_cancel_order_restores_stock": {
+            "planned": 200,
+            "actual_in_code": []
+          }
+        },
+        "drift_count": 1
+      },
+      "context_utilization": {
+        "context_endpoints_found": 53,
+        "plan_endpoints_used": 17,
+        "endpoint_utilization_pct": 32.1,
+        "context_field_names": 181,
+        "code_field_names": 52,
+        "shared_nontrivial_fields": [
+          "author",
+          "author_id",
+          "bio",
+          "book_id",
+          "category_id",
+          "comment",
+          "customer_email",
+          "customer_name",
+          "discount_percent",
+          "discounted_price",
+          "isbn",
+          "limit",
+          "min_price",
+          "page_size",
+          "price",
+          "published_year",
+          "quantity",
+          "rating",
+          "reviewer_name",
+          "search",
+          "stock",
+          "tag_ids",
+          "title"
+        ],
+        "context_status_codes": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "code_status_codes": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_hallucinated": []
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 48,
+            "failed": 2,
+            "failing_tests": [
+              "test_rating_no_reviews_returns_null",
+              "test_update_stock_invalid_format"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 48,
+            "failed": 2,
+            "failing_tests": [
+              "test_rating_no_reviews_returns_null",
+              "test_update_stock_invalid_format"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 48,
+            "failed": 2,
+            "failing_tests": [
+              "test_rating_no_reviews_returns_null",
+              "test_update_stock_invalid_format"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 4,
+            "passed": 48,
+            "failed": 2,
+            "failing_tests": [
+              "test_rating_no_reviews_returns_null",
+              "test_update_stock_invalid_format"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 5,
+            "passed": 48,
+            "failed": 2,
+            "failing_tests": [
+              "test_rating_no_reviews_returns_null",
+              "test_update_stock_invalid_format"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 2,
+        "deltas": [
+          {
+            "from_iter": 1,
+            "to_iter": 2,
+            "delta": 0,
+            "repair_type": null
+          },
+          {
+            "from_iter": 2,
+            "to_iter": 3,
+            "delta": 0,
+            "repair_type": null
+          },
+          {
+            "from_iter": 3,
+            "to_iter": 4,
+            "delta": 0,
+            "repair_type": null
+          },
+          {
+            "from_iter": 4,
+            "to_iter": 5,
+            "delta": 0,
+            "repair_type": null
+          }
+        ],
+        "never_fixed_tests": [
+          "test_rating_no_reviews_returns_null",
+          "test_update_stock_invalid_format"
+        ],
+        "fixed_tests": [],
+        "total_repair_calls": 0,
+        "total_stale_skipped": 0
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-22T15:34:38.792044",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L2",
+    "run_id": 1,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 75.33,
+    "plan_test_count": 50,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L2__run1.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L2__run1.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 49,
+        "tests_failed": 1,
+        "tests_errors": 0,
+        "total_executed": 50,
+        "validity_rate_pct": 98.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 28,
+        "uncovered_endpoints": [
+          "DELETE /books/{book_id}",
+          "GET /categories/{category_id}",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "POST /tags",
+          "PUT /authors/{author_id}"
+        ],
+        "endpoint_coverage_pct": 82.35
+      },
+      "assertion_depth": {
+        "total_test_functions": 50,
+        "total_assertions": 67,
+        "assertion_depth": 1.34,
+        "per_test_assertions": {
+          "test_check_api_health": 2,
+          "test_create_author_success": 2,
+          "test_create_author_invalid_data": 1,
+          "test_delete_author_with_books_fails": 1,
+          "test_delete_author_not_found": 1,
+          "test_create_category_success": 2,
+          "test_create_category_duplicate": 1,
+          "test_create_book_success": 2,
+          "test_create_book_duplicate_isbn": 1,
+          "test_create_book_invalid_author": 1,
+          "test_discount_old_book_success": 2,
+          "test_discount_new_book_fails": 1,
+          "test_discount_exceed_limit": 1,
+          "test_increase_stock_success": 2,
+          "test_decrease_stock_insufficient": 1,
+          "test_update_stock_negative_input": 2,
+          "test_add_tags_success": 2,
+          "test_add_tags_nonexistent": 1,
+          "test_remove_tags_success": 2,
+          "test_create_order_success": 2,
+          "test_create_order_insufficient_stock": 1,
+          "test_create_order_duplicate_items": 1,
+          "test_create_order_empty_cart": 1,
+          "test_status_transition_pending_to_confirmed": 2,
+          "test_status_transition_invalid": 1,
+          "test_delete_pending_order_returns_stock": 1,
+          "test_delete_shipped_order_fails": 1,
+          "test_list_books_pagination": 2,
+          "test_list_books_filter_by_author": 1,
+          "test_list_books_invalid_pagination": 1,
+          "test_create_review_success": 1,
+          "test_create_review_invalid_rating": 1,
+          "test_list_tags_all": 2,
+          "test_list_authors_default": 1,
+          "test_list_categories_all": 1,
+          "test_get_book_detail": 2,
+          "test_get_book_not_found": 1,
+          "test_get_rating_no_reviews": 2,
+          "test_delete_unused_tag": 1,
+          "test_delete_used_tag_fails": 1,
+          "test_list_orders_filtering": 1,
+          "test_update_book_title": 2,
+          "test_update_book_invalid_isbn": 1,
+          "test_delete_category_with_books": 1,
+          "test_update_tag_name": 1,
+          "test_get_order_detail": 2,
+          "test_get_author_detail": 1,
+          "test_update_category_name": 1,
+          "test_list_book_reviews": 1,
+          "test_delete_nonexistent_review": 1
+        }
+      },
+      "response_validation": {
+        "tests_with_body_check": 18,
+        "tests_status_only": 32,
+        "total_test_functions": 50,
+        "response_validation_pct": 36.0,
+        "per_test_body_check": {
+          "test_check_api_health": true,
+          "test_create_author_success": true,
+          "test_create_author_invalid_data": false,
+          "test_delete_author_with_books_fails": false,
+          "test_delete_author_not_found": false,
+          "test_create_category_success": true,
+          "test_create_category_duplicate": true,
+          "test_create_book_success": true,
+          "test_create_book_duplicate_isbn": false,
+          "test_create_book_invalid_author": false,
+          "test_discount_old_book_success": true,
+          "test_discount_new_book_fails": false,
+          "test_discount_exceed_limit": false,
+          "test_increase_stock_success": true,
+          "test_decrease_stock_insufficient": false,
+          "test_update_stock_negative_input": true,
+          "test_add_tags_success": true,
+          "test_add_tags_nonexistent": false,
+          "test_remove_tags_success": true,
+          "test_create_order_success": true,
+          "test_create_order_insufficient_stock": false,
+          "test_create_order_duplicate_items": false,
+          "test_create_order_empty_cart": false,
+          "test_status_transition_pending_to_confirmed": true,
+          "test_status_transition_invalid": false,
+          "test_delete_pending_order_returns_stock": false,
+          "test_delete_shipped_order_fails": false,
+          "test_list_books_pagination": true,
+          "test_list_books_filter_by_author": false,
+          "test_list_books_invalid_pagination": false,
+          "test_create_review_success": false,
+          "test_create_review_invalid_rating": false,
+          "test_list_tags_all": true,
+          "test_list_authors_default": false,
+          "test_list_categories_all": false,
+          "test_get_book_detail": true,
+          "test_get_book_not_found": false,
+          "test_get_rating_no_reviews": true,
+          "test_delete_unused_tag": false,
+          "test_delete_used_tag_fails": false,
+          "test_list_orders_filtering": false,
+          "test_update_book_title": true,
+          "test_update_book_invalid_isbn": false,
+          "test_delete_category_with_books": false,
+          "test_update_tag_name": false,
+          "test_get_order_detail": true,
+          "test_get_author_detail": false,
+          "test_update_category_name": false,
+          "test_list_book_reviews": false,
+          "test_delete_nonexistent_review": false
+        }
+      },
+      "test_type_distribution": {
+        "total_planned": 50,
+        "distribution": {
+          "happy_path": {
+            "count": 27,
+            "pct": 54.0
+          },
+          "error": {
+            "count": 23,
+            "pct": 46.0
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          400,
+          404,
+          409,
+          422
+        ],
+        "diversity_count": 7,
+        "code_distribution": {
+          "200": 20,
+          "201": 5,
+          "204": 1,
+          "400": 6,
+          "404": 4,
+          "409": 5,
+          "422": 7
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0,
+        "total_test_functions": 50
+      },
+      "avg_test_length": {
+        "avg_lines": 5.74,
+        "min_lines": 3,
+        "max_lines": 10,
+        "total_test_functions": 50,
+        "per_test_lines": {
+          "test_check_api_health": 4,
+          "test_create_author_success": 5,
+          "test_create_author_invalid_data": 3,
+          "test_delete_author_with_books_fails": 6,
+          "test_delete_author_not_found": 3,
+          "test_create_category_success": 5,
+          "test_create_category_duplicate": 4,
+          "test_create_book_success": 7,
+          "test_create_book_duplicate_isbn": 8,
+          "test_create_book_invalid_author": 5,
+          "test_discount_old_book_success": 7,
+          "test_discount_new_book_fails": 6,
+          "test_discount_exceed_limit": 6,
+          "test_increase_stock_success": 7,
+          "test_decrease_stock_insufficient": 6,
+          "test_update_stock_negative_input": 7,
+          "test_add_tags_success": 9,
+          "test_add_tags_nonexistent": 6,
+          "test_remove_tags_success": 10,
+          "test_create_order_success": 8,
+          "test_create_order_insufficient_stock": 7,
+          "test_create_order_duplicate_items": 7,
+          "test_create_order_empty_cart": 4,
+          "test_status_transition_pending_to_confirmed": 8,
+          "test_status_transition_invalid": 7,
+          "test_delete_pending_order_returns_stock": 8,
+          "test_delete_shipped_order_fails": 9,
+          "test_list_books_pagination": 4,
+          "test_list_books_filter_by_author": 3,
+          "test_list_books_invalid_pagination": 3,
+          "test_create_review_success": 6,
+          "test_create_review_invalid_rating": 6,
+          "test_list_tags_all": 4,
+          "test_list_authors_default": 3,
+          "test_list_categories_all": 3,
+          "test_get_book_detail": 7,
+          "test_get_book_not_found": 3,
+          "test_get_rating_no_reviews": 7,
+          "test_delete_unused_tag": 4,
+          "test_delete_used_tag_fails": 8,
+          "test_list_orders_filtering": 3,
+          "test_update_book_title": 7,
+          "test_update_book_invalid_isbn": 6,
+          "test_delete_category_with_books": 6,
+          "test_update_tag_name": 4,
+          "test_get_order_detail": 8,
+          "test_get_author_detail": 4,
+          "test_update_category_name": 4,
+          "test_list_book_reviews": 6,
+          "test_delete_nonexistent_review": 6
+        }
+      },
+      "method_coverage": {
+        "total_planned": 50,
+        "method_distribution": {
+          "DELETE": {
+            "count": 9,
+            "pct": 18.0
+          },
+          "GET": {
+            "count": 14,
+            "pct": 28.0
+          },
+          "PATCH": {
+            "count": 5,
+            "pct": 10.0
+          },
+          "POST": {
+            "count": 18,
+            "pct": 36.0
+          },
+          "PUT": {
+            "count": 4,
+            "pct": 8.0
+          }
+        }
+      },
+      "plan_adherence": {
+        "planned": 50,
+        "found_in_code": 50,
+        "extra_in_code": 0,
+        "missing_from_code": [],
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 1,
+        "stale_names": [
+          "test_update_stock_negative_input"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 102069,
+        "total_lines": 3743,
+        "total_est_tokens": 34023,
+        "section_count": 3,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          },
+          "TECHNICKÁ A BYZNYS DOKUMENTACE": {
+            "chars": 5364,
+            "lines": 124,
+            "est_tokens": 1788
+          },
+          "ZDROJOVÝ KÓD ENDPOINTŮ": {
+            "chars": 34422,
+            "lines": 1082,
+            "est_tokens": 11474
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 50,
+        "unique_endpoints_in_plan": 29,
+        "total_api_endpoints": 34,
+        "tests_per_endpoint": {
+          "GET /health": 1,
+          "POST /authors": 2,
+          "DELETE /authors/{author_id}": 2,
+          "POST /categories": 2,
+          "POST /books": 3,
+          "POST /books/{book_id}/discount": 3,
+          "PATCH /books/{book_id}/stock": 3,
+          "POST /books/{book_id}/tags": 2,
+          "DELETE /books/{book_id}/tags": 1,
+          "POST /orders": 4,
+          "PATCH /orders/{order_id}/status": 2,
+          "DELETE /orders/{order_id}": 2,
+          "GET /books": 3,
+          "POST /books/{book_id}/reviews": 2,
+          "GET /tags": 1,
+          "GET /authors": 1,
+          "GET /categories": 1,
+          "GET /books/{book_id}": 2,
+          "GET /books/{book_id}/rating": 1,
+          "DELETE /tags/{tag_id}": 2,
+          "GET /orders": 1,
+          "PUT /books/{book_id}": 2,
+          "DELETE /categories/{category_id}": 1,
+          "PUT /tags/{tag_id}": 1,
+          "GET /orders/{order_id}": 1,
+          "GET /authors/{author_id}": 1,
+          "PUT /categories/{category_id}": 1,
+          "GET /books/{book_id}/reviews": 1,
+          "DELETE /books/{book_id}/reviews": 1
+        },
+        "type_per_endpoint": {
+          "GET /health": {
+            "happy_path": 1
+          },
+          "POST /authors": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "DELETE /authors/{author_id}": {
+            "error": 2
+          },
+          "POST /categories": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "POST /books": {
+            "happy_path": 1,
+            "error": 2
+          },
+          "POST /books/{book_id}/discount": {
+            "happy_path": 1,
+            "error": 2
+          },
+          "PATCH /books/{book_id}/stock": {
+            "happy_path": 1,
+            "error": 2
+          },
+          "POST /books/{book_id}/tags": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "DELETE /books/{book_id}/tags": {
+            "happy_path": 1
+          },
+          "POST /orders": {
+            "happy_path": 1,
+            "error": 3
+          },
+          "PATCH /orders/{order_id}/status": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "DELETE /orders/{order_id}": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "GET /books": {
+            "happy_path": 2,
+            "error": 1
+          },
+          "POST /books/{book_id}/reviews": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "GET /tags": {
+            "happy_path": 1
+          },
+          "GET /authors": {
+            "happy_path": 1
+          },
+          "GET /categories": {
+            "happy_path": 1
+          },
+          "GET /books/{book_id}": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "GET /books/{book_id}/rating": {
+            "happy_path": 1
+          },
+          "DELETE /tags/{tag_id}": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "GET /orders": {
+            "happy_path": 1
+          },
+          "PUT /books/{book_id}": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "DELETE /categories/{category_id}": {
+            "error": 1
+          },
+          "PUT /tags/{tag_id}": {
+            "happy_path": 1
+          },
+          "GET /orders/{order_id}": {
+            "happy_path": 1
+          },
+          "GET /authors/{author_id}": {
+            "happy_path": 1
+          },
+          "PUT /categories/{category_id}": {
+            "happy_path": 1
+          },
+          "GET /books/{book_id}/reviews": {
+            "happy_path": 1
+          },
+          "DELETE /books/{book_id}/reviews": {
+            "error": 1
+          }
+        },
+        "top_tested": [
+          [
+            "POST /orders",
+            4
+          ],
+          [
+            "POST /books",
+            3
+          ],
+          [
+            "POST /books/{book_id}/discount",
+            3
+          ],
+          [
+            "PATCH /books/{book_id}/stock",
+            3
+          ],
+          [
+            "GET /books",
+            3
+          ]
+        ],
+        "error_focused_endpoints": {
+          "POST /orders": 3,
+          "DELETE /authors/{author_id}": 2,
+          "POST /books": 2,
+          "POST /books/{book_id}/discount": 2,
+          "PATCH /books/{book_id}/stock": 2,
+          "POST /authors": 1,
+          "POST /categories": 1,
+          "POST /books/{book_id}/tags": 1,
+          "PATCH /orders/{order_id}/status": 1,
+          "DELETE /orders/{order_id}": 1,
+          "GET /books": 1,
+          "POST /books/{book_id}/reviews": 1,
+          "GET /books/{book_id}": 1,
+          "DELETE /tags/{tag_id}": 1,
+          "PUT /books/{book_id}": 1,
+          "DELETE /categories/{category_id}": 1,
+          "DELETE /books/{book_id}/reviews": 1
+        },
+        "top3_concentration_pct": 20.0,
+        "skipped_endpoints": [
+          "DELETE /books/{book_id}",
+          "GET /categories/{category_id}",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "POST /tags",
+          "PUT /authors/{author_id}"
+        ],
+        "domain_distribution": {
+          "authors": 6,
+          "categories": 5,
+          "books": 24,
+          "tags": 4,
+          "orders": 10,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [],
+            "default_published_year": null
+          },
+          "create_author": {
+            "signature": "create_author()",
+            "lines": 4,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [
+              "name",
+              "bio",
+              "born_year"
+            ],
+            "default_published_year": null
+          },
+          "create_category": {
+            "signature": "create_category()",
+            "lines": 4,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [
+              "name",
+              "description"
+            ],
+            "default_published_year": null
+          },
+          "create_book": {
+            "signature": "create_book(author_id, category_id, published_year=2020)",
+            "lines": 12,
+            "has_stock_field": true,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [
+              "title",
+              "isbn",
+              "price",
+              "published_year",
+              "stock",
+              "author_id",
+              "category_id"
+            ],
+            "default_published_year": 2020
+          }
+        },
+        "helper_count": 4
+      },
+      "prompt_budget": {
+        "context_tokens_est": 34023,
+        "plan_tokens_est": 4106,
+        "instruction_tokens_est": 800,
+        "total_prompt_tokens_est": 38929,
+        "remaining_for_output_est": 89071,
+        "prompt_budget_pct": 30.4,
+        "model_context_window": 128000
+      },
+      "instruction_compliance": {
+        "total_http_calls": 69,
+        "missing_timeout": 69,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "json_after_204_risk": false,
+        "helper_between_tests": [],
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 1,
+        "categories": {
+          "other": 1
+        },
+        "category_pct": {
+          "other": 100.0
+        },
+        "per_test": {
+          "test_update_stock_negative_input": {
+            "category": "other",
+            "error_summary": ""
+          }
+        },
+        "category_details": {
+          "other": [
+            "test_update_stock_negative_input"
+          ]
+        }
+      },
+      "code_patterns": {
+        "total_tests": 50,
+        "per_test": {
+          "test_check_api_health": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_create_author_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 5
+          },
+          "test_create_author_invalid_data": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_delete_author_with_books_fails": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_delete_author_not_found": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_category_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 5
+          },
+          "test_create_category_duplicate": {
+            "http_calls": 1,
+            "helper_calls": 2,
+            "total_calls": 3,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_create_book_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_create_book_duplicate_isbn": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_create_book_invalid_author": {
+            "http_calls": 1,
+            "helper_calls": 2,
+            "total_calls": 3,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 5
+          },
+          "test_discount_old_book_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_discount_new_book_fails": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_discount_exceed_limit": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_increase_stock_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_decrease_stock_insufficient": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_update_stock_negative_input": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_add_tags_success": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 9
+          },
+          "test_add_tags_nonexistent": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_remove_tags_success": {
+            "http_calls": 3,
+            "helper_calls": 3,
+            "total_calls": 6,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 10
+          },
+          "test_create_order_success": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_create_order_insufficient_stock": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_create_order_duplicate_items": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_create_order_empty_cart": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_status_transition_pending_to_confirmed": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 8
+          },
+          "test_status_transition_invalid": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_delete_pending_order_returns_stock": {
+            "http_calls": 3,
+            "helper_calls": 3,
+            "total_calls": 6,
+            "asserts": 1,
+            "side_effect_check": true,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_delete_shipped_order_fails": {
+            "http_calls": 4,
+            "helper_calls": 3,
+            "total_calls": 7,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_list_books_pagination": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_books_filter_by_author": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_books_invalid_pagination": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_review_success": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_create_review_invalid_rating": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_list_tags_all": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_authors_default": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_categories_all": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_get_book_detail": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_get_book_not_found": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_get_rating_no_reviews": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_delete_unused_tag": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_delete_used_tag_fails": {
+            "http_calls": 3,
+            "helper_calls": 3,
+            "total_calls": 6,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_list_orders_filtering": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_update_book_title": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_update_book_invalid_isbn": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_delete_category_with_books": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_update_tag_name": {
+            "http_calls": 2,
+            "helper_calls": 0,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_get_order_detail": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 2,
+            "side_effect_check": true,
+            "uses_chaining": true,
+            "lines": 8
+          },
+          "test_get_author_detail": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_update_category_name": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_book_reviews": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_delete_nonexistent_review": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          }
+        },
+        "summary": {
+          "avg_http_calls": 1.32,
+          "avg_helper_calls": 2.04,
+          "avg_total_calls": 3.36,
+          "avg_asserts": 1.34,
+          "pct_side_effect_checks": 4.0,
+          "pct_chaining": 24.0,
+          "single_call_tests": 39,
+          "multi_step_tests": 4
+        }
+      },
+      "plan_code_drift": {
+        "planned_count": 50,
+        "actual_count": 50,
+        "matched": 50,
+        "only_in_plan": [],
+        "only_in_code": [],
+        "status_code_drift": {
+          "test_delete_pending_order_returns_stock": {
+            "planned": 204,
+            "actual_in_code": []
+          },
+          "test_list_books_invalid_pagination": {
+            "planned": 400,
+            "actual_in_code": [
+              422
+            ]
+          },
+          "test_delete_nonexistent_review": {
+            "planned": 404,
+            "actual_in_code": []
+          }
+        },
+        "drift_count": 3
+      },
+      "context_utilization": {
+        "context_endpoints_found": 57,
+        "plan_endpoints_used": 17,
+        "endpoint_utilization_pct": 29.8,
+        "context_field_names": 211,
+        "code_field_names": 48,
+        "shared_nontrivial_fields": [
+          "Author",
+          "Bio",
+          "Book",
+          "Tag",
+          "author_id",
+          "average_rating",
+          "bio",
+          "book_id",
+          "born_year",
+          "category_id",
+          "confirmed",
+          "customer_email",
+          "customer_name",
+          "delivered",
+          "discount_percent",
+          "discounted_price",
+          "isbn",
+          "ok",
+          "page_size",
+          "pending",
+          "price",
+          "published_year",
+          "quantity",
+          "rating",
+          "reviewer_name",
+          "shipped",
+          "stock",
+          "tag_ids",
+          "tags",
+          "title"
+        ],
+        "context_status_codes": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "code_status_codes": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_hallucinated": []
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 49,
+            "failed": 1,
+            "failing_tests": [
+              "test_update_stock_negative_input"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 49,
+            "failed": 1,
+            "failing_tests": [
+              "test_update_stock_negative_input"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 49,
+            "failed": 1,
+            "failing_tests": [
+              "test_update_stock_negative_input"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 4,
+            "passed": 49,
+            "failed": 1,
+            "failing_tests": [
+              "test_update_stock_negative_input"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 5,
+            "passed": 49,
+            "failed": 1,
+            "failing_tests": [
+              "test_update_stock_negative_input"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 2,
+        "deltas": [
+          {
+            "from_iter": 1,
+            "to_iter": 2,
+            "delta": 0,
+            "repair_type": null
+          },
+          {
+            "from_iter": 2,
+            "to_iter": 3,
+            "delta": 0,
+            "repair_type": null
+          },
+          {
+            "from_iter": 3,
+            "to_iter": 4,
+            "delta": 0,
+            "repair_type": null
+          },
+          {
+            "from_iter": 4,
+            "to_iter": 5,
+            "delta": 0,
+            "repair_type": null
+          }
+        ],
+        "never_fixed_tests": [
+          "test_update_stock_negative_input"
+        ],
+        "fixed_tests": [],
+        "total_repair_calls": 0,
+        "total_stale_skipped": 0
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-22T15:35:33.331846",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L3",
+    "run_id": 1,
+    "iterations_used": 2,
+    "all_tests_passed": true,
+    "elapsed_seconds": 54.17,
+    "plan_test_count": 50,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L3__run1.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L3__run1.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 50,
+        "tests_failed": 0,
+        "tests_errors": 0,
+        "total_executed": 50,
+        "validity_rate_pct": 100.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 31,
+        "uncovered_endpoints": [
+          "DELETE /categories/{category_id}",
+          "GET /authors/{author_id}",
+          "POST /reset"
+        ],
+        "endpoint_coverage_pct": 91.18
+      },
+      "assertion_depth": {
+        "total_test_functions": 50,
+        "total_assertions": 63,
+        "assertion_depth": 1.26,
+        "per_test_assertions": {
+          "test_check_health_status": 2,
+          "test_create_author_success": 2,
+          "test_create_author_invalid_data": 1,
+          "test_delete_author_with_books_fails": 1,
+          "test_delete_nonexistent_author": 1,
+          "test_create_category_duplicate_fails": 1,
+          "test_create_book_success": 2,
+          "test_create_book_duplicate_isbn_fails": 1,
+          "test_create_book_invalid_author": 2,
+          "test_get_book_details": 2,
+          "test_create_review_success": 1,
+          "test_create_review_invalid_rating": 1,
+          "test_get_rating_no_reviews": 2,
+          "test_apply_discount_too_new_fails": 1,
+          "test_apply_discount_max_percent": 1,
+          "test_update_stock_add": 2,
+          "test_update_stock_negative_fails": 1,
+          "test_create_tag_success": 1,
+          "test_delete_tag_in_use_fails": 1,
+          "test_add_tags_idempotency": 1,
+          "test_remove_nonexistent_tag_from_book": 2,
+          "test_create_order_insufficient_stock": 1,
+          "test_create_order_duplicate_book_id": 1,
+          "test_create_order_valid_cleanup": 2,
+          "test_update_status_pending_to_confirmed": 1,
+          "test_update_status_invalid_transition": 1,
+          "test_cancel_order_returns_stock": 1,
+          "test_delete_shipped_order_fails": 1,
+          "test_list_books_pagination_default": 2,
+          "test_list_books_search_filter": 2,
+          "test_list_books_price_filter": 1,
+          "test_list_books_invalid_page": 1,
+          "test_list_books_large_page_size": 1,
+          "test_list_authors_empty": 2,
+          "test_list_authors_with_params": 1,
+          "test_update_category_name_success": 1,
+          "test_update_book_isbn_conflict": 1,
+          "test_update_book_success": 2,
+          "test_list_orders_filter_customer": 1,
+          "test_list_orders_filter_status": 1,
+          "test_get_category_not_found": 1,
+          "test_delete_book_success": 1,
+          "test_update_author_success": 1,
+          "test_update_tag_duplicate_name_fails": 1,
+          "test_list_reviews_not_found_book": 1,
+          "test_list_tags_all": 1,
+          "test_list_categories_all": 1,
+          "test_get_order_detail": 1,
+          "test_get_tag_not_found": 1,
+          "test_create_review_malformed_json": 1
+        }
+      },
+      "response_validation": {
+        "tests_with_body_check": 13,
+        "tests_status_only": 37,
+        "total_test_functions": 50,
+        "response_validation_pct": 26.0,
+        "per_test_body_check": {
+          "test_check_health_status": true,
+          "test_create_author_success": true,
+          "test_create_author_invalid_data": false,
+          "test_delete_author_with_books_fails": false,
+          "test_delete_nonexistent_author": false,
+          "test_create_category_duplicate_fails": false,
+          "test_create_book_success": true,
+          "test_create_book_duplicate_isbn_fails": false,
+          "test_create_book_invalid_author": true,
+          "test_get_book_details": true,
+          "test_create_review_success": false,
+          "test_create_review_invalid_rating": false,
+          "test_get_rating_no_reviews": true,
+          "test_apply_discount_too_new_fails": false,
+          "test_apply_discount_max_percent": false,
+          "test_update_stock_add": true,
+          "test_update_stock_negative_fails": false,
+          "test_create_tag_success": false,
+          "test_delete_tag_in_use_fails": false,
+          "test_add_tags_idempotency": false,
+          "test_remove_nonexistent_tag_from_book": true,
+          "test_create_order_insufficient_stock": false,
+          "test_create_order_duplicate_book_id": false,
+          "test_create_order_valid_cleanup": false,
+          "test_update_status_pending_to_confirmed": false,
+          "test_update_status_invalid_transition": false,
+          "test_cancel_order_returns_stock": false,
+          "test_delete_shipped_order_fails": false,
+          "test_list_books_pagination_default": true,
+          "test_list_books_search_filter": true,
+          "test_list_books_price_filter": false,
+          "test_list_books_invalid_page": false,
+          "test_list_books_large_page_size": false,
+          "test_list_authors_empty": true,
+          "test_list_authors_with_params": false,
+          "test_update_category_name_success": false,
+          "test_update_book_isbn_conflict": false,
+          "test_update_book_success": true,
+          "test_list_orders_filter_customer": false,
+          "test_list_orders_filter_status": false,
+          "test_get_category_not_found": false,
+          "test_delete_book_success": false,
+          "test_update_author_success": false,
+          "test_update_tag_duplicate_name_fails": true,
+          "test_list_reviews_not_found_book": false,
+          "test_list_tags_all": false,
+          "test_list_categories_all": false,
+          "test_get_order_detail": false,
+          "test_get_tag_not_found": false,
+          "test_create_review_malformed_json": false
+        }
+      },
+      "test_type_distribution": {
+        "total_planned": 50,
+        "distribution": {
+          "happy_path": {
+            "count": 27,
+            "pct": 54.0
+          },
+          "error": {
+            "count": 22,
+            "pct": 44.0
+          },
+          "edge_case": {
+            "count": 1,
+            "pct": 2.0
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          400,
+          404,
+          409,
+          422
+        ],
+        "diversity_count": 7,
+        "code_distribution": {
+          "200": 20,
+          "201": 5,
+          "204": 1,
+          "400": 6,
+          "404": 6,
+          "409": 6,
+          "422": 5
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0,
+        "total_test_functions": 50
+      },
+      "avg_test_length": {
+        "avg_lines": 5.62,
+        "min_lines": 3,
+        "max_lines": 14,
+        "total_test_functions": 50,
+        "per_test_lines": {
+          "test_check_health_status": 4,
+          "test_create_author_success": 5,
+          "test_create_author_invalid_data": 3,
+          "test_delete_author_with_books_fails": 6,
+          "test_delete_nonexistent_author": 3,
+          "test_create_category_duplicate_fails": 5,
+          "test_create_book_success": 10,
+          "test_create_book_duplicate_isbn_fails": 8,
+          "test_create_book_invalid_author": 14,
+          "test_get_book_details": 7,
+          "test_create_review_success": 7,
+          "test_create_review_invalid_rating": 6,
+          "test_get_rating_no_reviews": 7,
+          "test_apply_discount_too_new_fails": 6,
+          "test_apply_discount_max_percent": 6,
+          "test_update_stock_add": 7,
+          "test_update_stock_negative_fails": 6,
+          "test_create_tag_success": 3,
+          "test_delete_tag_in_use_fails": 8,
+          "test_add_tags_idempotency": 8,
+          "test_remove_nonexistent_tag_from_book": 7,
+          "test_create_order_insufficient_stock": 7,
+          "test_create_order_duplicate_book_id": 7,
+          "test_create_order_valid_cleanup": 9,
+          "test_update_status_pending_to_confirmed": 7,
+          "test_update_status_invalid_transition": 7,
+          "test_cancel_order_returns_stock": 8,
+          "test_delete_shipped_order_fails": 9,
+          "test_list_books_pagination_default": 4,
+          "test_list_books_search_filter": 4,
+          "test_list_books_price_filter": 3,
+          "test_list_books_invalid_page": 3,
+          "test_list_books_large_page_size": 3,
+          "test_list_authors_empty": 4,
+          "test_list_authors_with_params": 3,
+          "test_update_category_name_success": 4,
+          "test_update_book_isbn_conflict": 7,
+          "test_update_book_success": 7,
+          "test_list_orders_filter_customer": 3,
+          "test_list_orders_filter_status": 3,
+          "test_get_category_not_found": 3,
+          "test_delete_book_success": 6,
+          "test_update_author_success": 4,
+          "test_update_tag_duplicate_name_fails": 5,
+          "test_list_reviews_not_found_book": 3,
+          "test_list_tags_all": 3,
+          "test_list_categories_all": 3,
+          "test_get_order_detail": 7,
+          "test_get_tag_not_found": 3,
+          "test_create_review_malformed_json": 6
+        }
+      },
+      "method_coverage": {
+        "total_planned": 50,
+        "method_distribution": {
+          "DELETE": {
+            "count": 6,
+            "pct": 12.0
+          },
+          "GET": {
+            "count": 18,
+            "pct": 36.0
+          },
+          "PATCH": {
+            "count": 5,
+            "pct": 10.0
+          },
+          "POST": {
+            "count": 16,
+            "pct": 32.0
+          },
+          "PUT": {
+            "count": 5,
+            "pct": 10.0
+          }
+        }
+      },
+      "plan_adherence": {
+        "planned": 50,
+        "found_in_code": 50,
+        "extra_in_code": 0,
+        "missing_from_code": [],
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 0,
+        "stale_names": []
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 104884,
+        "total_lines": 3821,
+        "total_est_tokens": 34961,
+        "section_count": 4,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          },
+          "TECHNICKÁ A BYZNYS DOKUMENTACE": {
+            "chars": 5364,
+            "lines": 124,
+            "est_tokens": 1788
+          },
+          "ZDROJOVÝ KÓD ENDPOINTŮ": {
+            "chars": 34422,
+            "lines": 1082,
+            "est_tokens": 11474
+          },
+          "DATABÁZOVÉ SCHÉMA": {
+            "chars": 2788,
+            "lines": 77,
+            "est_tokens": 929
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 50,
+        "unique_endpoints_in_plan": 31,
+        "total_api_endpoints": 34,
+        "tests_per_endpoint": {
+          "GET /health": 1,
+          "POST /authors": 2,
+          "DELETE /authors/{author_id}": 2,
+          "POST /categories": 1,
+          "POST /books": 3,
+          "GET /books/{book_id}": 1,
+          "POST /books/{book_id}/reviews": 1,
+          "GET /books/{book_id}/rating": 1,
+          "POST /books/{book_id}/discount": 2,
+          "PATCH /books/{book_id}/stock": 2,
+          "POST /tags": 1,
+          "DELETE /tags/{tag_id}": 1,
+          "POST /books/{book_id}/tags": 1,
+          "DELETE /books/{book_id}/tags": 1,
+          "POST /orders": 3,
+          "PATCH /orders/{order_id}/status": 3,
+          "DELETE /orders/{order_id}": 1,
+          "GET /books": 5,
+          "GET /authors": 2,
+          "PUT /categories/{category_id}": 1,
+          "PUT /books/{book_id}": 2,
+          "GET /orders": 2,
+          "GET /categories/{category_id}": 1,
+          "DELETE /books/{book_id}": 1,
+          "PUT /authors/{author_id}": 1,
+          "PUT /tags/{tag_id}": 1,
+          "GET /books/{book_id}/reviews": 1,
+          "GET /tags": 1,
+          "GET /categories": 1,
+          "GET /orders/{order_id}": 1,
+          "GET /tags/{tag_id}": 1
+        },
+        "type_per_endpoint": {
+          "GET /health": {
+            "happy_path": 1
+          },
+          "POST /authors": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "DELETE /authors/{author_id}": {
+            "error": 2
+          },
+          "POST /categories": {
+            "error": 1
+          },
+          "POST /books": {
+            "happy_path": 1,
+            "error": 2
+          },
+          "GET /books/{book_id}": {
+            "happy_path": 1
+          },
+          "POST /books/{book_id}/reviews": {
+            "error": 1
+          },
+          "GET /books/{book_id}/rating": {
+            "happy_path": 1
+          },
+          "POST /books/{book_id}/discount": {
+            "error": 1,
+            "edge_case": 1
+          },
+          "PATCH /books/{book_id}/stock": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "POST /tags": {
+            "happy_path": 1
+          },
+          "DELETE /tags/{tag_id}": {
+            "error": 1
+          },
+          "POST /books/{book_id}/tags": {
+            "happy_path": 1
+          },
+          "DELETE /books/{book_id}/tags": {
+            "happy_path": 1
+          },
+          "POST /orders": {
+            "error": 2,
+            "happy_path": 1
+          },
+          "PATCH /orders/{order_id}/status": {
+            "happy_path": 2,
+            "error": 1
+          },
+          "DELETE /orders/{order_id}": {
+            "error": 1
+          },
+          "GET /books": {
+            "happy_path": 3,
+            "error": 2
+          },
+          "GET /authors": {
+            "happy_path": 2
+          },
+          "PUT /categories/{category_id}": {
+            "happy_path": 1
+          },
+          "PUT /books/{book_id}": {
+            "error": 1,
+            "happy_path": 1
+          },
+          "GET /orders": {
+            "happy_path": 2
+          },
+          "GET /categories/{category_id}": {
+            "error": 1
+          },
+          "DELETE /books/{book_id}": {
+            "happy_path": 1
+          },
+          "PUT /authors/{author_id}": {
+            "happy_path": 1
+          },
+          "PUT /tags/{tag_id}": {
+            "error": 1
+          },
+          "GET /books/{book_id}/reviews": {
+            "error": 1
+          },
+          "GET /tags": {
+            "happy_path": 1
+          },
+          "GET /categories": {
+            "happy_path": 1
+          },
+          "GET /orders/{order_id}": {
+            "happy_path": 1
+          },
+          "GET /tags/{tag_id}": {
+            "error": 1
+          }
+        },
+        "top_tested": [
+          [
+            "GET /books",
+            5
+          ],
+          [
+            "POST /books",
+            3
+          ],
+          [
+            "POST /orders",
+            3
+          ],
+          [
+            "PATCH /orders/{order_id}/status",
+            3
+          ],
+          [
+            "POST /authors",
+            2
+          ]
+        ],
+        "error_focused_endpoints": {
+          "DELETE /authors/{author_id}": 2,
+          "POST /books": 2,
+          "POST /books/{book_id}/discount": 2,
+          "POST /orders": 2,
+          "GET /books": 2,
+          "POST /authors": 1,
+          "POST /categories": 1,
+          "POST /books/{book_id}/reviews": 1,
+          "PATCH /books/{book_id}/stock": 1,
+          "DELETE /tags/{tag_id}": 1,
+          "PATCH /orders/{order_id}/status": 1,
+          "DELETE /orders/{order_id}": 1,
+          "PUT /books/{book_id}": 1,
+          "GET /categories/{category_id}": 1,
+          "PUT /tags/{tag_id}": 1,
+          "GET /books/{book_id}/reviews": 1,
+          "GET /tags/{tag_id}": 1
+        },
+        "top3_concentration_pct": 22.0,
+        "skipped_endpoints": [
+          "DELETE /categories/{category_id}",
+          "GET /authors/{author_id}",
+          "POST /reset"
+        ],
+        "domain_distribution": {
+          "authors": 7,
+          "categories": 4,
+          "books": 21,
+          "tags": 5,
+          "orders": 10,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [],
+            "default_published_year": null
+          },
+          "create_author_helper": {
+            "signature": "create_author_helper()",
+            "lines": 3,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [
+              "name",
+              "bio",
+              "born_year"
+            ],
+            "default_published_year": null
+          },
+          "create_category_helper": {
+            "signature": "create_category_helper()",
+            "lines": 3,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [
+              "name",
+              "description"
+            ],
+            "default_published_year": null
+          },
+          "create_book_helper": {
+            "signature": "create_book_helper(author_id, category_id, year=2020)",
+            "lines": 11,
+            "has_stock_field": true,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [
+              "title",
+              "isbn",
+              "price",
+              "published_year",
+              "stock",
+              "author_id",
+              "category_id"
+            ],
+            "default_published_year": null
+          }
+        },
+        "helper_count": 4
+      },
+      "prompt_budget": {
+        "context_tokens_est": 34961,
+        "plan_tokens_est": 4257,
+        "instruction_tokens_est": 800,
+        "total_prompt_tokens_est": 40018,
+        "remaining_for_output_est": 87982,
+        "prompt_budget_pct": 31.3,
+        "model_context_window": 128000
+      },
+      "instruction_compliance": {
+        "total_http_calls": 70,
+        "missing_timeout": 70,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "json_after_204_risk": false,
+        "helper_between_tests": [],
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 0,
+        "categories": {},
+        "per_test": {}
+      },
+      "code_patterns": {
+        "total_tests": 50,
+        "per_test": {
+          "test_check_health_status": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 4
+          },
+          "test_create_author_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 5
+          },
+          "test_create_author_invalid_data": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_delete_author_with_books_fails": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_delete_nonexistent_author": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_category_duplicate_fails": {
+            "http_calls": 2,
+            "helper_calls": 1,
+            "total_calls": 3,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 5
+          },
+          "test_create_book_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 10
+          },
+          "test_create_book_duplicate_isbn_fails": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_create_book_invalid_author": {
+            "http_calls": 1,
+            "helper_calls": 2,
+            "total_calls": 3,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 14
+          },
+          "test_get_book_details": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_create_review_success": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_create_review_invalid_rating": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_get_rating_no_reviews": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_apply_discount_too_new_fails": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_apply_discount_max_percent": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_update_stock_add": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_update_stock_negative_fails": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_create_tag_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_delete_tag_in_use_fails": {
+            "http_calls": 3,
+            "helper_calls": 3,
+            "total_calls": 6,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_add_tags_idempotency": {
+            "http_calls": 3,
+            "helper_calls": 3,
+            "total_calls": 6,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_remove_nonexistent_tag_from_book": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_create_order_insufficient_stock": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_create_order_duplicate_book_id": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_create_order_valid_cleanup": {
+            "http_calls": 2,
+            "helper_calls": 4,
+            "total_calls": 6,
+            "asserts": 2,
+            "side_effect_check": true,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_update_status_pending_to_confirmed": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_update_status_invalid_transition": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_cancel_order_returns_stock": {
+            "http_calls": 3,
+            "helper_calls": 3,
+            "total_calls": 6,
+            "asserts": 1,
+            "side_effect_check": true,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_delete_shipped_order_fails": {
+            "http_calls": 4,
+            "helper_calls": 3,
+            "total_calls": 7,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_list_books_pagination_default": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_books_search_filter": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 4
+          },
+          "test_list_books_price_filter": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_books_invalid_page": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_books_large_page_size": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_authors_empty": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_list_authors_with_params": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_update_category_name_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_update_book_isbn_conflict": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_update_book_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_list_orders_filter_customer": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_orders_filter_status": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_get_category_not_found": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_delete_book_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_update_author_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_update_tag_duplicate_name_fails": {
+            "http_calls": 3,
+            "helper_calls": 0,
+            "total_calls": 3,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 5
+          },
+          "test_list_reviews_not_found_book": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_tags_all": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_categories_all": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_get_order_detail": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": true,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_get_tag_not_found": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_review_malformed_json": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          }
+        },
+        "summary": {
+          "avg_http_calls": 1.34,
+          "avg_helper_calls": 1.86,
+          "avg_total_calls": 3.2,
+          "avg_asserts": 1.26,
+          "pct_side_effect_checks": 6.0,
+          "pct_chaining": 12.0,
+          "single_call_tests": 39,
+          "multi_step_tests": 5
+        }
+      },
+      "plan_code_drift": {
+        "planned_count": 50,
+        "actual_count": 50,
+        "matched": 50,
+        "only_in_plan": [],
+        "only_in_code": [],
+        "status_code_drift": {
+          "test_remove_nonexistent_tag_from_book": {
+            "planned": 200,
+            "actual_in_code": [
+              404
+            ]
+          },
+          "test_cancel_order_returns_stock": {
+            "planned": 200,
+            "actual_in_code": []
+          },
+          "test_create_review_malformed_json": {
+            "planned": 400,
+            "actual_in_code": [
+              422
+            ]
+          }
+        },
+        "drift_count": 3
+      },
+      "context_utilization": {
+        "context_endpoints_found": 57,
+        "plan_endpoints_used": 17,
+        "endpoint_utilization_pct": 29.8,
+        "context_field_names": 211,
+        "code_field_names": 56,
+        "shared_nontrivial_fields": [
+          "author",
+          "author_id",
+          "average_rating",
+          "bio",
+          "book",
+          "book_id",
+          "born_year",
+          "cancelled",
+          "category_id",
+          "comment",
+          "confirmed",
+          "customer_email",
+          "customer_name",
+          "delivered",
+          "discount_percent",
+          "isbn",
+          "limit",
+          "max_price",
+          "min_price",
+          "ok",
+          "page_size",
+          "pending",
+          "price",
+          "published_year",
+          "quantity",
+          "rating",
+          "reviewer_name",
+          "search",
+          "shipped",
+          "skip",
+          "stock",
+          "tag_ids",
+          "tags",
+          "title"
+        ],
+        "context_status_codes": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "code_status_codes": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_hallucinated": []
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 48,
+            "failed": 2,
+            "failing_tests": [
+              "test_create_book_invalid_author",
+              "test_remove_nonexistent_tag_from_book"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 50,
+            "failed": 0,
+            "failing_tests": [],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 3,
+        "deltas": [
+          {
+            "from_iter": 1,
+            "to_iter": 2,
+            "delta": 2,
+            "repair_type": null
+          }
+        ],
+        "never_fixed_tests": [],
+        "fixed_tests": [
+          "test_create_book_invalid_author",
+          "test_remove_nonexistent_tag_from_book"
+        ],
+        "total_repair_calls": 0,
+        "total_stale_skipped": 0
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-22T15:37:05.033171",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L4",
+    "run_id": 1,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 91.3,
+    "plan_test_count": 50,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run1.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L4__run1.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 49,
+        "tests_failed": 1,
+        "tests_errors": 0,
+        "total_executed": 50,
+        "validity_rate_pct": 98.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 32,
+        "uncovered_endpoints": [
+          "GET /tags",
+          "POST /reset"
+        ],
+        "endpoint_coverage_pct": 94.12
+      },
+      "assertion_depth": {
+        "total_test_functions": 50,
+        "total_assertions": 73,
+        "assertion_depth": 1.46,
+        "per_test_assertions": {
+          "test_health_check_success": 2,
+          "test_create_author_success": 3,
+          "test_create_author_invalid_name": 1,
+          "test_list_authors_paginated": 2,
+          "test_get_author_not_found": 2,
+          "test_update_author_success": 2,
+          "test_delete_author_dependency_conflict": 1,
+          "test_create_category_success": 2,
+          "test_create_category_duplicate_name": 1,
+          "test_list_categories_success": 2,
+          "test_update_category_conflict": 1,
+          "test_delete_category_success": 1,
+          "test_create_book_success": 2,
+          "test_create_book_invalid_isbn": 1,
+          "test_create_book_nonexistent_author": 1,
+          "test_list_books_filter_price": 2,
+          "test_get_book_not_found": 1,
+          "test_update_book_isbn_conflict": 1,
+          "test_delete_book_success": 1,
+          "test_create_review_invalid_rating": 1,
+          "test_list_reviews_success": 1,
+          "test_get_rating_null_for_empty": 2,
+          "test_discount_valid_old_book": 2,
+          "test_discount_invalid_new_book": 1,
+          "test_update_stock_increase": 2,
+          "test_update_stock_insufficient": 1,
+          "test_create_tag_too_long": 1,
+          "test_delete_tag_attached_to_book": 1,
+          "test_add_multiple_tags": 2,
+          "test_remove_tag_from_book": 2,
+          "test_create_order_insufficient_stock": 1,
+          "test_create_order_duplicate_book": 1,
+          "test_list_orders_filter_name": 4,
+          "test_get_order_details": 5,
+          "test_status_transition_invalid": 1,
+          "test_status_cancel_returns_stock": 1,
+          "test_delete_pending_order_success": 1,
+          "test_delete_shipped_order_error": 1,
+          "test_list_books_page_overflow": 2,
+          "test_get_rating_nonexistent_book": 1,
+          "test_update_tag_conflict": 1,
+          "test_add_tags_nonexistent_book": 1,
+          "test_update_author_nonexistent": 1,
+          "test_create_book_missing_fields": 1,
+          "test_update_stock_boundary_zero": 1,
+          "test_create_order_negative_quantity": 1,
+          "test_list_authors_limit_zero": 1,
+          "test_get_category_not_found": 1,
+          "test_get_tag_not_found": 1,
+          "test_list_books_invalid_price_filter": 1
+        }
+      },
+      "response_validation": {
+        "tests_with_body_check": 20,
+        "tests_status_only": 30,
+        "total_test_functions": 50,
+        "response_validation_pct": 40.0,
+        "per_test_body_check": {
+          "test_health_check_success": true,
+          "test_create_author_success": true,
+          "test_create_author_invalid_name": false,
+          "test_list_authors_paginated": true,
+          "test_get_author_not_found": true,
+          "test_update_author_success": true,
+          "test_delete_author_dependency_conflict": false,
+          "test_create_category_success": true,
+          "test_create_category_duplicate_name": false,
+          "test_list_categories_success": true,
+          "test_update_category_conflict": true,
+          "test_delete_category_success": false,
+          "test_create_book_success": true,
+          "test_create_book_invalid_isbn": false,
+          "test_create_book_nonexistent_author": false,
+          "test_list_books_filter_price": true,
+          "test_get_book_not_found": false,
+          "test_update_book_isbn_conflict": false,
+          "test_delete_book_success": false,
+          "test_create_review_invalid_rating": false,
+          "test_list_reviews_success": false,
+          "test_get_rating_null_for_empty": true,
+          "test_discount_valid_old_book": true,
+          "test_discount_invalid_new_book": false,
+          "test_update_stock_increase": true,
+          "test_update_stock_insufficient": false,
+          "test_create_tag_too_long": false,
+          "test_delete_tag_attached_to_book": false,
+          "test_add_multiple_tags": true,
+          "test_remove_tag_from_book": true,
+          "test_create_order_insufficient_stock": false,
+          "test_create_order_duplicate_book": false,
+          "test_list_orders_filter_name": true,
+          "test_get_order_details": true,
+          "test_status_transition_invalid": false,
+          "test_status_cancel_returns_stock": true,
+          "test_delete_pending_order_success": false,
+          "test_delete_shipped_order_error": false,
+          "test_list_books_page_overflow": true,
+          "test_get_rating_nonexistent_book": false,
+          "test_update_tag_conflict": false,
+          "test_add_tags_nonexistent_book": false,
+          "test_update_author_nonexistent": false,
+          "test_create_book_missing_fields": false,
+          "test_update_stock_boundary_zero": true,
+          "test_create_order_negative_quantity": false,
+          "test_list_authors_limit_zero": false,
+          "test_get_category_not_found": false,
+          "test_get_tag_not_found": false,
+          "test_list_books_invalid_price_filter": false
+        }
+      },
+      "test_type_distribution": {
+        "total_planned": 50,
+        "distribution": {
+          "happy_path": {
+            "count": 21,
+            "pct": 42.0
+          },
+          "error": {
+            "count": 27,
+            "pct": 54.0
+          },
+          "edge_case": {
+            "count": 2,
+            "pct": 4.0
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          400,
+          404,
+          409,
+          422
+        ],
+        "diversity_count": 7,
+        "code_distribution": {
+          "200": 15,
+          "201": 8,
+          "204": 3,
+          "400": 6,
+          "404": 8,
+          "409": 6,
+          "422": 7
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0,
+        "total_test_functions": 50
+      },
+      "avg_test_length": {
+        "avg_lines": 6.02,
+        "min_lines": 3,
+        "max_lines": 14,
+        "total_test_functions": 50,
+        "per_test_lines": {
+          "test_health_check_success": 4,
+          "test_create_author_success": 7,
+          "test_create_author_invalid_name": 3,
+          "test_list_authors_paginated": 5,
+          "test_get_author_not_found": 4,
+          "test_update_author_success": 6,
+          "test_delete_author_dependency_conflict": 6,
+          "test_create_category_success": 5,
+          "test_create_category_duplicate_name": 5,
+          "test_list_categories_success": 4,
+          "test_update_category_conflict": 5,
+          "test_delete_category_success": 4,
+          "test_create_book_success": 9,
+          "test_create_book_invalid_isbn": 8,
+          "test_create_book_nonexistent_author": 7,
+          "test_list_books_filter_price": 7,
+          "test_get_book_not_found": 3,
+          "test_update_book_isbn_conflict": 7,
+          "test_delete_book_success": 6,
+          "test_create_review_invalid_rating": 6,
+          "test_list_reviews_success": 6,
+          "test_get_rating_null_for_empty": 7,
+          "test_discount_valid_old_book": 7,
+          "test_discount_invalid_new_book": 6,
+          "test_update_stock_increase": 7,
+          "test_update_stock_insufficient": 6,
+          "test_create_tag_too_long": 3,
+          "test_delete_tag_attached_to_book": 8,
+          "test_add_multiple_tags": 9,
+          "test_remove_tag_from_book": 9,
+          "test_create_order_insufficient_stock": 9,
+          "test_create_order_duplicate_book": 9,
+          "test_list_orders_filter_name": 9,
+          "test_get_order_details": 14,
+          "test_status_transition_invalid": 7,
+          "test_status_cancel_returns_stock": 8,
+          "test_delete_pending_order_success": 7,
+          "test_delete_shipped_order_error": 9,
+          "test_list_books_page_overflow": 4,
+          "test_get_rating_nonexistent_book": 3,
+          "test_update_tag_conflict": 5,
+          "test_add_tags_nonexistent_book": 4,
+          "test_update_author_nonexistent": 3,
+          "test_create_book_missing_fields": 3,
+          "test_update_stock_boundary_zero": 7,
+          "test_create_order_negative_quantity": 9,
+          "test_list_authors_limit_zero": 3,
+          "test_get_category_not_found": 3,
+          "test_get_tag_not_found": 3,
+          "test_list_books_invalid_price_filter": 3
+        }
+      },
+      "method_coverage": {
+        "total_planned": 50,
+        "method_distribution": {
+          "DELETE": {
+            "count": 7,
+            "pct": 14.0
+          },
+          "GET": {
+            "count": 16,
+            "pct": 32.0
+          },
+          "PATCH": {
+            "count": 5,
+            "pct": 10.0
+          },
+          "POST": {
+            "count": 17,
+            "pct": 34.0
+          },
+          "PUT": {
+            "count": 5,
+            "pct": 10.0
+          }
+        }
+      },
+      "plan_adherence": {
+        "planned": 50,
+        "found_in_code": 50,
+        "extra_in_code": 0,
+        "missing_from_code": [],
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 1,
+        "stale_names": [
+          "test_list_orders_filter_name"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 122203,
+        "total_lines": 4312,
+        "total_est_tokens": 40734,
+        "section_count": 5,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          },
+          "TECHNICKÁ A BYZNYS DOKUMENTACE": {
+            "chars": 5364,
+            "lines": 124,
+            "est_tokens": 1788
+          },
+          "ZDROJOVÝ KÓD ENDPOINTŮ": {
+            "chars": 34422,
+            "lines": 1082,
+            "est_tokens": 11474
+          },
+          "DATABÁZOVÉ SCHÉMA": {
+            "chars": 2788,
+            "lines": 77,
+            "est_tokens": 929
+          },
+          "EXISTUJÍCÍ TESTY (UKÁZKA STYLU)": {
+            "chars": 17278,
+            "lines": 490,
+            "est_tokens": 5759
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 50,
+        "unique_endpoints_in_plan": 32,
+        "total_api_endpoints": 34,
+        "tests_per_endpoint": {
+          "GET /health": 1,
+          "POST /authors": 2,
+          "GET /authors": 1,
+          "GET /authors/{author_id}": 1,
+          "PUT /authors/{author_id}": 1,
+          "DELETE /authors/{author_id}": 1,
+          "POST /categories": 2,
+          "GET /categories": 1,
+          "PUT /categories/{category_id}": 1,
+          "DELETE /categories/{category_id}": 1,
+          "POST /books": 1,
+          "GET /books": 1,
+          "GET /books/{book_id}": 1,
+          "PUT /books/{book_id}": 1,
+          "DELETE /books/{book_id}": 1,
+          "POST /books/{book_id}/reviews": 1,
+          "GET /books/{book_id}/reviews": 1,
+          "GET /books/{book_id}/rating": 1,
+          "POST /books/{book_id}/discount": 2,
+          "PATCH /books/{book_id}/stock": 1,
+          "POST /tags": 1,
+          "DELETE /tags/{tag_id}": 1,
+          "POST /books/{book_id}/tags": 1,
+          "DELETE /books/{book_id}/tags": 1,
+          "POST /orders": 1,
+          "GET /orders": 1,
+          "GET /orders/{order_id}": 1,
+          "PATCH /orders/{order_id}/status": 2,
+          "DELETE /orders/{order_id}": 2,
+          "PUT /tags/{tag_id}": 1,
+          "GET /categories/{category_id}": 1,
+          "GET /tags/{tag_id}": 1
+        },
+        "type_per_endpoint": {
+          "GET /health": {
+            "happy_path": 1
+          },
+          "POST /authors": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "GET /authors": {
+            "edge_case": 1
+          },
+          "GET /authors/{author_id}": {
+            "error": 1
+          },
+          "PUT /authors/{author_id}": {
+            "error": 1
+          },
+          "DELETE /authors/{author_id}": {
+            "error": 1
+          },
+          "POST /categories": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "GET /categories": {
+            "happy_path": 1
+          },
+          "PUT /categories/{category_id}": {
+            "error": 1
+          },
+          "DELETE /categories/{category_id}": {
+            "happy_path": 1
+          },
+          "POST /books": {
+            "error": 1
+          },
+          "GET /books": {
+            "error": 1
+          },
+          "GET /books/{book_id}": {
+            "error": 1
+          },
+          "PUT /books/{book_id}": {
+            "error": 1
+          },
+          "DELETE /books/{book_id}": {
+            "happy_path": 1
+          },
+          "POST /books/{book_id}/reviews": {
+            "error": 1
+          },
+          "GET /books/{book_id}/reviews": {
+            "happy_path": 1
+          },
+          "GET /books/{book_id}/rating": {
+            "error": 1
+          },
+          "POST /books/{book_id}/discount": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "PATCH /books/{book_id}/stock": {
+            "happy_path": 1
+          },
+          "POST /tags": {
+            "error": 1
+          },
+          "DELETE /tags/{tag_id}": {
+            "error": 1
+          },
+          "POST /books/{book_id}/tags": {
+            "error": 1
+          },
+          "DELETE /books/{book_id}/tags": {
+            "happy_path": 1
+          },
+          "POST /orders": {
+            "error": 1
+          },
+          "GET /orders": {
+            "happy_path": 1
+          },
+          "GET /orders/{order_id}": {
+            "happy_path": 1
+          },
+          "PATCH /orders/{order_id}/status": {
+            "error": 1,
+            "happy_path": 1
+          },
+          "DELETE /orders/{order_id}": {
+            "happy_path": 1,
+            "error": 1
+          },
+          "PUT /tags/{tag_id}": {
+            "error": 1
+          },
+          "GET /categories/{category_id}": {
+            "error": 1
+          },
+          "GET /tags/{tag_id}": {
+            "error": 1
+          }
+        },
+        "top_tested": [
+          [
+            "POST /authors",
+            2
+          ],
+          [
+            "POST /categories",
+            2
+          ],
+          [
+            "POST /books/{book_id}/discount",
+            2
+          ],
+          [
+            "PATCH /orders/{order_id}/status",
+            2
+          ],
+          [
+            "DELETE /orders/{order_id}",
+            2
+          ]
+        ],
+        "error_focused_endpoints": {
+          "POST /authors": 1,
+          "GET /authors": 1,
+          "GET /authors/{author_id}": 1,
+          "PUT /authors/{author_id}": 1,
+          "DELETE /authors/{author_id}": 1,
+          "POST /categories": 1,
+          "PUT /categories/{category_id}": 1,
+          "POST /books": 1,
+          "GET /books": 1,
+          "GET /books/{book_id}": 1,
+          "PUT /books/{book_id}": 1,
+          "POST /books/{book_id}/reviews": 1,
+          "GET /books/{book_id}/rating": 1,
+          "POST /books/{book_id}/discount": 1,
+          "POST /tags": 1,
+          "DELETE /tags/{tag_id}": 1,
+          "POST /books/{book_id}/tags": 1,
+          "POST /orders": 1,
+          "PATCH /orders/{order_id}/status": 1,
+          "DELETE /orders/{order_id}": 1,
+          "PUT /tags/{tag_id}": 1,
+          "GET /categories/{category_id}": 1,
+          "GET /tags/{tag_id}": 1
+        },
+        "top3_concentration_pct": 12.0,
+        "skipped_endpoints": [
+          "GET /tags",
+          "POST /reset"
+        ],
+        "domain_distribution": {
+          "authors": 6,
+          "categories": 6,
+          "books": 13,
+          "tags": 4,
+          "orders": 7,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": false,
+            "payload_keys": [],
+            "default_published_year": null
+          },
+          "create_test_author": {
+            "signature": "create_test_author(name=None, bio='Test Bio', born_year=1980)",
+            "lines": 5,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": true,
+            "payload_keys": [
+              "name",
+              "bio",
+              "born_year"
+            ],
+            "default_published_year": null
+          },
+          "create_test_category": {
+            "signature": "create_test_category(name=None)",
+            "lines": 5,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": true,
+            "payload_keys": [
+              "name"
+            ],
+            "default_published_year": null
+          },
+          "create_test_book": {
+            "signature": "create_test_book(author_id, category_id, title=None, isbn=None, price=29.99, published_year=2020, stock=10)",
+            "lines": 10,
+            "has_stock_field": true,
+            "uses_unique_names": true,
+            "has_assertion": true,
+            "payload_keys": [
+              "title",
+              "isbn",
+              "price",
+              "published_year",
+              "stock",
+              "author_id",
+              "category_id"
+            ],
+            "default_published_year": 2020
+          },
+          "create_test_tag": {
+            "signature": "create_test_tag(name=None)",
+            "lines": 5,
+            "has_stock_field": false,
+            "uses_unique_names": true,
+            "has_assertion": true,
+            "payload_keys": [
+              "name"
+            ],
+            "default_published_year": null
+          },
+          "create_test_order": {
+            "signature": "create_test_order(customer_name='Customer', customer_email='a@b.com', items=None)",
+            "lines": 8,
+            "has_stock_field": false,
+            "uses_unique_names": false,
+            "has_assertion": true,
+            "payload_keys": [
+              "customer_name",
+              "customer_email",
+              "items"
+            ],
+            "default_published_year": null
+          }
+        },
+        "helper_count": 6
+      },
+      "prompt_budget": {
+        "context_tokens_est": 40734,
+        "plan_tokens_est": 4541,
+        "instruction_tokens_est": 800,
+        "total_prompt_tokens_est": 46075,
+        "remaining_for_output_est": 81925,
+        "prompt_budget_pct": 36.0,
+        "model_context_window": 128000
+      },
+      "instruction_compliance": {
+        "total_http_calls": 61,
+        "missing_timeout": 0,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "json_after_204_risk": false,
+        "helper_between_tests": [],
+        "compliance_score": 100
+      },
+      "failure_taxonomy": {
+        "total_failures": 1,
+        "categories": {
+          "other": 1
+        },
+        "category_pct": {
+          "other": 100.0
+        },
+        "per_test": {
+          "test_list_orders_filter_name": {
+            "category": "other",
+            "error_summary": ""
+          }
+        },
+        "category_details": {
+          "other": [
+            "test_list_orders_filter_name"
+          ]
+        }
+      },
+      "code_patterns": {
+        "total_tests": 50,
+        "per_test": {
+          "test_health_check_success": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 4
+          },
+          "test_create_author_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 3,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_create_author_invalid_name": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_authors_paginated": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 5
+          },
+          "test_get_author_not_found": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_update_author_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 6
+          },
+          "test_delete_author_dependency_conflict": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_create_category_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 5
+          },
+          "test_create_category_duplicate_name": {
+            "http_calls": 1,
+            "helper_calls": 2,
+            "total_calls": 3,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 5
+          },
+          "test_list_categories_success": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_update_category_conflict": {
+            "http_calls": 1,
+            "helper_calls": 2,
+            "total_calls": 3,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 5
+          },
+          "test_delete_category_success": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_create_book_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_create_book_invalid_isbn": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_create_book_nonexistent_author": {
+            "http_calls": 1,
+            "helper_calls": 2,
+            "total_calls": 3,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_list_books_filter_price": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_get_book_not_found": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_update_book_isbn_conflict": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_delete_book_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_create_review_invalid_rating": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_list_reviews_success": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_get_rating_null_for_empty": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_discount_valid_old_book": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_discount_invalid_new_book": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_update_stock_increase": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_update_stock_insufficient": {
+            "http_calls": 1,
+            "helper_calls": 3,
+            "total_calls": 4,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 6
+          },
+          "test_create_tag_too_long": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_delete_tag_attached_to_book": {
+            "http_calls": 2,
+            "helper_calls": 4,
+            "total_calls": 6,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 8
+          },
+          "test_add_multiple_tags": {
+            "http_calls": 1,
+            "helper_calls": 5,
+            "total_calls": 6,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 9
+          },
+          "test_remove_tag_from_book": {
+            "http_calls": 2,
+            "helper_calls": 4,
+            "total_calls": 6,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 9
+          },
+          "test_create_order_insufficient_stock": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_create_order_duplicate_book": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_list_orders_filter_name": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 4,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_get_order_details": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 5,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 14
+          },
+          "test_status_transition_invalid": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_status_cancel_returns_stock": {
+            "http_calls": 2,
+            "helper_calls": 4,
+            "total_calls": 6,
+            "asserts": 1,
+            "side_effect_check": true,
+            "uses_chaining": true,
+            "lines": 8
+          },
+          "test_delete_pending_order_success": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 7
+          },
+          "test_delete_shipped_order_error": {
+            "http_calls": 3,
+            "helper_calls": 4,
+            "total_calls": 7,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_list_books_page_overflow": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 2,
+            "side_effect_check": false,
+            "uses_chaining": true,
+            "lines": 4
+          },
+          "test_get_rating_nonexistent_book": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_update_tag_conflict": {
+            "http_calls": 1,
+            "helper_calls": 2,
+            "total_calls": 3,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 5
+          },
+          "test_add_tags_nonexistent_book": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 4
+          },
+          "test_update_author_nonexistent": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_create_book_missing_fields": {
+            "http_calls": 1,
+            "helper_calls": 1,
+            "total_calls": 2,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_update_stock_boundary_zero": {
+            "http_calls": 2,
+            "helper_calls": 3,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": true,
+            "uses_chaining": true,
+            "lines": 7
+          },
+          "test_create_order_negative_quantity": {
+            "http_calls": 1,
+            "helper_calls": 4,
+            "total_calls": 5,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 9
+          },
+          "test_list_authors_limit_zero": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_get_category_not_found": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_get_tag_not_found": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          },
+          "test_list_books_invalid_price_filter": {
+            "http_calls": 1,
+            "helper_calls": 0,
+            "total_calls": 1,
+            "asserts": 1,
+            "side_effect_check": false,
+            "uses_chaining": false,
+            "lines": 3
+          }
+        },
+        "summary": {
+          "avg_http_calls": 1.12,
+          "avg_helper_calls": 2.14,
+          "avg_total_calls": 3.26,
+          "avg_asserts": 1.46,
+          "pct_side_effect_checks": 4.0,
+          "pct_chaining": 22.0,
+          "single_call_tests": 45,
+          "multi_step_tests": 1
+        }
+      },
+      "plan_code_drift": {
+        "planned_count": 50,
+        "actual_count": 50,
+        "matched": 50,
+        "only_in_plan": [],
+        "only_in_code": [],
+        "status_code_drift": {
+          "test_status_cancel_returns_stock": {
+            "planned": 200,
+            "actual_in_code": []
+          },
+          "test_update_stock_boundary_zero": {
+            "planned": 200,
+            "actual_in_code": []
+          },
+          "test_list_books_invalid_price_filter": {
+            "planned": 400,
+            "actual_in_code": [
+              422
+            ]
+          }
+        },
+        "drift_count": 3
+      },
+      "context_utilization": {
+        "context_endpoints_found": 68,
+        "plan_endpoints_used": 17,
+        "endpoint_utilization_pct": 25.0,
+        "context_field_names": 241,
+        "code_field_names": 56,
+        "shared_nontrivial_fields": [
+          "Author",
+          "Book",
+          "Category",
+          "Tag",
+          "Test",
+          "author_id",
+          "average_rating",
+          "bio",
+          "book_id",
+          "born_year",
+          "cancelled",
+          "category_id",
+          "confirmed",
+          "customer_email",
+          "customer_name",
+          "delivered",
+          "discount_percent",
+          "discounted_price",
+          "isbn",
+          "limit",
+          "max_price",
+          "min_price",
+          "ok",
+          "price",
+          "published_year",
+          "quantity",
+          "rating",
+          "reviewer_name",
+          "shipped",
+          "skip",
+          "stock",
+          "tag_ids",
+          "tags",
+          "title",
+          "total_price"
+        ],
+        "context_status_codes": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "code_status_codes": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_hallucinated": []
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 48,
+            "failed": 2,
+            "failing_tests": [
+              "test_list_orders_filter_name",
+              "test_get_order_details"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 49,
+            "failed": 1,
+            "failing_tests": [
+              "test_list_orders_filter_name"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 49,
+            "failed": 1,
+            "failing_tests": [
+              "test_list_orders_filter_name"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 4,
+            "passed": 49,
+            "failed": 1,
+            "failing_tests": [
+              "test_list_orders_filter_name"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 5,
+            "passed": 49,
+            "failed": 1,
+            "failing_tests": [
+              "test_list_orders_filter_name"
+            ],
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 3,
+        "deltas": [
+          {
+            "from_iter": 1,
+            "to_iter": 2,
+            "delta": 1,
+            "repair_type": null
+          },
+          {
+            "from_iter": 2,
+            "to_iter": 3,
+            "delta": 0,
+            "repair_type": null
+          },
+          {
+            "from_iter": 3,
+            "to_iter": 4,
+            "delta": 0,
+            "repair_type": null
+          },
+          {
+            "from_iter": 4,
+            "to_iter": 5,
+            "delta": 0,
+            "repair_type": null
+          }
+        ],
+        "never_fixed_tests": [
+          "test_list_orders_filter_name"
+        ],
+        "fixed_tests": [
+          "test_get_order_details"
+        ],
+        "total_repair_calls": 0,
+        "total_stale_skipped": 0
+      }
+    }
+  }
+]

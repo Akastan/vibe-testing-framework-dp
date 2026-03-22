@@ -481,30 +481,62 @@ def classify_failures(pytest_log: str, code: str) -> dict:
 
 
 def _extract_error_block(pytest_log: str, test_name: str) -> str:
-    """Extrahuje chybový blok pro test. Dvě strategie:
-    1. FAILURES sekce (plný traceback)
-    2. Fallback: short test summary řádek (jednořádkový souhrn)
+    """Extrahuje chybový blok pro test. Tři strategie:
+    1. FAILURES sekce (plný traceback) — matchuje test_name kdekoliv v header řádku
+    2. Fallback: short test summary řádek (s nebo bez error message)
+    3. Jakýkoli řádek s E-prefixem nebo assert poblíž test_name
     """
-    # Strategie 1: FAILURES blok
+    # Strategie 1: FAILURES blok — test_name může být prefix::test_name v headeru
+    # Pytest header: "_______ file::test_name _______" nebo "_______ test_name _______"
     pattern = (
-        rf'_{2,}\s+{re.escape(test_name)}\s+_{2,}'
+        rf'_{2,}\s+\S*{re.escape(test_name)}\s+_{2,}'
         rf'(.*?)'
-        rf'(?=_{2,}\s+\w+\s+_{2,}|={2,}\s+short test summary|$)'
+        rf'(?=_{2,}\s+\S*\w+\s+_{2,}|={2,}\s+short test summary|$)'
     )
     m = re.search(pattern, pytest_log, re.DOTALL)
     if m and m.group(1).strip():
         return m.group(1).strip()[:2000]
 
-    # Strategie 2: short test summary ("FAILED ...::test_name - error message")
-    summary_pattern = rf'FAILED\s+\S+::{re.escape(test_name)}\s*[-–]\s*(.+)'
-    m2 = re.search(summary_pattern, pytest_log)
+    # Strategie 2: short test summary — s nebo bez error message za dashem
+    # Format A: "FAILED file::test_name - ErrorType: message"
+    # Format B: "FAILED file::test_name"  (bez error message)
+    summary_pattern = rf'FAILED\s+\S+::{re.escape(test_name)}\s*(?:[-–]\s*(.+))?$'
+    m2 = re.search(summary_pattern, pytest_log, re.MULTILINE)
     if m2:
-        return m2.group(1).strip()[:500]
+        if m2.group(1):
+            return m2.group(1).strip()[:500]
+        # Nemáme error message z summary, zkusíme najít E-řádky poblíž
+        # Hledej v okolí tohoto FAILED řádku (pytest --tb=short dává traceback NAD summary)
 
-    # Strategie 3: jakýkoli řádek obsahující jméno testu a "E " nebo "assert"
+    # Strategie 3: najdi E-řádky (chybové) které jsou v bloku pro tento test
+    # --tb=short formát: "test_file.py:LINE: in test_name\n    code\nE   error"
+    tb_pattern = rf'in {re.escape(test_name)}\b.*?\n(.*?)(?=\n\S|\nFAILED|\n={2,}|\Z)'
+    m3 = re.search(tb_pattern, pytest_log, re.DOTALL)
+    if m3:
+        block = m3.group(1).strip()
+        # Extrahuj jen E-řádky
+        e_lines = [l.strip() for l in block.splitlines() if l.strip().startswith('E ')]
+        if e_lines:
+            return '\n'.join(e_lines)[:500]
+        if block:
+            return block[:500]
+
+    # Strategie 4: jakýkoli řádek obsahující test_name + "E " nebo "assert"
     for line in pytest_log.splitlines():
         if test_name in line and ('E ' in line or 'assert' in line.lower()):
             return line.strip()[:500]
+
+    # Strategie 5: hledej AssertionError/assert řádky bezprostředně za řádkem s test_name
+    lines = pytest_log.splitlines()
+    for i, line in enumerate(lines):
+        if test_name in line:
+            # Prohledej následujících 10 řádků
+            for j in range(i + 1, min(i + 11, len(lines))):
+                s = lines[j].strip()
+                if s.startswith('E ') and len(s) > 4:
+                    return s[2:].strip()[:500]
+                if 'AssertionError' in s or 'assert' in s.lower():
+                    return s[:500]
 
     return ""
 
