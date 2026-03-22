@@ -1,9 +1,14 @@
 """
-Fáze 2: Generování testovacího plánu pomocí LLM.
-Zajišťuje přesný počet testů přes retry loop + doplnění/ořezání.
+Fáze 2: Generování testovacího plánu pomocí LLM (v2 — unified prompt framework).
+
+Změny oproti v1:
+- Prompt se generuje přes PromptBuilder (API pravidla z YAML)
+- Filtrování /reset testů přímo v post-processingu (ne až po count validaci)
 """
 import json
 import re
+
+from prompts.prompt_templates import PromptBuilder
 
 
 def _count_plan_tests(plan: dict) -> int:
@@ -31,6 +36,35 @@ def _trim_plan(plan: dict, target: int) -> dict:
     return plan
 
 
+def _filter_reset_tests(plan: dict) -> dict:
+    """Odstraní testy na /reset endpoint z plánu."""
+    filtered = []
+    removed = 0
+    for ep in plan.get("test_plan", []):
+        endpoint = ep.get("endpoint", "").lower()
+        if "/reset" in endpoint:
+            removed += len(ep.get("test_cases", []))
+            continue
+
+        # Filtruj i jednotlivé test_cases s "reset" v názvu
+        cases = ep.get("test_cases", [])
+        clean_cases = [
+            tc for tc in cases
+            if "reset" not in tc.get("name", "").lower()
+        ]
+        removed += len(cases) - len(clean_cases)
+
+        if clean_cases:
+            ep["test_cases"] = clean_cases
+            filtered.append(ep)
+
+    if removed > 0:
+        print(f"  [Plán] Odfiltrováno {removed} reset testů")
+
+    plan["test_plan"] = filtered
+    return plan
+
+
 def _parse_plan_json(raw: str) -> dict:
     clean = raw.strip()
     clean = re.sub(r'^```(?:json)?\s*', '', clean)
@@ -42,79 +76,48 @@ def _parse_plan_json(raw: str) -> dict:
         return {"test_plan": []}
 
 
-def generate_test_plan(context_data: str, llm, level: str = "L0", test_count: int = 40) -> dict:
-    base_prompt = f"""Analyzuj toto API a vytvoř testovací plán s PŘESNĚ {test_count} testy.
-Rozhodni sám, které endpointy a scénáře jsou nejdůležitější pro otestování.
+def generate_test_plan(context_data: str, llm,
+                       prompt_builder: PromptBuilder,
+                       level: str = "L0",
+                       test_count: int = 40) -> dict:
 
-Vrať POUZE validní JSON:
-{{
-  "test_plan": [
-    {{
-      "endpoint": "/cesta",
-      "method": "GET",
-      "test_cases": [
-        {{
-          "name": "nazev_testu",
-          "type": "happy_path",
-          "expected_status": 200,
-          "description": "Popis co test ověřuje"
-        }}
-      ]
-    }}
-  ]
-}}
-
-PRAVIDLA:
-- type = "happy_path" | "edge_case" | "error"
-- name = snake_case bez diakritiky, unikátní napříč celým plánem
-- endpoint musí být přesná cesta z API (s path parametry jako {{book_id}})
-- method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
-- Jeden endpoint (method+path) = jeden objekt v poli, s více test_cases uvnitř
-- PŘESNĚ {test_count} testů celkem, ani více ani méně
-
-Kontext:
-{context_data}
-"""
+    base_prompt = prompt_builder.planning_prompt(context_data, level, test_count)
 
     MAX_ATTEMPTS = 4
 
-    # === Generování plánu s retry ===
     plan = {"test_plan": []}
     for attempt in range(1, MAX_ATTEMPTS + 1):
+        # Filtruj reset testy PŘED počítáním
+        plan = _filter_reset_tests(plan)
         actual = _count_plan_tests(plan)
 
         if actual == test_count:
             break
 
         if actual == 0:
-            # Prázdný plán → generuj od nuly
             if attempt > 1:
                 print(f"  [Plán] Retry {attempt}: plán prázdný, opakuji generování...")
             raw = llm.generate_text(base_prompt)
             plan = _parse_plan_json(raw)
 
         elif actual < test_count:
-            # Málo testů → doplň
             missing = test_count - actual
             print(f"  [Plán] {actual} testů, doplňuji {missing}...")
-            fill_prompt = (
-                f"Tento testovací plán má {actual} testů, ale potřebuji PŘESNĚ {test_count}. "
-                f"Přidej {missing} nových testů. Zaměř se na endpointy a scénáře které ještě "
-                f"nejsou dostatečně pokryté (edge cases, error handling, validace).\n\n"
-                f"Vrať CELÝ plán (starý + nový) jako validní JSON.\n\n"
-                f"Aktuální plán:\n{json.dumps(plan, indent=2, ensure_ascii=False)}"
+            fill_prompt = prompt_builder.planning_fill_prompt(
+                json.dumps(plan, indent=2, ensure_ascii=False),
+                actual, test_count,
             )
             raw = llm.generate_text(fill_prompt)
             new_plan = _parse_plan_json(raw)
             if _count_plan_tests(new_plan) > 0:
                 plan = new_plan
-
         else:
-            # Moc testů → ořízni (deterministicky, nepotřebuje LLM)
             break
 
     # === Post-processing ===
+    plan = _filter_reset_tests(plan)  # Finální filtrování
     actual = _count_plan_tests(plan)
+
     if actual > test_count:
         print(f"  [Plán] {actual} testů → ořezávám na {test_count}")
         plan = _trim_plan(plan, test_count)

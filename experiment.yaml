@@ -3,11 +3,11 @@
 # ══════════════════════════════════════════════════════════
 
 experiment:
-  name: "diplomka_v3"
+  name: "diplomka_v4"
   levels: ["L0", "L1", "L2", "L3", "L4"]
   #levels: ["L2"]
-  max_iterations: 5        # Feedback loop iterací
-  runs_per_combination: 2 #3  # Opakování pro statistickou validitu
+  max_iterations: 3        # Feedback loop iterací
+  runs_per_combination: 1 #3  # Opakování pro statistickou validitu
   test_count: 30           # Kolik testů LLM vygeneruje
 
 # ── LLM modely ───────────────────────────────────────────
@@ -43,8 +43,10 @@ llms:
   #   model: "deepseek-chat"
   #   api_key_env: "DEEPSEEK_API_KEY"
 
+
 # ── Testovaná API ────────────────────────────────────────
-# Pro každé API definuj cesty ke vstupům a server konfiguraci
+# api_rules: instrukce pro LLM jak volat endpointy (bez těchto testy padnou)
+# helper_hints: jak správně nastavit helper funkce (default hodnoty, povinná pole)
 apis:
   - name: "bookstore"
     docker: true
@@ -57,6 +59,20 @@ apis:
       source_code: "inputs/source_code.py"
       db_schema: "inputs/db_schema.sql"
       existing_tests: "inputs/existing_tests.py"
+
+    # ── API-specifická pravidla (injektují se do promptu) ──
+    api_rules:
+      - "DELETE endpointy vracejí 204 s PRÁZDNÝM tělem. Nevolej .json() na 204 odpovědích."
+      - "DELETE /books/{id}/tags používá REQUEST BODY: requests.delete(..., json={\"tag_ids\": [...]})"
+      - "PATCH /books/{id}/stock používá QUERY parametr: params={\"quantity\": N}, ne JSON body."
+      - "Neověřuj přesný text chybových hlášek, ověřuj jen přítomnost klíče \"detail\"."
+      - "POST endpointy vracejí 201 při úspěchu."
+
+    helper_hints:
+      - "create_book helper MUSÍ nastavit \"stock\": 10, jinak objednávky selžou (insufficient stock → 400)."
+      - "Každý unikátní string (name, ISBN, title) generuj přes unique() helper s uuid4."
+      - "create_book musí vytvořit autora i kategorii (přes create_author/create_category helpery) pokud nejsou předány."
+      - "Pro test discountu na \"novou\" knihu (published_year aktuální rok) vytvoř knihu ROVNOU přes POST s published_year=2026, nepoužívej PUT/PATCH na změnu roku."
 
   # - name: "todo-api"
   #   source_dir: "../todo-api"

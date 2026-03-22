@@ -1,28 +1,12 @@
-
 """
-Vibe Testing Framework – Experiment Runner.
-Čte experiment.yaml a spouští všechny kombinace: LLM × API × Level × Run.
+Vibe Testing Framework – Experiment Runner (v2 — unified prompt framework).
 
-Použití:
-    1. Uprav experiment.yaml (LLM modely, API, úrovně, počet runů)
-    2. Nastav API klíče v .env (GEMINI_API_KEY, OPENAI_API_KEY, ...)
-    3. Ujisti se, že na portu 8000 NEBĚŽÍ žádný server (framework si ho spouští sám)
-    4. Spusť:
-         taskkill /IM python.exe /F          # Windows: zabij staré procesy
-         .venv\\Scripts\\Activate.ps1
-         python main.py
-
-    Server se spustí automaticky a zůstává běžet napříč iteracemi i úrovněmi.
-    Po dokončení všech úrovní pro dané API se server automaticky zastaví.
-
-Výstupy:
-    outputs/test_generated_{llm}__{api}__{level}__run{N}.py   – vygenerované testy
-    outputs/test_plan_{llm}__{api}__{level}__run{N}.json      – testovací plán
-    outputs/..._log.txt                                        – pytest log
-    results/experiment_{name}_{timestamp}.json                 – souhrnné metriky
+Změny oproti v1:
+- PromptBuilder se vytváří z api_cfg a předává do všech fází
+- StaleTracker žije per run (resetuje se mezi runy)
+- phase2 dostává prompt_builder místo raw promptu
 """
 import os
-import sys
 import json
 import time
 import yaml
@@ -30,9 +14,13 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 from llm_provider import create_llm
+from prompts.prompt_templates import PromptBuilder
 from prompts.phase1_context import analyze_context
 from prompts.phase2_planning import generate_test_plan
-from prompts.phase3_generation import generate_test_code, repair_failing_tests, validate_test_count, count_test_functions
+from prompts.phase3_generation import (
+    generate_test_code, repair_failing_tests, validate_test_count,
+    count_test_functions, StaleTracker,
+)
 from prompts.phase4_validation import run_tests_and_validate, stop_managed_server
 from prompts.phase5_metrics import calculate_all_metrics, parse_test_validity_rate
 
@@ -53,10 +41,9 @@ def load_experiment_config(path: str = "experiment.yaml") -> dict:
         return yaml.safe_load(f)
 
 
-
 def _sanitize_tag(name: str) -> str:
-    """Nahradí tečky a jiné problematické znaky v názvu souboru."""
     return name.replace(".", "_").replace(" ", "_")
+
 
 def run_pipeline(
     llm, llm_name: str, api_cfg: dict, level: str,
@@ -70,6 +57,9 @@ def run_pipeline(
     output_path = os.path.join(OUTPUTS_DIR, output_filename)
 
     inputs = api_cfg["inputs"]
+
+    # ── Unified prompt builder (z api_cfg) ────────────
+    prompt_builder = PromptBuilder(api_cfg)
 
     print(f"\n{'=' * 65}")
     print(f"  {llm_name} | {api_name} | {level} | Běh {run_id}")
@@ -89,7 +79,10 @@ def run_pipeline(
 
     # ── FÁZE 2: Plánování ────────────────────────────────
     print(f"  [Fáze 2] Generování plánu ({test_count} testů)...")
-    test_plan = generate_test_plan(context, llm, level=level, test_count=test_count)
+    test_plan = generate_test_plan(
+        context, llm, prompt_builder=prompt_builder,
+        level=level, test_count=test_count,
+    )
 
     os.makedirs(OUTPUTS_DIR, exist_ok=True)
     with open(os.path.join(OUTPUTS_DIR, plan_filename), "w", encoding="utf-8") as f:
@@ -105,6 +98,7 @@ def run_pipeline(
     print(f"  [Fáze 3+4] Generování kódu (max {max_iterations} iterací)...")
     test_code = generate_test_code(
         test_plan, context, llm,
+        prompt_builder=prompt_builder,
         base_url=api_cfg["base_url"],
     )
 
@@ -112,10 +106,14 @@ def run_pipeline(
     if plan_test_count > 0:
         test_code = validate_test_count(
             test_code, plan_test_count, llm=llm,
+            prompt_builder=prompt_builder,
             base_url=api_cfg["base_url"], context=context,
         )
         actual_count = count_test_functions(test_code)
     print(f"  Testů v kódu: {actual_count} (plán: {plan_test_count})")
+
+    # Stale tracker per run (resetuje se mezi runy)
+    stale_tracker = StaleTracker(threshold=2)
 
     iteration = 0
     success = False
@@ -138,7 +136,9 @@ def run_pipeline(
             print("  ❌ Testy selhaly. Opravuji...")
             test_code = repair_failing_tests(
                 test_code, output_log, context, llm,
+                prompt_builder=prompt_builder,
                 base_url=api_cfg["base_url"],
+                stale_tracker=stale_tracker,
             )
         else:
             print(f"  ⚠️ Max iterací dosaženo.")
@@ -154,19 +154,26 @@ def run_pipeline(
         test_plan=test_plan,
     )
 
+    # Přidej stale info do metrik
+    metrics["stale_tests"] = {
+        "stale_count": len(stale_tracker.get_stale()),
+        "stale_names": stale_tracker.get_stale(),
+    }
+
     ec = metrics["endpoint_coverage"]
     ad = metrics["assertion_depth"]
     rv = metrics["response_validation"]
     et = metrics["empty_tests"]
+    st = metrics["stale_tests"]
 
     print(f"\n  {'─' * 50}")
     print(f"  Validity:   {tv['validity_rate_pct']}% ({tv['tests_passed']}/{tv['total_executed']})")
     print(f"  Endpoint:   {ec['endpoint_coverage_pct']}% ({ec['covered_endpoints']}/{ec['total_api_endpoints']})")
     print(f"  Assert:     {ad['assertion_depth']} avg ({ad['total_assertions']} total)")
-    print(
-        f"  Body check: {rv['response_validation_pct']}% ({rv['tests_with_body_check']}/{rv['total_test_functions']})")
+    print(f"  Body check: {rv['response_validation_pct']}% ({rv['tests_with_body_check']}/{rv['total_test_functions']})")
     print(f"  Status codes: {metrics['status_code_diversity']['diversity_count']} unique")
     print(f"  Empty tests: {et['empty_count']}")
+    print(f"  Stale tests: {st['stale_count']}")
     print(f"  Čas:        {elapsed}s | Iterací: {iteration}")
 
     return {
@@ -195,7 +202,6 @@ def main():
     runs = exp["runs_per_combination"]
     test_count = exp["test_count"]
 
-    # Celkový počet kombinací
     total = len(cfg["llms"]) * len(cfg["apis"]) * len(levels) * runs
     print(f"\n🔬 EXPERIMENT: {exp['name']}")
     print(f"   {len(cfg['llms'])} LLMs × {len(cfg['apis'])} APIs × {len(levels)} levels × {runs} runs = {total} běhů")
@@ -242,10 +248,8 @@ def main():
                             "error": str(e),
                         })
 
-            # Zastavit server po dokončení všech úrovní pro toto API
             stop_managed_server(api_cfg)
 
-    # Uložit výsledky
     os.makedirs(RESULTS_DIR, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     path = os.path.join(RESULTS_DIR, f"experiment_{exp['name']}_{timestamp}.json")
@@ -253,7 +257,6 @@ def main():
     with open(path, "w", encoding="utf-8") as f:
         json.dump(all_results, f, indent=2, ensure_ascii=False)
 
-    # Shrnutí
     print(f"\n\n{'=' * 65}")
     print(f"  EXPERIMENT DOKONČEN | {len(all_results)} běhů | Výsledky: {path}")
     print(f"{'=' * 65}")
