@@ -184,7 +184,7 @@ class StaleTracker:
     po sobě jdoucích iterací. Stale testy se přeskakují při repair.
     """
 
-    def __init__(self, threshold: int = 2):
+    def __init__(self, threshold: int = 3):
         self.threshold = threshold
         # {test_name: [normalized_error_iter1, normalized_error_iter2, ...]}
         self._history: dict[str, list[str]] = {}
