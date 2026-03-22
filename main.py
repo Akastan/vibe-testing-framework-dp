@@ -23,6 +23,9 @@ from prompts.phase3_generation import (
 )
 from prompts.phase4_validation import run_tests_and_validate, stop_managed_server
 from prompts.phase5_metrics import calculate_all_metrics, parse_test_validity_rate
+from prompts.phase6_diagnostics import (
+    collect_all_diagnostics, RepairTracker as DiagRepairTracker,
+)
 
 OUTPUTS_DIR = "outputs"
 RESULTS_DIR = "results"
@@ -58,8 +61,8 @@ def run_pipeline(
 
     inputs = api_cfg["inputs"]
 
-    # ── Unified prompt builder (z api_cfg) ────────────
-    prompt_builder = PromptBuilder(api_cfg)
+    # ── Unified prompt builder (z api_cfg + level) ──────
+    prompt_builder = PromptBuilder(api_cfg, level=level)
 
     print(f"\n{'=' * 65}")
     print(f"  {llm_name} | {api_name} | {level} | Běh {run_id}")
@@ -81,7 +84,7 @@ def run_pipeline(
     print(f"  [Fáze 2] Generování plánu ({test_count} testů)...")
     test_plan = generate_test_plan(
         context, llm, prompt_builder=prompt_builder,
-        level=level, test_count=test_count,
+        test_count=test_count,
     )
 
     os.makedirs(OUTPUTS_DIR, exist_ok=True)
@@ -112,8 +115,10 @@ def run_pipeline(
         actual_count = count_test_functions(test_code)
     print(f"  Testů v kódu: {actual_count} (plán: {plan_test_count})")
 
-    # Stale tracker per run (resetuje se mezi runy)
+    # Stale tracker per run
     stale_tracker = StaleTracker(threshold=2)
+    # Diagnostický repair tracker
+    diag_repair_tracker = DiagRepairTracker()
 
     iteration = 0
     success = False
@@ -132,8 +137,10 @@ def run_pipeline(
 
         if success:
             print("  ✅ Všechny testy prošly!")
+            diag_repair_tracker.record_iteration(iteration, output_log)
         elif iteration < max_iterations:
             print("  ❌ Testy selhaly. Opravuji...")
+            diag_repair_tracker.record_iteration(iteration, output_log)
             test_code = repair_failing_tests(
                 test_code, output_log, context, llm,
                 prompt_builder=prompt_builder,
@@ -142,6 +149,7 @@ def run_pipeline(
             )
         else:
             print(f"  ⚠️ Max iterací dosaženo.")
+            diag_repair_tracker.record_iteration(iteration, output_log)
 
     elapsed = round(time.time() - start_time, 2)
 
@@ -176,6 +184,18 @@ def run_pipeline(
     print(f"  Stale tests: {st['stale_count']}")
     print(f"  Čas:        {elapsed}s | Iterací: {iteration}")
 
+    # ── FÁZE 6: Diagnostika ──────────────────────────
+    plan_json_str = json.dumps(test_plan, indent=2, ensure_ascii=False)
+    diagnostics = collect_all_diagnostics(
+        context=context,
+        test_plan=test_plan,
+        code=test_code,
+        pytest_log=output_log,
+        openapi_path=inputs["openapi"],
+        plan_json_str=plan_json_str,
+        repair_tracker=diag_repair_tracker,
+    )
+
     return {
         "timestamp": datetime.now().isoformat(),
         "llm": llm_name,
@@ -189,6 +209,7 @@ def run_pipeline(
         "output_filename": output_filename,
         "plan_filename": plan_filename,
         "metrics": metrics,
+        "diagnostics": diagnostics,
     }
 
 

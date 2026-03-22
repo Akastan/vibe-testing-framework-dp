@@ -78,10 +78,9 @@ def _parse_plan_json(raw: str) -> dict:
 
 def generate_test_plan(context_data: str, llm,
                        prompt_builder: PromptBuilder,
-                       level: str = "L0",
                        test_count: int = 40) -> dict:
 
-    base_prompt = prompt_builder.planning_prompt(context_data, level, test_count)
+    base_prompt = prompt_builder.planning_prompt(context_data, test_count)
 
     MAX_ATTEMPTS = 4
 

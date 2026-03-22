@@ -47,6 +47,7 @@ llms:
 # ── Testovaná API ────────────────────────────────────────
 # api_rules: instrukce pro LLM jak volat endpointy (bez těchto testy padnou)
 # helper_hints: jak správně nastavit helper funkce (default hodnoty, povinná pole)
+
 apis:
   - name: "bookstore"
     docker: true
@@ -60,19 +61,31 @@ apis:
       db_schema: "inputs/db_schema.sql"
       existing_tests: "inputs/existing_tests.py"
 
-    # ── API-specifická pravidla (injektují se do promptu) ──
-    api_rules:
-      - "DELETE endpointy vracejí 204 s PRÁZDNÝM tělem. Nevolej .json() na 204 odpovědích."
-      - "DELETE /books/{id}/tags používá REQUEST BODY: requests.delete(..., json={\"tag_ids\": [...]})"
-      - "PATCH /books/{id}/stock používá QUERY parametr: params={\"quantity\": N}, ne JSON body."
-      - "Neověřuj přesný text chybových hlášek, ověřuj jen přítomnost klíče \"detail\"."
-      - "POST endpointy vracejí 201 při úspěchu."
+    # ── FRAMEWORK RULES ─────────────────────────────────
+    # JAK psát testy. Platí pro VŠECHNY levely.
+    # Nesmí obsahovat žádnou znalost o tom CO API dělá.
+    # Jen technické instrukce pro pytest + requests.
+    # ────────────────────────────────────────────────────
+    framework_rules:
+      - "Timeout=30 na každém HTTP volání."
+      - "Unikátní stringy přes uuid4: unique(prefix) → f'{prefix}_{uuid.uuid4().hex[:8]}'"
+      - "Nepoužívej fixtures, conftest, setup_module."
+      - "Nevolej /reset endpoint — framework resetuje DB automaticky."
+      - "Každý test musí být self-contained (vytvoří si data přes helpery)."
+      - "Na DELETE s 204 nevolej .json() — tělo je prázdné."
 
-    helper_hints:
-      - "create_book helper MUSÍ nastavit \"stock\": 10, jinak objednávky selžou (insufficient stock → 400)."
-      - "Každý unikátní string (name, ISBN, title) generuj přes unique() helper s uuid4."
-      - "create_book musí vytvořit autora i kategorii (přes create_author/create_category helpery) pokud nejsou předány."
-      - "Pro test discountu na \"novou\" knihu (published_year aktuální rok) vytvoř knihu ROVNOU přes POST s published_year=2026, nepoužívej PUT/PATCH na změnu roku."
+    # ── API KNOWLEDGE ───────────────────────────────────
+    # CO API dělá. Injektuje se POUZE do L1+.
+    # Na L0 model toto NEDOSTANE — musí si to odvodit z OpenAPI spec.
+    # ────────────────────────────────────────────────────
+    api_knowledge:
+      - "create_book helper MUSÍ nastavit 'stock': 10, jinak objednávky selžou na insufficient stock (API default je 0)."
+      - "Helper create_book má mít default published_year=2020. Pro test discountu na NOVOU knihu (mladší 1 roku) vytvoř knihu s published_year aktuálního roku PŘÍMO V TESTU."
+      - "DELETE /books/{id}/tags používá REQUEST BODY: json={\"tag_ids\": [...]}."
+      - "PATCH /books/{id}/stock používá QUERY parametr: params={\"quantity\": N}, ne JSON body."
+      - "Stock quantity je DELTA (přičte/odečte), ne absolutní hodnota. Stock=10, quantity=5 → výsledek 15."
+      - "Pro 'not found' endpointy API vrací 404, ne 422."
+      - "POST endpointy vracejí 201 při úspěchu, ne 200."
 
   # - name: "todo-api"
   #   source_dir: "../todo-api"

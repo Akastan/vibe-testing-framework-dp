@@ -1,49 +1,64 @@
 """
-Unified Prompt Framework – šablony promptů pro všechny fáze pipeline.
+Unified Prompt Framework – v5 (fair experimental design).
 
-Princip: Prompt = Base Template + API Rules (z YAML) + Context (z phase1) + Runtime Data.
-Žádné hardcoded API-specifické instrukce v kódu.
+Klíčový princip oddělení:
+  - framework_rules: JAK psát testy (pytest/requests technikálie).
+    Injektují se do VŠECH levelů. Neobsahují znalost o API.
+  - api_knowledge: CO API dělá (chování, pravidla, defaulty).
+    Injektují se POUZE do L1+ (kde tato znalost přirozeně existuje v kontextu).
+
+Tím je zajištěno že jediná proměnná mezi levely je KONTEXT.
 
 Použití:
-    builder = PromptBuilder(api_cfg)
-    prompt = builder.planning_prompt(context, level, test_count)
-    prompt = builder.generation_prompt(test_plan, context, base_url)
-    prompt = builder.repair_single_prompt(test_name, test_code, error, helpers, base_url)
-    prompt = builder.repair_helpers_prompt(helpers, sample_errors, failing_count, base_url)
-    prompt = builder.fill_tests_prompt(missing, helpers, existing_names, context, base_url)
+    builder = PromptBuilder(api_cfg, level="L0")
+    prompt = builder.planning_prompt(context, test_count)
+    prompt = builder.generation_prompt(plan_json, context, base_url)
+    ...
 """
 from __future__ import annotations
 
 
 class PromptBuilder:
-    """Sestavuje prompty z experiment.yaml konfigurace pro dané API."""
+    """Sestavuje prompty z experiment.yaml konfigurace pro dané API + level."""
 
-    def __init__(self, api_cfg: dict):
+    # L1+ dostane api_knowledge, L0 ne
+    _KNOWLEDGE_LEVELS = ("L1", "L2", "L3", "L4")
+
+    def __init__(self, api_cfg: dict, level: str):
         self.api_name = api_cfg["name"]
-        self.api_rules: list[str] = api_cfg.get("api_rules", [])
-        self.helper_hints: list[str] = api_cfg.get("helper_hints", [])
+        self.level = level
         self.base_url = api_cfg["base_url"]
 
+        # Framework rules — platí vždy
+        self.framework_rules: list[str] = api_cfg.get("framework_rules", [])
+
+        # API knowledge — jen pro L1+
+        if level in self._KNOWLEDGE_LEVELS:
+            self.api_knowledge: list[str] = api_cfg.get("api_knowledge", [])
+        else:
+            self.api_knowledge = []
+
     # ──────────────────────────────────────────────────
-    #  Interní helpery pro sestavení bloků
+    #  Interní bloky
     # ──────────────────────────────────────────────────
 
-    def _rules_block(self) -> str:
-        """Formátuje API-specifická pravidla jako blok textu."""
-        if not self.api_rules:
+    def _framework_block(self) -> str:
+        if not self.framework_rules:
             return ""
-        lines = "\n".join(f"- {r}" for r in self.api_rules)
-        return f"\nSPECIFIKA TOHOTO API (bez dodržení testy spadnou):\n{lines}\n"
+        lines = "\n".join(f"- {r}" for r in self.framework_rules)
+        return f"\nTECHNICKÉ POŽADAVKY FRAMEWORKU:\n{lines}\n"
 
-    def _helper_hints_block(self) -> str:
-        """Formátuje hinty pro helper funkce."""
-        if not self.helper_hints:
+    def _knowledge_block(self) -> str:
+        """Vrací blok s API knowledge. Prázdný pro L0."""
+        if not self.api_knowledge:
             return ""
-        lines = "\n".join(f"- {r}" for r in self.helper_hints)
-        return f"\nPRAVIDLA PRO HELPER FUNKCE:\n{lines}\n"
+        lines = "\n".join(f"- {r}" for r in self.api_knowledge)
+        return (
+            f"\nZNÁMÉ CHOVÁNÍ TOHOTO API (použij při psaní helperů a assertů):\n"
+            f"{lines}\n"
+        )
 
     def _stale_block(self, stale_tests: list[str] | None = None) -> str:
-        """Blok se seznamem zamrzlých testů (neopravovat)."""
         if not stale_tests:
             return ""
         names = ", ".join(stale_tests)
@@ -57,7 +72,7 @@ class PromptBuilder:
     #  FÁZE 2: Plánování
     # ══════════════════════════════════════════════════
 
-    def planning_prompt(self, context: str, level: str, test_count: int) -> str:
+    def planning_prompt(self, context: str, test_count: int) -> str:
         return f"""Analyzuj toto API a vytvoř testovací plán s PŘESNĚ {test_count} testy.
 Rozhodni sám, které endpointy a scénáře jsou nejdůležitější pro otestování.
 
@@ -87,7 +102,7 @@ PRAVIDLA:
 - Jeden endpoint (method+path) = jeden objekt v poli, s více test_cases uvnitř
 - PŘESNĚ {test_count} testů celkem, ani více ani méně
 - NEGENERUJ test na reset databáze ani /reset endpoint
-{self._rules_block()}
+{self._knowledge_block()}
 Kontext:
 {context}
 """
@@ -115,46 +130,25 @@ PLÁN:
 
 KONTEXT:
 {context}
-
-TECHNICKÉ POŽADAVKY (aby testy šly spustit):
-- import pytest, requests, uuid na začátku
-- Každý test začíná test_, používá timeout=30 na každém HTTP volání
-- Nepoužívej fixtures, conftest, setup_module, setup_function ani žádné pytest hooks.
-- Databáze se resetuje automaticky PŘED spuštěním testů (framework to zajistí).
-  Negeneruj test na reset databáze a NEVOLEJ /reset endpoint nikde v kódu.
-- Každý test musí být self-contained – vytvoří si vlastní data přes helper funkce.
-
+{self._framework_block()}
 UNIKÁTNÍ NÁZVY (povinné, jinak testy kolidují):
 - Pro unikátní názvy použij uuid4 suffix:
     def unique(prefix="test"):
         return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
-- V KAŽDÉM helper volání generuj unikátní názvy:
-    def create_author(name=None):
-        name = name or unique("Author")
-        r = requests.post(f"{{BASE_URL}}/authors", json={{"name": name}}, timeout=30)
-        assert r.status_code == 201
-        return r.json()
-{self._helper_hints_block()}
-KVALITA ASERCÍ (důležité pro kvalitu testů):
+- V KAŽDÉM helper volání generuj unikátní názvy.
+{self._knowledge_block()}
+KVALITA ASERCÍ:
 - Nekontroluj POUZE status kód. Každý test by měl ověřit i odpověď:
   - Happy path (201/200): ověř klíče v response body (assert "id" in data, assert data["name"] == ...)
-  - Error (400/404/409/422): ověř assert "detail" in r.json()
+  - Error: ověř assert "detail" in r.json()
   - GET seznam: ověř strukturu (assert "items" in data nebo assert isinstance(data, list))
   - Side effects: po vytvoření objednávky ověř snížení skladu, po smazání ověř 404 na GET
-- Příklad dobrého testu:
-    def test_create_author_valid():
-        name = unique("Author")
-        r = requests.post(f"{{BASE_URL}}/authors", json={{"name": name}}, timeout=30)
-        assert r.status_code == 201
-        data = r.json()
-        assert data["name"] == name
-        assert "id" in data
-{self._rules_block()}
+
 Vrať POUZE Python kód, žádný markdown.
 """
 
     # ══════════════════════════════════════════════════
-    #  FÁZE 3: Opravy – izolovaná oprava jednoho testu
+    #  FÁZE 3: Opravy
     # ══════════════════════════════════════════════════
 
     def repair_single_prompt(
@@ -178,15 +172,10 @@ CHYBA:
 PRAVIDLA:
 - Vrať POUZE opravenou funkci (def test_...(): ...), žádné importy ani helpery.
 - Neměň název funkce.
-- Zachovej timeout=30 na HTTP voláních.
 - Používej existující helper funkce, nevymýšlej nové.
 - Pokud test ověřuje jen status kód, přidej i kontrolu response body.
-{self._rules_block()}{self._stale_block(stale_tests)}
+{self._framework_block()}{self._knowledge_block()}{self._stale_block(stale_tests)}
 """
-
-    # ══════════════════════════════════════════════════
-    #  FÁZE 3: Opravy – oprava helper funkcí
-    # ══════════════════════════════════════════════════
 
     def repair_helpers_prompt(
         self, helpers: str, sample_errors: list[str],
@@ -202,18 +191,14 @@ AKTUÁLNÍ HELPERY:
 
 UKÁZKY CHYB ({failing_count} testů celkem padá):
 {errors_text}
-{self._helper_hints_block()}
+{self._knowledge_block()}
 PRAVIDLA:
 - Vrať POUZE opravené helpery a importy (vše co je nad test funkcemi).
 - Zachovej signatury helperů kompatibilní s existujícími testy.
 - Zajisti unikátní názvy přes uuid4 (unique() helper).
 - Žádný markdown, jen Python kód.
-{self._rules_block()}
+{self._framework_block()}
 """
-
-    # ══════════════════════════════════════════════════
-    #  FÁZE 3: Doplnění chybějících testů
-    # ══════════════════════════════════════════════════
 
     def fill_tests_prompt(
         self, missing: int, helpers: str, existing_names: list[str],
@@ -235,8 +220,8 @@ KONTEXT API:
 PRAVIDLA:
 - Vrať POUZE {missing} nových test funkcí (def test_...(): ...).
 - Žádné importy, žádné helpery, žádný markdown.
-- Každý test musí být self-contained, používat timeout=30, unique() helper.
+- Každý test musí být self-contained.
 - Zaměř se na scénáře které existující testy nepokrývají.
 - Nekontroluj jen status kód — ověřuj i response body.
-{self._rules_block()}
+{self._framework_block()}{self._knowledge_block()}
 """
