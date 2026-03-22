@@ -141,11 +141,17 @@ def run_pipeline(
         elif iteration < max_iterations:
             print("  ❌ Testy selhaly. Opravuji...")
             diag_repair_tracker.record_iteration(iteration, output_log)
-            test_code = repair_failing_tests(
+            test_code, repair_info = repair_failing_tests(
                 test_code, output_log, context, llm,
                 prompt_builder=prompt_builder,
                 base_url=api_cfg["base_url"],
                 stale_tracker=stale_tracker,
+            )
+            # Zapiš repair metadata do DALŠÍ iterace (ta co poběží s opraveným kódem)
+            diag_repair_tracker.annotate_last(
+                repair_type=repair_info["repair_type"],
+                repaired_count=repair_info["repaired_count"],
+                stale_skipped=repair_info["stale_skipped"],
             )
         else:
             print(f"  ⚠️ Max iterací dosaženo.")

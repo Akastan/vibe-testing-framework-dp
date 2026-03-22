@@ -210,9 +210,18 @@ def snapshot_helpers(code: str) -> dict:
 
 
 def _extract_default_year(body: str) -> int | None:
-    """Najde default published_year v helper kódu."""
-    m = re.search(r'published_year["\']?\s*[:=]\s*(\d{4})', body)
-    return int(m.group(1)) if m else None
+    """Najde default published_year v helper kódu.
+    Matchuje: published_year=2020, year=2020, "published_year": 2020
+    """
+    patterns = [
+        r'published_year["\']?\s*[:=]\s*(\d{4})',
+        r'\byear\s*=\s*(\d{4})',
+    ]
+    for p in patterns:
+        m = re.search(p, body)
+        if m:
+            return int(m.group(1))
+    return None
 
 
 # ═══════════════════════════════════════════════════════════
@@ -341,6 +350,16 @@ class RepairTracker:
 
         failing_names = re.findall(r'FAILED\s+\S+::(\w+)', pytest_log)
 
+        # Per-iteration failure taxonomy (ne jen z poslední iterace)
+        per_test_errors = {}
+        for name in dict.fromkeys(failing_names):
+            error = _extract_error_block(pytest_log, name)
+            category = _classify_single_failure(error, name, "")
+            per_test_errors[name] = {
+                "category": category,
+                "error_summary": _summarize_error(error),
+            }
+
         self._iterations.append({
             "iteration": iteration,
             "passed": passed,
@@ -349,7 +368,18 @@ class RepairTracker:
             "repair_type": repair_type,
             "repaired_count": repaired_count,
             "stale_skipped": stale_count,
+            "failure_details": per_test_errors,
         })
+
+    def annotate_last(self, repair_type: str | None = None,
+                      repaired_count: int = 0, stale_skipped: int = 0):
+        """Doplní repair metadata k poslední zaznamenané iteraci.
+        Volá se po repair_failing_tests() v main.py.
+        """
+        if self._iterations:
+            self._iterations[-1]["repair_type"] = repair_type
+            self._iterations[-1]["repaired_count"] = repaired_count
+            self._iterations[-1]["stale_skipped"] = stale_skipped
 
     def get_trajectory(self) -> dict:
         if not self._iterations:
@@ -376,6 +406,13 @@ class RepairTracker:
         first_failing = set(self._iterations[0]["failing_tests"])
         last_failing = set(self._iterations[-1]["failing_tests"])
 
+        # Aggregate failure categories across all iterations
+        all_categories = {}
+        for it in self._iterations:
+            for name, info in it.get("failure_details", {}).items():
+                if name not in all_categories:
+                    all_categories[name] = info["category"]
+
         return {
             "iterations": self._iterations,
             "convergence_iteration": convergence + 1,
@@ -388,6 +425,7 @@ class RepairTracker:
             "total_stale_skipped": sum(
                 it.get("stale_skipped", 0) for it in self._iterations
             ),
+            "failure_categories": all_categories,
         }
 
 
@@ -443,19 +481,44 @@ def classify_failures(pytest_log: str, code: str) -> dict:
 
 
 def _extract_error_block(pytest_log: str, test_name: str) -> str:
+    """Extrahuje chybový blok pro test. Dvě strategie:
+    1. FAILURES sekce (plný traceback)
+    2. Fallback: short test summary řádek (jednořádkový souhrn)
+    """
+    # Strategie 1: FAILURES blok
     pattern = (
         rf'_{2,}\s+{re.escape(test_name)}\s+_{2,}'
         rf'(.*?)'
         rf'(?=_{2,}\s+\w+\s+_{2,}|={2,}\s+short test summary|$)'
     )
     m = re.search(pattern, pytest_log, re.DOTALL)
-    return m.group(1).strip()[:2000] if m else ""
+    if m and m.group(1).strip():
+        return m.group(1).strip()[:2000]
+
+    # Strategie 2: short test summary ("FAILED ...::test_name - error message")
+    summary_pattern = rf'FAILED\s+\S+::{re.escape(test_name)}\s*[-–]\s*(.+)'
+    m2 = re.search(summary_pattern, pytest_log)
+    if m2:
+        return m2.group(1).strip()[:500]
+
+    # Strategie 3: jakýkoli řádek obsahující jméno testu a "E " nebo "assert"
+    for line in pytest_log.splitlines():
+        if test_name in line and ('E ' in line or 'assert' in line.lower()):
+            return line.strip()[:500]
+
+    return ""
 
 
 def _classify_single_failure(error: str, test_name: str, code: str) -> str:
     """Klasifikuje jeden failing test."""
-    # Status code mismatch: "assert 404 == 422"
-    if re.search(r'assert\s+\d{3}\s*==\s*\d{3}', error):
+    if not error:
+        return "unknown_no_error_captured"
+
+    # Status code mismatch: "assert 404 == 422" nebo "404 != 422"
+    if re.search(r'assert\s+\d{3}\s*[=!]=\s*\d{3}', error):
+        return "wrong_status_code"
+    # Varianta z short summary: "assert 404 == 200"
+    if re.search(r'\d{3}\s*==\s*\d{3}', error):
         return "wrong_status_code"
 
     # Helper cascade: chyba je v helperu, ne v testu
@@ -728,6 +791,30 @@ def collect_all_diagnostics(
     if not plan_json_str:
         plan_json_str = json.dumps(test_plan, indent=2, ensure_ascii=False)
 
+    # Failure taxonomy: preferuj data z první iterace RepairTrackeru
+    # (tam jsou čerstvé tracebacky, ne stale opakování)
+    failure_tax = {"total_failures": 0, "categories": {}, "per_test": {}}
+    if repair_tracker and repair_tracker._iterations:
+        first_iter = repair_tracker._iterations[0]
+        details = first_iter.get("failure_details", {})
+        if details:
+            cats = {}
+            for name, info in details.items():
+                c = info["category"]
+                cats[c] = cats.get(c, 0) + 1
+            total = len(details)
+            failure_tax = {
+                "total_failures": total,
+                "categories": cats,
+                "category_pct": {
+                    k: round(v / total * 100, 1) for k, v in cats.items()
+                } if total else {},
+                "per_test": details,
+            }
+    # Fallback: parsuj z posledního pytest logu
+    if failure_tax["total_failures"] == 0:
+        failure_tax = classify_failures(pytest_log, code)
+
     diag = {
         "context_size": measure_context_size(context),
         "plan_analysis": analyze_plan(test_plan, openapi_path),
@@ -736,7 +823,7 @@ def collect_all_diagnostics(
             context, plan_json_str, model_context_window
         ),
         "instruction_compliance": check_instruction_compliance(code),
-        "failure_taxonomy": classify_failures(pytest_log, code),
+        "failure_taxonomy": failure_tax,
         "code_patterns": analyze_code_patterns(code),
         "plan_code_drift": analyze_plan_code_drift(test_plan, code),
         "context_utilization": analyze_context_utilization(

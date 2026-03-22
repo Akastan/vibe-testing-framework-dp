@@ -422,21 +422,19 @@ def repair_failing_tests(master_code: str, pytest_log: str,
                          context: str, llm,
                          prompt_builder: PromptBuilder,
                          base_url: str,
-                         stale_tracker: StaleTracker | None = None) -> str:
+                         stale_tracker: StaleTracker | None = None,
+                         ) -> tuple[str, dict]:
     """
     Izolovaně opraví selhávající testy s podporou stale detection.
 
-    Strategie:
-    1. Parsuj failing testy
-    2. Aktualizuj stale tracker (pokud existuje)
-    3. Odfiltruj stale testy
-    4. Pokud je společná root cause → oprav helpery
-    5. Pokud je příliš mnoho failing → oprav helpery
-    6. Jinak → mikro-prompt pro každý repairable test
+    Vrací: (opravený_kód, repair_info)
+    repair_info = {"repair_type": str|None, "repaired_count": int, "stale_skipped": int}
     """
+    repair_info = {"repair_type": None, "repaired_count": 0, "stale_skipped": 0}
+
     failing = _parse_failing_test_names(pytest_log)
     if not failing:
-        return master_code
+        return master_code, repair_info
 
     # Stale detection
     stale_tests = []
@@ -445,6 +443,7 @@ def repair_failing_tests(master_code: str, pytest_log: str,
         stale_tracker.update(pytest_log, failing)
         stale_tests = stale_tracker.get_stale()
         repairable = stale_tracker.filter_repairable(failing)
+        repair_info["stale_skipped"] = len(stale_tests)
 
         if stale_tests:
             print(f"    [Repair] {len(stale_tests)} stale testů přeskočeno: "
@@ -452,31 +451,37 @@ def repair_failing_tests(master_code: str, pytest_log: str,
 
         if not repairable:
             print(f"    [Repair] Všechny failing testy jsou stale, přeskakuji opravu.")
-            return master_code
+            repair_info["repair_type"] = "skipped_all_stale"
+            return master_code, repair_info
 
     helpers = _extract_helpers_code(master_code)
     backup = master_code
 
-    # Společná root cause → oprava helperů (na všech failing, ne jen repairable)
+    # Společná root cause → oprava helperů
     if _detect_helper_root_cause(pytest_log, failing):
         print(f"    [Repair] Společná root cause ({len(failing)} testů). Opravuji helpery...")
+        repair_info["repair_type"] = "helper_root_cause"
         master_code = _repair_helpers(
             master_code, pytest_log, helpers, failing, llm, prompt_builder, base_url
         )
-        return master_code
+        repair_info["repaired_count"] = len(failing)
+        return master_code, repair_info
 
     # Příliš mnoho repairable → fallback na opravu helperů
     if len(repairable) > MAX_INDIVIDUAL_REPAIRS:
         print(f"    [Repair] {len(repairable)} repairable testů (limit {MAX_INDIVIDUAL_REPAIRS}). "
               f"Opravuji helpery...")
+        repair_info["repair_type"] = "helper_fallback"
         master_code = _repair_helpers(
             master_code, pytest_log, helpers, repairable, llm, prompt_builder, base_url
         )
-        return master_code
+        repair_info["repaired_count"] = len(repairable)
+        return master_code, repair_info
 
     # Izolovaná oprava jednotlivých testů
     print(f"    [Repair] Izolovaná oprava {len(repairable)} testů"
           f" (+ {len(stale_tests)} stale přeskočeno)...")
+    repair_info["repair_type"] = "isolated"
     repaired = 0
 
     for i, test_name in enumerate(repairable, 1):
@@ -507,6 +512,7 @@ def repair_failing_tests(master_code: str, pytest_log: str,
         else:
             print(f"      ⚠️ {test_name} oprava selhala")
 
+    repair_info["repaired_count"] = repaired
     print(f"    [Repair] ✅ Opraveno {repaired}/{len(repairable)}")
 
     # Bezpečnostní kontrola: počet testů se nesmí změnit
@@ -516,4 +522,4 @@ def repair_failing_tests(master_code: str, pytest_log: str,
         print(f"    [Repair] ⚠️ Počet testů se změnil ({before} → {after}), revertuji")
         master_code = backup
 
-    return master_code
+    return master_code, repair_info
