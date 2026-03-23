@@ -395,9 +395,25 @@ Run 3 měl 78.3% timeout chyb (18/23 failing testů). Generic HTTP wrapper helpe
 
 ---
 
-## 8. Code coverage
+## 8. Code coverage (manuální měření — coverage.py)
 
-_(Bude doplněno po manuálním měření coverage.py.)_
+### 8.1 Celkové code coverage per level (app/ celkem, 635 statements)
+
+| Level | Code Cov (avg) | Std | crud.py (avg) | main.py (avg) |
+|-------|---------------|-----|---------------|---------------|
+| L0 | 86.3%          | 6.2 | 71.0%       | 93.3%       |
+| L1 | 91.0%          | 1.7 | 81.3%       | 95.3%       |
+| L2 | 93.9%          | 1.0 | 87.1%       | 96.7%       |
+| L3 | 92.7%          | 3.5 | 84.8%       | 95.6%       |
+| L4 | 95.0%          | 1.1 | 89.7%       | 96.7%       |
+
+### 8.2 Analýza code coverage
+
+**L0 (86.3%):** Nejnižší code coverage a nejvyšší variance (std 6.2). Hlavní příčina: failing testy nedostanou kód přes happy path — timeout chain způsobí že celé domény (tags, orders, stock update) zůstanou nepokryté. crud.py avg 71% je výrazně nižší než main.py 93% protože crud.py obsahuje business logiku (discount pravidla, stock aritmetika, order validace) kterou failing testy neproexecuují. Nejhůře pokryté CRUD funkce: update_order_status (avg 21%), get_book_average_rating (avg 22%), remove_tags_from_book (avg 29%), delete_order (avg 33%). To přesně odpovídá doménám kde L0 selhává — order management a tag operace.
+
+**L1 (91.0%):** Vyšší coverage (+4.7 p.p.) a výrazně stabilnější (std 1.7). Dokumentace poskytuje korektní stock setup → order testy procházejí → CRUD logika pro orders pokrytá (create_order 96%, delete_order 97% vs L0 72% a 33%). Nepokryté zůstávají některé update/delete funkce pro category a author — model soustředí testy na business-critical endpointy (books, orders, discounts) a jednoduché CRUD update operace přeskakuje. update_category avg 18% a update_tag avg 30% — model s dokumentací testuje create/delete ale ne update pro tyto entity.
+
+**Paradox EP coverage vs code coverage:** L0 má EP coverage 96.1% ale code coverage jen 86.3%. L1 má EP coverage 84.3% ale code coverage 91.0%. Vysvětlení: L0 "zavolá" endpoint ale test failne (špatný status kód, timeout) → endpoint je pokrytý v EP coverage ale kód za error handling path není executed. L1 pokrývá méně endpointů ale testy procházejí → kód je proexecutovaný hlouběji. Code coverage lépe odráží skutečnou kvalitu testů než EP coverage.
 
 ---
 

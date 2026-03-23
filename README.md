@@ -247,9 +247,25 @@ Toto je klíčový finding: **centralizovaná abstrakce bez doménových znalost
    - `GET /categories/{category_id}`, `GET /tags/{tag_id}` — jednoduché detail endpointy, model je považuje za low-value
    - `GET /categories` — list endpoint, pokrytý méně často na L2+
 
-#### Code coverage (manuální měření)
+#### Code coverage (manuální měření — coverage.py, app/ celkem 635 statements)
 
-_(Bude doplněno po manuálním měření coverage.py pro každý level.)_
+| Level | Code Cov (avg) | Std | crud.py avg | main.py avg |
+|-------|----------------|-----|-------------|-------------|
+| L0 | 86.3%          | 6.2 | 71.0%       | 93.3%       |
+| L1 | 91.0%          | 1.7 | 81.3%       | 95.3%       |
+| L2 | 93.9%          | 1.0 | 87.1%       | 96.7%       |
+| L3 | 92.7%          | 3.5 | 84.8%       | 95.6%       |
+| L4 | 95.0%          | 1.1 | 89.7%       | 96.7%       |
+
+**Zjištění:**
+
+1. **L0→L1: +4.7 p.p. code coverage (86.3→91.0%).** Dokumentace pomáhá s korektním setup → více testů projde → více kódu je proexecutováno. Nejhůře pokryté CRUD funkce na L0: update_order_status (21%), get_book_average_rating (22%), remove_tags_from_book (29%) — přesně domény kde L0 selhává kvůli timeout chain.
+
+2. **Paradox EP coverage vs code coverage:** L0 má EP coverage 96.1% ale code coverage jen 86.3%. L1 má EP coverage 84.3% ale code coverage 91.0%. Vysvětlení: L0 zavolá endpoint ale test failne → endpoint je "pokrytý" ale kód za error handling path není executed. L1 pokrývá méně endpointů ale testy procházejí → kód je proexecutovaný hlouběji. **Code coverage lépe odráží skutečnou kvalitu testů než endpoint coverage.**
+
+3. **L0 variance je vysoká (std 6.2):** Koreluje s validity rate — run s 76% validity má code coverage 78%, run s 94% validity má 93%. Code coverage silně závisí na počtu passing testů.
+
+4. **crud.py je diferenciátor (L0 71% vs L1 81%):** main.py je thin wrapper (jen routy), coverage je vždy 93%+. Rozdíl mezi levely se projevuje v crud.py kde je business logika — order management, discount pravidla, stock aritmetika.
 
 ---
 
