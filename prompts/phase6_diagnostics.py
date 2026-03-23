@@ -546,14 +546,16 @@ def _classify_single_failure(error: str, test_name: str, code: str) -> str:
     if not error:
         return "unknown_no_error_captured"
 
-    # Status code mismatch: "assert 404 == 422" nebo "404 != 422"
+    # Status code mismatch — všechny varianty:
+    # "E  assert 404 == 422"           (E-řádek, dvě čísla)
+    # "assert 404 == 200"              (short summary)
+    # "assert r.status_code == 400"    (zdrojový kód testu)
+    # "AssertionError: 404 != 200"
+    if re.search(r'status_code\s*==\s*\d{3}', error):
+        return "wrong_status_code"
     if re.search(r'assert\s+\d{3}\s*[=!]=\s*\d{3}', error):
         return "wrong_status_code"
-    # Varianta z short summary: "assert 404 == 200"
-    if re.search(r'\d{3}\s*==\s*\d{3}', error):
-        return "wrong_status_code"
-
-    if re.search(r'status_code\s*==\s*\d{3}', error):
+    if re.search(r'\d{3}\s*[!=]=\s*\d{3}', error):
         return "wrong_status_code"
 
     # Helper cascade: chyba je v helperu, ne v testu
@@ -568,16 +570,34 @@ def _classify_single_failure(error: str, test_name: str, code: str) -> str:
     if 'AttributeError' in error:
         return "attribute_error"
 
+    # Connection errors
+    if re.search(r'ConnectionError|ConnectionRefused|RemoteDisconnected', error, re.I):
+        return "connection_error"
+
+    # Timeout
+    if re.search(r'Timeout|timed?\s*out', error, re.I):
+        return "timeout"
+
+    # TypeError (špatný argument, None kde se čeká dict apod.)
+    if 'TypeError' in error:
+        return "type_error"
+
+    # JSONDecodeError (volání .json() na prázdné tělo)
+    if 'JSONDecodeError' in error or 'json' in error.lower() and 'decode' in error.lower():
+        return "json_decode_error"
+
+    # pytest.fail() — explicitní selhání v testu
+    if 'pytest.fail' in error or 'Failed' in error:
+        return "explicit_fail"
+
     # Value mismatch: "assert 15 == 5", "assert None == 'test'"
+    # Musí být PO status_code checku aby nechytil status kódy
     if re.search(r'assert\s+\S+\s*==\s*\S+', error) and 'status_code' not in error:
         return "assertion_value_mismatch"
 
-    # Connection errors
-    if re.search(r'ConnectionError|ConnectionRefused|Timeout', error, re.I):
-        return "connection_error"
-
-    if 'Timeout' in error:
-        return "timeout"
+    # Neexistující endpoint (404/405 na URL které API nemá)
+    if re.search(r'404\s*(Method )?Not (Found|Allowed)|405', error):
+        return "nonexistent_endpoint"
 
     return "other"
 
