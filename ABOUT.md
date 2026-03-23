@@ -8,8 +8,7 @@ Framework přijme OpenAPI spec + kontext → LLM vygeneruje test plán + pytest 
 
 - **RQ1:** Jak úroveň kontextu (L0–L4) ovlivňuje test validity rate a liší se vliv mezi LLM modely?
 - **RQ2:** Jak se liší code coverage a endpoint coverage mezi modely a úrovněmi?
-- **RQ3:** Jak efektivně detekují vygenerované testy záměrně vnesené chyby (mutation score)?
-- **RQ4:** Jaké typy selhání vznikají (halucinace, sémantické nepochopení, helper bugy) a liší se mezi modely/úrovněmi?
+- **RQ3:** Jaké typy selhání vznikají (halucinace, sémantické nepochopení, helper bugy) a liší se mezi modely/úrovněmi?
 
 ## Rozměry experimentu
 
