@@ -1,28 +1,12 @@
-
 """
-Vibe Testing Framework – Experiment Runner.
-Čte experiment.yaml a spouští všechny kombinace: LLM × API × Level × Run.
+Vibe Testing Framework – Experiment Runner (v2 — unified prompt framework).
 
-Použití:
-    1. Uprav experiment.yaml (LLM modely, API, úrovně, počet runů)
-    2. Nastav API klíče v .env (GEMINI_API_KEY, OPENAI_API_KEY, ...)
-    3. Ujisti se, že na portu 8000 NEBĚŽÍ žádný server (framework si ho spouští sám)
-    4. Spusť:
-         taskkill /IM python.exe /F          # Windows: zabij staré procesy
-         .venv\\Scripts\\Activate.ps1
-         python main.py
-
-    Server se spustí automaticky a zůstává běžet napříč iteracemi i úrovněmi.
-    Po dokončení všech úrovní pro dané API se server automaticky zastaví.
-
-Výstupy:
-    outputs/test_generated_{llm}__{api}__{level}__run{N}.py   – vygenerované testy
-    outputs/test_plan_{llm}__{api}__{level}__run{N}.json      – testovací plán
-    outputs/..._log.txt                                        – pytest log
-    results/experiment_{name}_{timestamp}.json                 – souhrnné metriky
+Změny oproti v1:
+- PromptBuilder se vytváří z api_cfg a předává do všech fází
+- StaleTracker žije per run (resetuje se mezi runy)
+- phase2 dostává prompt_builder místo raw promptu
 """
 import os
-import sys
 import json
 import time
 import yaml
@@ -30,11 +14,18 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 from llm_provider import create_llm
+from prompts.prompt_templates import PromptBuilder
 from prompts.phase1_context import analyze_context
 from prompts.phase2_planning import generate_test_plan
-from prompts.phase3_generation import generate_test_code, repair_failing_tests, validate_test_count, count_test_functions
+from prompts.phase3_generation import (
+    generate_test_code, repair_failing_tests, validate_test_count,
+    count_test_functions, StaleTracker,
+)
 from prompts.phase4_validation import run_tests_and_validate, stop_managed_server
 from prompts.phase5_metrics import calculate_all_metrics, parse_test_validity_rate
+from prompts.phase6_diagnostics import (
+    collect_all_diagnostics, RepairTracker as DiagRepairTracker,
+)
 
 OUTPUTS_DIR = "outputs"
 RESULTS_DIR = "results"
@@ -53,10 +44,9 @@ def load_experiment_config(path: str = "experiment.yaml") -> dict:
         return yaml.safe_load(f)
 
 
-
 def _sanitize_tag(name: str) -> str:
-    """Nahradí tečky a jiné problematické znaky v názvu souboru."""
     return name.replace(".", "_").replace(" ", "_")
+
 
 def run_pipeline(
     llm, llm_name: str, api_cfg: dict, level: str,
@@ -70,6 +60,9 @@ def run_pipeline(
     output_path = os.path.join(OUTPUTS_DIR, output_filename)
 
     inputs = api_cfg["inputs"]
+
+    # ── Unified prompt builder (z api_cfg + level) ──────
+    prompt_builder = PromptBuilder(api_cfg, level=level)
 
     print(f"\n{'=' * 65}")
     print(f"  {llm_name} | {api_name} | {level} | Běh {run_id}")
@@ -89,7 +82,10 @@ def run_pipeline(
 
     # ── FÁZE 2: Plánování ────────────────────────────────
     print(f"  [Fáze 2] Generování plánu ({test_count} testů)...")
-    test_plan = generate_test_plan(context, llm, level=level, test_count=test_count)
+    test_plan = generate_test_plan(
+        context, llm, prompt_builder=prompt_builder,
+        test_count=test_count,
+    )
 
     os.makedirs(OUTPUTS_DIR, exist_ok=True)
     with open(os.path.join(OUTPUTS_DIR, plan_filename), "w", encoding="utf-8") as f:
@@ -105,6 +101,7 @@ def run_pipeline(
     print(f"  [Fáze 3+4] Generování kódu (max {max_iterations} iterací)...")
     test_code = generate_test_code(
         test_plan, context, llm,
+        prompt_builder=prompt_builder,
         base_url=api_cfg["base_url"],
     )
 
@@ -112,14 +109,21 @@ def run_pipeline(
     if plan_test_count > 0:
         test_code = validate_test_count(
             test_code, plan_test_count, llm=llm,
+            prompt_builder=prompt_builder,
             base_url=api_cfg["base_url"], context=context,
         )
         actual_count = count_test_functions(test_code)
     print(f"  Testů v kódu: {actual_count} (plán: {plan_test_count})")
 
+    # Stale tracker per run
+    stale_tracker = StaleTracker(threshold=2)
+    # Diagnostický repair tracker
+    diag_repair_tracker = DiagRepairTracker()
+
     iteration = 0
     success = False
     output_log = ""
+    last_repair_type = None
 
     while iteration < max_iterations and not success:
         iteration += 1
@@ -134,14 +138,27 @@ def run_pipeline(
 
         if success:
             print("  ✅ Všechny testy prošly!")
+            diag_repair_tracker.record_iteration(iteration, output_log)
         elif iteration < max_iterations:
             print("  ❌ Testy selhaly. Opravuji...")
-            test_code = repair_failing_tests(
+            diag_repair_tracker.record_iteration(iteration, output_log)
+            test_code, repair_info = repair_failing_tests(
                 test_code, output_log, context, llm,
+                prompt_builder=prompt_builder,
                 base_url=api_cfg["base_url"],
+                stale_tracker=stale_tracker,
+                previous_repair_type=last_repair_type,  # ← NOVÉ
+            )
+            last_repair_type = repair_info["repair_type"]  # ← NOVÉ
+            # Zapiš repair metadata do DALŠÍ iterace (ta co poběží s opraveným kódem)
+            diag_repair_tracker.annotate_last(
+                repair_type=repair_info["repair_type"],
+                repaired_count=repair_info["repaired_count"],
+                stale_skipped=repair_info["stale_skipped"],
             )
         else:
             print(f"  ⚠️ Max iterací dosaženo.")
+            diag_repair_tracker.record_iteration(iteration, output_log)
 
     elapsed = round(time.time() - start_time, 2)
 
@@ -154,20 +171,39 @@ def run_pipeline(
         test_plan=test_plan,
     )
 
+    # Přidej stale info do metrik
+    metrics["stale_tests"] = {
+        "stale_count": len(stale_tracker.get_stale()),
+        "stale_names": stale_tracker.get_stale(),
+    }
+
     ec = metrics["endpoint_coverage"]
     ad = metrics["assertion_depth"]
     rv = metrics["response_validation"]
     et = metrics["empty_tests"]
+    st = metrics["stale_tests"]
 
     print(f"\n  {'─' * 50}")
     print(f"  Validity:   {tv['validity_rate_pct']}% ({tv['tests_passed']}/{tv['total_executed']})")
     print(f"  Endpoint:   {ec['endpoint_coverage_pct']}% ({ec['covered_endpoints']}/{ec['total_api_endpoints']})")
     print(f"  Assert:     {ad['assertion_depth']} avg ({ad['total_assertions']} total)")
-    print(
-        f"  Body check: {rv['response_validation_pct']}% ({rv['tests_with_body_check']}/{rv['total_test_functions']})")
+    print(f"  Body check: {rv['response_validation_pct']}% ({rv['tests_with_body_check']}/{rv['total_test_functions']})")
     print(f"  Status codes: {metrics['status_code_diversity']['diversity_count']} unique")
     print(f"  Empty tests: {et['empty_count']}")
+    print(f"  Stale tests: {st['stale_count']}")
     print(f"  Čas:        {elapsed}s | Iterací: {iteration}")
+
+    # ── FÁZE 6: Diagnostika ──────────────────────────
+    plan_json_str = json.dumps(test_plan, indent=2, ensure_ascii=False)
+    diagnostics = collect_all_diagnostics(
+        context=context,
+        test_plan=test_plan,
+        code=test_code,
+        pytest_log=output_log,
+        openapi_path=inputs["openapi"],
+        plan_json_str=plan_json_str,
+        repair_tracker=diag_repair_tracker,
+    )
 
     return {
         "timestamp": datetime.now().isoformat(),
@@ -182,6 +218,7 @@ def run_pipeline(
         "output_filename": output_filename,
         "plan_filename": plan_filename,
         "metrics": metrics,
+        "diagnostics": diagnostics,
     }
 
 
@@ -195,7 +232,6 @@ def main():
     runs = exp["runs_per_combination"]
     test_count = exp["test_count"]
 
-    # Celkový počet kombinací
     total = len(cfg["llms"]) * len(cfg["apis"]) * len(levels) * runs
     print(f"\n🔬 EXPERIMENT: {exp['name']}")
     print(f"   {len(cfg['llms'])} LLMs × {len(cfg['apis'])} APIs × {len(levels)} levels × {runs} runs = {total} běhů")
@@ -242,10 +278,8 @@ def main():
                             "error": str(e),
                         })
 
-            # Zastavit server po dokončení všech úrovní pro toto API
             stop_managed_server(api_cfg)
 
-    # Uložit výsledky
     os.makedirs(RESULTS_DIR, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     path = os.path.join(RESULTS_DIR, f"experiment_{exp['name']}_{timestamp}.json")
@@ -253,7 +287,6 @@ def main():
     with open(path, "w", encoding="utf-8") as f:
         json.dump(all_results, f, indent=2, ensure_ascii=False)
 
-    # Shrnutí
     print(f"\n\n{'=' * 65}")
     print(f"  EXPERIMENT DOKONČEN | {len(all_results)} běhů | Výsledky: {path}")
     print(f"{'=' * 65}")

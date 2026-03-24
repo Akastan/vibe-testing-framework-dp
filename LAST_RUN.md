@@ -1,320 +1,663 @@
-# Analýza běhu: diplomka_v3 — 2026-03-22
+# Analýza běhu: diplomka_v7 — 2026-03-23
 
-**Konfigurace:** gemini-3.1-flash-lite-preview | bookstore | L0–L4 | 2 runy | 5 iterací | 30 testů
+## Konfigurace experimentu
 
----
-
-## Souhrnná tabulka
-
-| Level | Run | Validity | Failed | Iterace | EP Cov | Assert | Resp Val | Empty | Status Codes | Čas |
-|-------|-----|----------|--------|---------|--------|--------|----------|-------|-------------|-----|
-| L0 | 1 | 96.55% (28/29) | 1 | 5 | 67.65% | 2.07 | 82.76% | 0 | 5 | 84s |
-| L0 | 2 | 96.67% (29/30) | 1 | 5 | 67.65% | 1.90 | 76.67% | 0 | 5 | 53s |
-| L1 | 1 | 93.33% (28/30) | 2 | 5 | 67.65% | 2.17 | 83.33% | 0 | 7 | 82s |
-| L1 | 2 | 86.67% (26/30) | 4 | 5 | 70.59% | 2.37 | 63.33% | 0 | 7 | 136s |
-| L2 | 1 | 90.00% (27/30) | 3 | 5 | 64.71% | 2.33 | 93.33% | 0 | 7 | 129s |
-| L2 | 2 | 96.67% (29/30) | 1 | 5 | 58.82% | 1.77 | 73.33% | 1 | 7 | 64s |
-| L3 | 1 | 93.33% (28/30) | 2 | 5 | 55.88% | 1.87 | 60.00% | 0 | 7 | 95s |
-| L3 | 2 | **100%** (30/30) | 0 | **2** | 61.76% | 1.93 | 83.33% | 1 | 6 | 41s |
-| L4 | 1 | 93.33% (28/30) | 2 | 5 | 58.82% | 1.50 | 53.33% | 0 | 9 | 89s |
-| L4 | 2 | 93.33% (28/30) | 2 | 5 | 55.88% | 2.30 | 96.67% | 0 | 6 | 98s |
-
-### Průměry per level
-
-| Level | Validity (avg) | EP Cov (avg) | Assert (avg) | Resp Val (avg) |
-|-------|---------------|-------------|-------------|---------------|
-| **L0** | **96.61%** | 67.65% | 1.99 | 79.72% |
-| **L1** | 90.00% | 69.12% | 2.27 | 73.33% |
-| **L2** | 93.33% | 61.77% | 2.05 | 83.33% |
-| **L3** | **96.67%** | 58.82% | 1.90 | 71.67% |
-| **L4** | 93.33% | 57.35% | 1.90 | 75.00% |
+| Parametr | Hodnota |
+|----------|---------|
+| LLM modely | gemini-3.1-flash-lite-preview |
+| Úrovně kontextu | L0, L1, L2, L3, L4 |
+| API | bookstore (FastAPI + SQLite, 34 endpointů) |
+| Iterací | 5 |
+| Runů na kombinaci | 3 |
+| Testů na run | 50 |
+| Celkem kombinací | 1 × 5 × 3 = 15 runů |
+| Fair design | framework_rules (všechny levely) + api_knowledge (jen L1+) |
+| Stale threshold | 3 |
+| MAX_INDIVIDUAL_REPAIRS | 10 |
 
 ---
 
-## Detailní rozbor selhání per level
+## 1. Souhrnná tabulka — Gemini 3.1 Flash Lite (agregace přes 3 runy)
 
-### L0 Run 1 — 28/29 passed (96.55%)
+| Level | Validity (avg ± std) | Failed (avg) | Stale (avg) | Iter (avg) | EP Cov (avg) | Assert Depth | Compliance | Čas (avg) |
+|-------|---------------------|--------------|-------------|------------|--------------|-------------|------------|-----------|
+| L0 | 82.7% ± 8.1 | 8.7 | 4.3 | 5.0 | 96.1% | 1.73 | 80 | 152s |
+| L1 | 92.7% ± 8.1 | 3.7 | 4.0 | 4.0 | 84.3% | 1.37 | 80 | 114s |
+| L2 | 99.3% ± 1.2 | 0.3 | 0.3 | 2.7 | 87.3% | 1.37 | 80 | 42s |
+| L3 | 99.3% ± 1.2 | 0.3 | 0.3 | 2.3 | 77.5% | 1.30 | 87 | 42s |
+| L4 | **100.0% ± 0.0** | 0 | 0 | **1.0** | 85.3% | 1.43 | **93** | 42s |
 
-**Poznámka:** Plán má jen 29 testů (ne 30). Reset test (`test_reset_db_success`) byl odfiltrován ale plán se nedoplnil na 30. Bug ve frameworku: `_filter_reset_tests` se volá po count validaci.
-
-**Iterace 1: 12 failing** — Klasický helper bug. `create_book` generuje ISBN přes hardcoded string, ne přes `unique()`. Druhé volání `create_book` → ISBN kolize → 409. Všech 10 testů co volají `create_book` padá na `assert 409 == 201`. Plus 2 testy se špatným status kódem (422 místo 404).
-
-**Iterace 2: 3 failing** — Helper opraven (ISBN přes unique). Zbývají:
-- `test_get_author_not_found`: očekává 422, API vrací 404. Model bez kontextu neví jaký kód API vrací pro "not found".
-- `test_create_order_valid`: `assert 400 == 201`. Kniha má stock=0 (helper nemá stock), objednávka selže na insufficient stock.
-- `test_delete_nonexistent_book`: očekává 422, API vrací 404. Stejný problém jako author.
-
-**Iterace 3: 1 failing** — Repair opravil status kódy (422→404). Zbývá jen `test_create_order_valid` — stock=0, neopravitelné bez helper opravy.
-
-**Iterace 3–5: stuck** — `test_create_order_valid` padá identicky (assert 400 in [200, 201]). Repair mění assert ale nemůže opravit chybějící stock v helperu. V iteraci 5 repair dokonce rozbil test jinak (assert 422 == 200) — model zkusil úplně jinou strategii ale stock stále chybí.
-
-**Root cause:** `create_book` helper nemá `"stock": 10`. OpenAPI spec říká `stock: default 0`, model to respektuje a vynechá.
+**Hlavní trend:** Validity monotónně roste L0→L4 (82.7→100%). L4 je jediný level s 100% ve všech třech runech a průměrnou 1 iterací. L2 a L3 jsou téměř identické (99.3%), ale L3 má nižší EP coverage kvůli Run 2 outlier (52.9%).
 
 ---
 
-### L0 Run 2 — 29/30 passed (96.67%)
+## 2. Stabilita napříč runy
 
-**Iterace 1: 15 failing** — Jiný helper bug než run 1. `create_book` volá `create_author()` a `create_category()` interně, ale nevrací book objekt správně. Response z POST /books je `{"detail": "..."}` (409 ISBN kolize) → `book["id"]` → KeyError. Kaskádový efekt: 14 testů padá na KeyError.
+### 2.1 Variance validity rate
 
-**Iterace 2: 3 failing** — Helper opraven. Zbývají:
-- `test_get_author_not_found`: 422 vs 404 (stejné jako run 1)
-- `test_delete_book_success`: po smazání kontroluje GET → očekává 422, API vrací 404
-- `test_update_stock_success`: `assert 15 == 5`. Helper vytváří knihu se stock=10, test přičte 5, očekává 5 ale dostane 15 (10+5). Model neví že helper nastavuje stock=10.
+| Level | Run 1 | Run 2 | Run 3 | Avg | Std | Interpretace |
+|-------|-------|-------|-------|-----|-----|--------------|
+| L0 | 76.0% | 94.0% | 78.0% | 82.7% | 8.1 | **Nestabilní** — Run 2 výrazně lepší |
+| L1 | 84.0% | 100.0% | 94.0% | 92.7% | 8.1 | Nestabilní — Run 1 má 8 stale testů |
+| L2 | 98.0% | 100.0% | 100.0% | 99.3% | 1.2 | **Stabilní** |
+| L3 | 100.0% | 100.0% | 98.0% | 99.3% | 1.2 | **Stabilní** |
+| L4 | 100.0% | 100.0% | 100.0% | 100.0% | 0.0 | **Perfektně stabilní** |
 
-**Iterace 3: 1 failing** — Status kódy opraveny. Zbývá `test_update_stock_success` — model opakovaně hádá špatnou výchozí hodnotu stocku. V iteraci 5 test úplně přepsal na jinou logiku ale rozbil volání (422).
+**Otázka oponenta:** "Jsou vaše výsledky reprodukovatelné?"
 
-**Root cause:** Model neví jaký stock helper nastavuje → špatný assert na výslednou hodnotu.
+**Odpověď:** L2–L4 jsou vysoce stabilní (std ≤ 1.2 p.p.). L0 a L1 vykazují vysokou varianci (std 8.1 p.p.) — to je očekávané a vysvětlitelné:
 
----
+**L0 nestabilita:** Model bez api_knowledge volí nepředvídatelně mezi třemi architekturami:
+- **Run 1:** Domain helpery (create_author, create_category, create_book s stock=10, delete_resource) — 5 helperů, ale 20 failing testů v iter 1 kvůli timeout chybám a špatným status kódům. Validity 76%.
+- **Run 2:** Pouze `unique()` helper, veškerý setup inline — 1 helper, ale paradoxně nejlepší výsledek (94%). Model bez abstrakce dělal setup korektněji přímo v testech.
+- **Run 3:** Generic HTTP wrapper helpery (post_resource, get_resource, put_resource, delete_resource) — 5 helperů, ale 23 failing v iter 1 (78.3% timeout). Generické wrappery neřeší doménovou logiku. Validity 78%.
 
-### L1 Run 1 — 28/30 passed (93.33%)
+**L1 nestabilita:** Run 1 měl 8 never-fixed testů (test_update_author_name, test_get_author_books, test_get_category_books_empty — testují endpointy s filtrováním kde model špatně chápe query parametry). Run 2 byl perfektní (100%). Run 3 měl 3 never-fixed (wrong_status_code na discount a stock update).
 
-**Iterace 1–5: stabilně 2 failing**, žádný pokrok.
+### 2.2 Konzistentní vs nestabilní kombinace
 
-**`test_apply_discount_too_new_book`**: Model vytvoří knihu s `published_year=2020` (z helperu), pak se pokusí přes PUT změnit rok. Ale PUT payload je nesprávný — posílá jen `{"published_year": 2025}` bez ostatních povinných polí. V iteraci 4-5 repair změní strategii (vytvoří novou knihu s rokem 2026), ale pak vrací 404 protože nová kniha se nepodařila vytvořit (kolize ISBN nebo jiný problém). Osciluje mezi 200 a 404.
+**Konzistentní** (std ≤ 1.2): L2, L3, L4
 
-**`test_get_reviews_with_malformed_query_params`**: Posílá `GET /books/{id}/reviews?invalid_param=abc`, očekává 400 nebo 422. API ignoruje neznámé query parametry a vrací 200. Principiálně neopravitelné — FastAPI nevaliduje extra query parametry.
-
-**Root cause:** Oba testy mají špatné předpoklady o chování API. Discount test neumí správně vytvořit "novou" knihu. Reviews test předpokládá striktní validaci query parametrů.
-
----
-
-### L1 Run 2 — 26/30 passed (86.67%)
-
-Nejhorší výsledek celého běhu.
-
-**Iterace 1: 5 failing:**
-
-1. **`test_apply_discount_recent_book`**: Stejný problém jako run 1. PATCH na `/books/{id}` pro změnu roku — API nemá PATCH endpoint na books. Rok se nezmění → sleva projde → 200 místo 400.
-
-2. **`test_invalid_status_transition`**: `KeyError: 'id'` při vytváření objednávky. Helper `create_book` nemá `"stock"` v payloadu. Kniha se vytvoří se stock=0. `POST /orders` vrátí 400 (insufficient stock). Response nemá `"id"` → KeyError.
-
-3. **`test_delete_delivered_order_forbidden`**: Stejný kaskádový efekt — objednávka se nepodaří vytvořit kvůli stock=0 → KeyError na `order["id"]`.
-
-4. **`test_remove_nonexistent_tag_from_book`**: DELETE `/books/{id}/tags` s `tag_ids: [9999]` → API vrací 404 (tag neexistuje). Model očekává 200 (idempotentní operace).
-
-5. **`test_get_order_details`**: KeyError — order se nepodařila vytvořit (stock=0).
-
-**Iterace 2: 5 failing** — Identické. Repair opravil asserty ale ne root cause (chybějící stock).
-
-**Iterace 3: 4 failing** — `test_remove_nonexistent_tag_from_book` opraven (status kód 200→404). Ostatní 4 zůstávají.
-
-**Iterace 3–5: stuck na 4 failing:**
-- `test_apply_discount_recent_book` — PATCH neexistuje, neopravitelné
-- `test_invalid_status_transition` — repair opravil assert na `status_code == 201` ale stock je stále 0 → 400
-- `test_delete_delivered_order_forbidden` — kaskáda z neúspěšné objednávky, repair mění assert ale KeyError přetrvává protože objednávka se vytváří v těle testu (ne přes helper) a nemá stock
-- `test_get_order_details` — stejné, objednávka selže na 400
-
-**Root causes:**
-- Chybějící `"stock"` v `create_book` helperu → 3 order testy padají
-- PATCH na books neexistuje → discount test padá
-- Repair nedetekuje helper root cause protože signatury chyb jsou různé (KeyError vs assert 400==201 vs assert 200==400)
+**Nestabilní** (std > 4): L0 (8.1), L1 (8.1)
 
 ---
 
-### L2 Run 1 — 27/30 passed (90.00%)
+## 3. Odpovědi na výzkumné otázky
 
-**Iterace 1–5: stabilně 2–3 failing.** Z logů bohužel nemám detail pro L2 run1, ale z JSON:
-- 3 failed, assertion depth 2.33, response validation 93.33%
-- Endpoint coverage 64.71%
-- 1 edge case test
+### RQ1: Jak úroveň kontextu ovlivňuje test validity rate?
 
-Typické L2 problémy: discount test (PATCH neexistuje), halucinované endpointy ze zdrojového kódu.
+| Level | Avg Validity | Std | Trend |
+|-------|-------------|-----|-------|
+| L0 | 82.7% | 8.1 | Baseline — bez business knowledge |
+| L1 | 92.7% | 8.1 | +10.0 p.p. — dokumentace dramaticky pomáhá |
+| L2 | 99.3% | 1.2 | +6.7 p.p. — zdrojový kód přináší velký skok |
+| L3 | 99.3% | 1.2 | +0.0 p.p. — DB schéma nepřidává validity |
+| L4 | 100.0% | 0.0 | +0.7 p.p. — referenční testy = perfektní |
 
----
+**Zjištění:**
 
-### L2 Run 2 — 29/30 passed (96.67%)
+1. **Největší skok je L0→L1 (+10.0 p.p.).** Dokumentace poskytuje kritické informace: stock default=0 → create_book helper MUSÍ nastavit stock: 10; PATCH /stock používá query parametr ne body; POST vrací 201 ne 200; DELETE tags používá request body. Bez těchto informací model hádá a často špatně.
 
-Z JSON: 1 failing, 1 empty test (`test_apply_discount_too_new_book` — 0 asercí). Model vygeneroval test bez assertů, ten vždy projde ale nic netestuje. Ironicky to pomohlo validity (test projde), ale snížilo assertion depth.
+2. **L1→L2 je druhý největší skok (+6.7 p.p.).** Zdrojový kód poskytuje přesné informace o validaci (raise HTTPException s konkrétními status kódy), business pravidlech (discount jen pro knihy starší než rok) a error handling cestách. Model vidí přesně jaký status kód API vrací v jakém případě → dramaticky redukuje wrong_status_code chyby.
 
----
+3. **L2→L3 nepřináší zlepšení validity (obě 99.3%).** DB schéma přidává jen 929 tokenů. V v6 L3 mělo 100% — v v7 Run 3 má 1 failing test (test_apply_discount_new_book_error). DB schéma pomáhá s pochopením FK constraints a datového modelu, ale informace relevantní pro validity jsou již v L2 zdrojovém kódu.
 
-### L3 Run 1 — 28/30 passed (93.33%)
+4. **L4 dosahuje 100% ve všech runech.** Referenční testy poskytují in-context learning — model kopíruje správné patterny (helper struktura, timeout, status kódy). Nulová variance = perfektní reprodukovatelnost.
 
-**Iterace 1–5: stabilně 2 failing**, identické každou iteraci.
+5. **L0 selhává primárně na dvou kategoriích:**
+   - **timeout (46.4% všech L0 chyb):** Model generuje setup který vytváří knihu inline bez stock → order selhává → DB lock → timeout na dalších callech
+   - **wrong_status_code (35.7%):** Model assertuje 422 pro not-found (z OpenAPI spec) ale API vrací 404; assertuje 400 místo 409 pro duplikáty
 
-**`test_apply_discount_too_recent_book`**: Opět pokus změnit `published_year` přes PUT. Model posílá celý book objekt (včetně `id`, `author`, `category` z GET response) jako PUT payload → některá pole nejsou v `BookUpdate` schématu → request buď projde bez změny roku, nebo selže na validaci. Výsledek: sleva se aplikuje na knihu z 2020 → 200 místo 400.
+**Proč L0 Run 2 je výrazně lepší (94% vs 76-78%):**
+Run 2 použil minimalistickou strategii — pouze `unique()` helper, veškerý setup inline. Paradoxně, bez abstrakce model dělal setup korektněji: každý test si vytvořil autora+kategorii+knihu s explicitními parametry. Runy 1 a 3 použily helpery (domain resp. generic), kde chyba v helperu kaskáduje do mnoha testů.
 
-**`test_search_query_empty_string`**: Posílá `GET /books?search=&page=-1` nebo podobný nevalidní query. V iteraci 1 očekává 404, v iteraci 2+ osciluje mezi 200 a 422. API vrací 422 kvůli `page=-1` (ne kvůli search), ale model si myslí že problém je v search parametru. Neopravitelné — model nechápe co přesně validace odmítá.
+### RQ2: Jak se liší endpoint coverage mezi úrovněmi?
 
-**Root cause:** Oba testy mají fundamentálně špatné premisy. Discount: neumí změnit rok vydání. Search: nerozumí validačním pravidlům.
+| Level | EP Cov (avg) | Std | Min run | Max run |
+|-------|-------------|-----|---------|---------|
+| L0 | **96.1%** | 1.7 | 94.1% | 97.1% |
+| L1 | 84.3% | 3.4 | 82.4% | 88.2% |
+| L2 | 87.3% | 1.7 | 85.3% | 88.2% |
+| L3 | 77.5% | 20.5 | **52.9%** | 91.2% |
+| L4 | 85.3% | 5.1 | 82.4% | 91.2% |
 
----
+**Zjištění:**
 
-### L3 Run 2 — 30/30 passed (100%) ✅
+1. **L0 má paradoxně nejvyšší EP coverage (96.1%).** Model bez kontextu distribuuje testy rovnoměrně přes všechny endpointy z OpenAPI spec — nemá důvod preferovat jedny před druhými. Ale tyto testy jsou méně kvalitní (nižší validity). Jedinou konzistentně chybějící je POST /reset (korektně odfiltrovaný).
 
-Jediný run s plnou validity. Za 2 iterace.
+2. **L1+ klesá EP coverage protože model alokuje více testů na business-critical endpointy.** S dokumentací model vidí že orders, discounts a stock management jsou složité → alokuje 3-4 testy na POST /orders místo 1 → méně místa pro GET /categories/{id}. To je správné chování — kvalita nad kvantitou.
 
-**Iterace 1: 2 failing:**
+3. **L3 má nejnižší průměrnou EP coverage (77.5%) kvůli Run 2 outlier (52.9%).** V Run 2 model soustředil 13 testů na "GET /authors/9999" pattern (not-found testy pro různé entity) a pokryl jen 18 unikátních endpointů z plánu. 16 endpointů nebylo pokryto včetně všech GET list endpointů, GET detail, PUT update a DELETE /books. Toto je artefakt specifického plánovacího rozhodnutí modelu — DB schéma ukázalo 404 pattern pro neexistující entity a model ho nadměrně testoval.
 
-1. **`test_invalid_status_transition`**: `create_book` helper má hardcoded ISBN `"1234567890"` → druhé volání v jiném testu způsobí kolizi → 409. Opraven v iteraci 2 (ISBN přes unique).
+4. **L4 má konzistentní EP coverage (82.4-91.2%).** Referenční testy ukazují balanced přístup — model kopíruje distribuci z existujících testů.
 
-2. **`test_update_book_stock_invalid_quantity`**: `assert 400 == 422`. Model očekává 422 (Pydantic validace), API vrací 400 (business rule — insufficient stock). Opraven v iteraci 2 (změní assert na 400).
+**Konzistentně nepokryté endpointy (2+ levely):**
+- `POST /reset` — korektně odfiltrovaný ve všech levelech
+- `GET /categories/{category_id}` — chybí v L0 Run 1, L2 Run 1+2, L3 Run 3, L4 Run 1+3
+- `GET /tags/{tag_id}` — chybí v L1 Run 1+3, L2 Run 1+3, L4 Run 2+3
+- `GET /categories` — chybí v L2 Run 1, L3 Run 2, L4 Run 2+3
 
-**Iterace 2: 30/30 passed.** Oba problémy byly opravitelné jednoduchou změnou assertu/helperu.
+### RQ3: Mutation score
 
-**Proč 100%?** Šťastná kombinace: helper měl stock=10, discount test vytvořil knihu s `published_year=2026` rovnou přes POST (ne přes PUT), žádné halucinované endpointy. Model zůstal konzervativní.
+_(Bude doplněno po mutmut měření.)_
 
-**Poznámka:** 1 empty test (`test_invalid_auth_token_access` — 0 asercí). Validity 100% ale tento test nic netestuje.
+### RQ4: Jaké typy selhání vznikají?
 
----
+**Failure taxonomy z první iterace (čerstvé tracebacky):**
 
-### L4 Run 1 — 28/30 passed (93.33%)
+| Level | Celkem failures (iter 1) | wrong_status_code | timeout | assertion_mismatch | other |
+|-------|-------------------------|-------------------|---------|-------------------|-------|
+| L0 | 53 (3 runy) | 17 (32.1%) | 31 (58.5%) | 1 (1.9%) | 4 (7.5%) |
+| L1 | 14 (3 runy) | 13 (92.9%) | 0 (0%) | 1 (7.1%) | 0 (0%) |
+| L2 | 2 (3 runy) | 2 (100%) | 0 (0%) | 0 (0%) | 0 (0%) |
+| L3 | 1 (3 runy) | 1 (100%) | 0 (0%) | 0 (0%) | 0 (0%) |
+| L4 | 0 (3 runy) | — | — | — | — |
 
-**Iterace 1: 3 failing:**
+**Klíčová zjištění:**
 
-1. **`test_remove_nonexistent_tag_from_book`**: DELETE s neexistujícím tag_id → 404. Model očekává 200 (idempotentní). Opraven v iteraci 3 (změna assertu).
+1. **Timeout je dominantní problém L0 (58.5%).** Příčina: model bez api_knowledge generuje setup kde kniha nemá dostatečný stock → create_order selhává → DB se zamkne → následné HTTP cally timeout. Toto se neobjevuje na L1+ protože api_knowledge říká "stock: 10".
 
-2. **`test_post_author_invalid_content_type`**: Posílá `Content-Type: text/plain`, očekává 415 (Unsupported Media Type). FastAPI vrací 422 (parsuje request, validace selže). Principiálně neopravitelné — model hádat nemůže jaký kód FastAPI vrátí pro špatný content-type.
+2. **wrong_status_code je hlavní problém L1 (92.9%).** Model s dokumentací ví jaké chyby testovat, ale ne vždy správně odhadne konkrétní HTTP status kód. Typické záměny: 400↔409 (business error vs conflict), 404↔422 (not found vs validation), 200↔201 (success vs created).
 
-3. **`test_delete_category_fails_when_associated_with_book`**: Očekává 400, API vrací 409 (conflict). Repair mění 400→409 ale v další iteraci zpátky na 400. Model osciluje — v kontextu (L4) vidí oba kódy pro různé situace.
+3. **L2+ má minimální selhání.** Zdrojový kód obsahuje explicitní `raise HTTPException(status_code=...)` → model vidí přesný kód.
 
-**Iterace 3–5: stuck na 2 failing** (content-type + delete category). Oba principiálně neopravitelné — model osciluje mezi status kódy.
-
-**Root cause:** Model s plným kontextem (L4) generuje ambicióznější testy (content-type validace, přesné status kódy) ale hádá špatně. Paradox: existující testy (L4 input) nemají tyto edge cases, takže model nemá vzor a improvizuje.
-
----
-
-### L4 Run 2 — 28/30 passed (93.33%)
-
-**Iterace 1: 3 failing:**
-
-1. **`test_apply_discount_new_book`**: `TypeError: create_book() got an unexpected keyword argument 'published_year'`. Model zavolal helper s parametrem který helper nepřijímá. Opraven v iteraci 2 (model přepíše test aby vytvořil knihu jinak).
-
-2. **`test_malformed_json_payload`**: Posílá `{"invalid": "data"}` na POST /authors, očekává 400. API vrací 200 (FastAPI ignoruje extra pole). V iteraci 2 opraveno na 422 ale pak vrací 200. V iteraci 3 opraven (projde).
-
-3. **`test_update_book_stock_zero_value`**: `assert updated_book["stock"] == 0` ale stock je 5. Test posílá `quantity=-5` při stock=10 (z helperu) → 10-5=5, ne 0. Model špatně počítá aritmetiku / neví jaký stock helper nastavuje.
-
-**Iterace 2: 3 failing** — discount opraveno na jinou strategii ale vrací 200 místo 400 (rok se nezmění). Malformed stále 422 vs 400. Stock stále 5 vs 0.
-
-**Iterace 3–5: stuck na 2 failing:**
-- `test_apply_discount_new_book`: vrací 404 (book not found — nová kniha se nepodařila vytvořit). Model v repair přepsal test ale stále selhává.
-- `test_update_book_stock_zero_value`: `assert 5 == 0`. Model nechápe stock aritmetiku.
-
-**Root cause:** Sémantické nepochopení — model neví kolik stock helper nastavuje (10), takže nemůže správně assertovat výsledek po odečtení.
-
----
-
-## Klasifikace typů selhání
-
-Napříč všemi 10 runy jsem identifikoval 5 kategorií selhání:
-
-### 1. Chybějící stock v helper funkci
-**Výskyt:** L0r1, L0r2, L1r2, L3r2(iter1)
-**Mechanismus:** `create_book` helper nemá `"stock": 10`. OpenAPI spec říká `stock: default 0`. Kniha se vytvoří se stock=0. Testy na objednávky padají (insufficient stock → 400) a kaskádově způsobí KeyError na `order["id"]`.
-**Opravitelné repair loopem?** NE — repair vidí jen test, ne helper. A signatury chyb jsou různé (KeyError vs assert) takže helper root cause detekce selže.
-
-### 2. Discount "too new book" — špatná HTTP metoda
-**Výskyt:** L1r1, L1r2, L2r1, L3r1, L4r2
-**Mechanismus:** Model chce otestovat pravidlo "sleva jen pro knihy starší 1 roku". Vytvoří knihu s rokem 2020, pak se pokusí změnit rok na 2025/2026. Ale používá PATCH (neexistuje) nebo PUT se špatným payloadem. Rok se nezmění → sleva projde → 200 místo 400.
-**Opravitelné?** NE — principiálně chybný přístup. Správné řešení: vytvořit novou knihu rovnou s `published_year=2026`.
-
-### 3. Špatný očekávaný status kód
-**Výskyt:** L0r1(422 vs 404), L0r2(422 vs 404), L1r2(200 vs 404 na remove_tags), L3r2(422 vs 400), L4r1(415 vs 422, 400 vs 409), L4r2(400 vs 422)
-**Mechanismus:** Model hádá HTTP status kód bez dostatečné informace. Časté záměny: 422↔404 (validace vs not found), 400↔409 (business rule vs conflict), 415↔422 (content-type vs validace).
-**Opravitelné?** ČÁSTEČNĚ — jednoduché záměny (422→404) repair opraví. Oscilace (400↔409) ne.
-
-### 4. Sémantické nepochopení API logiky
-**Výskyt:** L0r2(stock aritmetika), L1r1(query param validace), L3r1(search validace), L4r2(stock aritmetika)
-**Mechanismus:** Model nerozumí jak API interně zpracovává data. Příklady: neví jaký stock helper nastaví, předpokládá že API validuje extra query parametry, nerozumí že quantity je delta (ne absolutní hodnota).
-**Opravitelné?** NE — repair nemůže naučit model sémantiku API.
-
-### 5. Halucinace / neexistující funkce
-**Výskyt:** L4r1(Content-Type 415 test), L1r1(malformed query params)
-**Mechanismus:** Model vygeneruje test pro chování které API nemá. Např. striktní Content-Type validace, validace extra query parametrů.
-**Opravitelné?** NE — API toto chování nemá, žádný status kód nebude správný.
-
-### Distribuce typů selhání
-
-| Typ | Počet výskytů | % z celku |
-|-----|--------------|-----------|
-| Chybějící stock | 4 runy | 33% |
-| Discount PATCH/PUT | 5 runů | 42% |
-| Špatný status kód | 6 runů | 50% |
-| Sémantické nepochopení | 4 runy | 33% |
-| Halucinace | 2 runy | 17% |
-
-(Jeden run může mít více typů selhání)
+4. **L4 má nulové selhání.** Referenční testy poskytují přesné příklady správných assertů.
 
 ---
 
-## Metriky — detailní rozbor
+## 4. Detailní rozbor selhání — per Level
 
-### Test Validity Rate
+### 4.1 L0 — Black-box (pouze OpenAPI spec)
 
-**Rozptyl je vysoký.** L1 má 93.33% a 86.67% (rozdíl 6.67 p.p.). L3 má 93.33% a 100% (rozdíl 6.67 p.p.). Se 2 runy nelze spolehlivě určit průměr — potřeba minimálně 3, ideálně 5 runů.
+**Pattern across 3 runů:**
+- Run 1: 38/50 (76.0%) — 20F v iter 1, helper_fallback+isolated, 12 never-fixed
+- Run 2: 47/50 (94.0%) — 10F v iter 1, isolated, 3 never-fixed
+- Run 3: 39/50 (78.0%) — 23F v iter 1, helper_fallback+isolated, 11 never-fixed
 
-**L0 je paradoxně nejstabilnější** (96.55%, 96.67%). Bez kontextu model generuje konzervativní testy — méně ambiciózní ale méně chybové.
+**Proč Run 2 je výrazně lepší:**
+Run 2 má pouze 1 helper (`unique()`). Veškerý setup je inline — každý test vytváří POST /authors, POST /categories, POST /books s explicitními parametry. Model bez helperů nedělá chybu v centralizovaném setupu → méně kaskádových selhání. Runy 1 a 3 mají helpery kde chyba v helperu (timeout kvůli chybějícímu stock) propaguje do 10+ testů.
 
-**L3 run 2 (100%)** je outlier — šťastná kombinace kde oba problémy z iterace 1 byly triviálně opravitelné (ISBN kolize + status kód 422→400).
+**Kategorie never-fixed testů (across runů):**
 
-### Endpoint Coverage
+| Kategorie | Příklady | Počet (celkem) | Root cause |
+|-----------|---------|----------------|------------|
+| Timeout z inline setupu | test_book_price_update, test_list_book_reviews, test_patch_book_partial_update | 8 | Setup vytváří knihu přes inline POST který timeoutuje kvůli DB lock z předchozích testů |
+| Wrong status code | test_create_category_duplicate_name (400→409), test_create_author_missing_required_fields (422→200), test_update_category_description (200→422) | 7 | Model assertuje špatný HTTP kód bez znalosti API chování |
+| Assertion mismatch | test_list_books_filter_by_author, test_get_books_pagination_limit | 3 | Model špatně chápe query parametry (filter vs pagination) |
+| Stock/order kaskáda | test_create_order_success, test_get_order_detail, test_delete_pending_order | 5 | Chybí stock → order se nevytvoří → navazující testy selhávají |
+| Neexistující endpoint | test_delete_invalid_order_status (PATCH ne DELETE pro status) | 3 | Model hádá endpoint URL bez kontextu |
 
-**Klesá s kontextem:** L0 67.65% → L4 57.35%. Konzistentní trend. Více kontextu = model generuje specifičtější testy na méně endpointů. Typicky nepokryté: GET single entity, PUT update, DELETE cascade endpointy.
+**Timeout pattern detail:**
+Run 3 má 78.3% timeoutů (18/23). Model použil generic helpery (post_resource, get_resource) které interně volají requests bez specifického error handlingu. Když první book creation selhá (chybí povinné pole nebo FK constraint), helper vrátí error response místo JSON → další kód spadne → DB connection zůstane otevřená → timeout chain.
 
-**Stabilní mezi runy** — L0 run1 i run2 mají shodně 67.65%. Plán (a tím endpoint coverage) je deterministický daný kontextem, ne náhodou.
+### 4.2 L1 — OpenAPI + dokumentace
 
-### Assertion Depth
+**Pattern across 3 runů:**
+- Run 1: 42/50 (84.0%) — 8F v iter 1, isolated, 0 fixed, 8 never-fixed
+- Run 2: 50/50 (100.0%) — 2F v iter 1, isolated, 2 fixed v iter 2
+- Run 3: 47/50 (94.0%) — 4F v iter 1, isolated, 1 fixed, 3 never-fixed
 
-**Průměr 1.5–2.37.** L1r2 má nejvyšší (2.37) — model s byznys dokumentací generuje bohatší asserty. L4r1 má nejnižší (1.50) — paradoxně, model s existujícími testy jako vzorem generuje jednoduché asserty (kopíruje minimalistický styl z referenčních testů).
+**Run 2 je perfektní** protože model s dokumentací vygeneroval přesně správné helpery a testoval endpointy které existují. Jen 2 testy selhaly v iter 1 (wrong_status_code na test_create_book_no_author a test_apply_discount_new_book_error) — oba opraveny repair loopem.
 
-### Response Validation
+**Run 1 selhává nejvíce (84.0%):** 8 never-fixed testů, všechny wrong_status_code:
+- test_update_author_name: assertuje 200 ale PUT /authors vrací jiný kód
+- test_apply_discount_valid: assertuje 200 ale POST /discount vrací jiný formát
+- test_get_author_books: assertuje 200 na GET /books?author_id=X — endpoint existuje ale vrací jiný formát
+- test_get_category_books_empty: assertuje 200 na GET /books?category_id=X s prázdným výsledkem
+- test_list_books_filtering_by_category: assertion_value_mismatch — filtrování vrací víc knih než očekáváno
+- test_list_books_invalid_pagination: assertuje 422 pro špatný page param ale API vrací 200 s prázdným listem
+- test_create_review_nonexistent_book: assertuje 404 ale API vrací 422
+- test_create_order_insufficient_stock: assertuje 400 ale API vrací jiný kód
 
-**Nejvíce variabilní metrika.** L2r1 má 93.33%, L4r1 jen 53.33%. Response validation závisí na tom jestli model přidá `assert "detail" in r.json()` nebo `assert data["name"] == name` — to je hodně závislé na promptu a náhodě.
+**Klíčový finding:** L1 selhání jsou sémantická — model chápe co testovat (business pravidla z dokumentace) ale ne vždy správně odhadne přesný status kód nebo response formát. Dokumentace popisuje chování slovně ("vrací chybu při nedostatečném skladu") ale nespecifikuje přesný HTTP kód.
 
-**L4r2 (96.67%)** je nejlepší — existující testy jako vzor motivují model kontrolovat response body.
+### 4.3 L2 — OpenAPI + dokumentace + zdrojový kód
 
-### Status Code Diversity
+**Pattern across 3 runů:**
+- Run 1: 49/50 (98.0%) — 1 stale (test_login_with_malformed_json — POST /auth/login neexistuje)
+- Run 2: 50/50 (100.0%) — 1F v iter 1 (test_create_book_nonexistent_author 422→404), opraveno
+- Run 3: 50/50 (100.0%) — perfektní na první pokus
 
-**L4r1 má 9 unikátních kódů** (200, 201, 204, 400, 404, 405, 409, 415, 422) — nejbohatší. Model s plným kontextem testuje více edge cases. L0 má jen 5 kódů (200, 201, 204, 404, 422) — bez kontextu model nezná 409 (conflict) ani 400 (business rule).
+**L2 je dramaticky stabilnější než L1.** Zdrojový kód eliminuje ambiguitu status kódů — model vidí `raise HTTPException(status_code=409, detail="...")` a assertuje přesně 409.
 
-### Empty Tests
+**Jediný stale test (Run 1):** test_login_with_malformed_json — model viděl ve zdrojovém kódu validační logiku a vytvořil test pro POST /auth/login, endpoint který neexistuje. Model "halucinoval" autentizační endpoint ze zdrojového kódu kde viděl JSON parsing.
 
-- L2r2: 1 (`test_apply_discount_too_new_book` — 0 asercí, repair vymazal asserty aby test prošel)
-- L3r2: 1 (`test_invalid_auth_token_access` — model vygeneroval prázdný test pro auth endpoint který neexistuje)
+### 4.4 L3 — OpenAPI + dokumentace + zdrojový kód + DB schéma
 
-### Plan Adherence
+**Pattern across 3 runů:**
+- Run 1: 50/50 (100.0%) — perfektní na první pokus
+- Run 2: 50/50 (100.0%) — perfektní na první pokus, ale EP coverage jen 52.9%
+- Run 3: 49/50 (98.0%) — 1 stale (test_apply_discount_new_book_error)
 
-**Stabilně 93–97%.** Vždy chybí `test_reset_*` (odfiltrovaný). Občas chybí ještě 1 test (model vygeneruje jiný název než plán).
+**Run 2 EP coverage anomálie:** Model soustředil 13/50 testů na "not found" pattern (GET /authors/9999, GET /categories/9999 atd.) — 62% error testů. EP coverage klesla na 52.9% protože model nepokryl GET list, PUT update a většinu DELETE endpointů. DB schéma ukázalo FK constraints a NOT NULL → model se soustředil na testování integrity constraints místo CRUD operací.
+
+**Run 3 stale test:** test_apply_discount_new_book_error — model testuje discount pro knihu s published_year aktuálního roku. Assertuje status 400 ale API vrací jiný kód. Tento test selhává opakovaně protože model nechápe přesnou sémantiku "nová kniha" (published_year ≥ aktuální rok - 1 vs = aktuální rok).
+
+### 4.5 L4 — Kompletní kontext + referenční testy
+
+**Všechny 3 runy: 50/50 (100.0%) na první iteraci.**
+
+L4 je jediný level kde všechny 3 runy dosáhly perfektního výsledku bez jakékoliv opravy. Referenční testy poskytují:
+- Přesné helper signatury s timeout=30 a assert status_code v těle
+- Správné status kódy pro každý typ operace
+- Korektní setup pattern (create_test_author → create_test_category → create_test_book)
+- Pattern pro order testy (create_test_order helper)
 
 ---
 
-## Pozorování o repair loop
+## 5. Diagnostiky — cross-cutting analýzy
 
-### Konvergence
+### 5.1 Context size a prompt budget
 
-| Iterace | Průměrný počet failing testů |
-|---------|------------------------------|
-| 1 | 5.4 |
-| 2 | 3.0 |
-| 3 | 2.1 |
-| 4 | 2.0 |
-| 5 | 1.9 |
+| Level | Tokeny (est) | Sekce | Budget (% okna 128k) |
+|-------|-------------|-------|----------------------|
+| L0 | 20,737 | 1 (OpenAPI) | 20.1% |
+| L1 | 22,538 | 2 (+docs: +1,788) | 21.5% |
+| L2 | 34,023 | 3 (+source: +11,474) | 30.5% |
+| L3 | 34,961 | 4 (+schema: +929) | 31.1% |
+| L4 | 40,734 | 5 (+tests: +5,759) | 35.8% |
 
-**Největší skok je mezi iterací 1→2** (helper opravy, jednoduché status kódy). Po iteraci 3 se výsledky stabilizují — zbývající failing testy jsou principiálně neopravitelné.
+**Otázka oponenta:** "Nepřetížili jste model kontextem?"
 
-### Efektivita oprav
+**Odpověď:** Maximální prompt budget je 35.8% (L4). Model má vždy >82k tokenů volných pro generování. L4 s největším kontextem dosahuje nejlepších výsledků (100% validity, 0 stale) — kontext nepřetěžuje model. L2→L3 přidává jen 929 tokenů ale udržuje stejnou validity (99.3%) — důkaz že kvalita kontextu je důležitější než kvantita.
 
-- **Helper opravy (iterace 1→2):** velmi efektivní, opraví 10+ testů najednou
-- **Izolovaná oprava status kódů (iterace 2→3):** efektivní pro jednoduché záměny (422→404)
-- **Iterace 4–5:** téměř nulový přínos. Testy které zůstávají jsou stuck.
+### 5.2 Helper snapshot — strukturální rozdíly
 
-### Stale detection by ušetřil
+| Level | Helperů (avg) | create_book stock | Asserty v helperu | Strategie |
+|-------|--------------|-------------------|-------------------|-----------|
+| L0 | 3.7 | Variabilní | Ne | Run 1: domain, Run 2: žádné, Run 3: generic wrappers |
+| L1 | 4.0 | ✅ stock=10 | Ne | Konzistentní domain helpers |
+| L2 | 4.0 | ✅ stock=10 | Run 3 ano | Stejné jako L1, Run 1 create_test_* naming |
+| L3 | 4.3 | ✅ stock=10 | Run 2 ano | Lépe parametrizované (name=None), Run 2 +create_tag |
+| L4 | **5.3** | ✅ stock=10 | **Ano (všechny)** | +create_test_tag, Run 2 +create_test_order |
 
-Bez stale detection: iterace 3–5 plýtvají 2–4 LLM cally per iteraci na testy co se neopraví. U 10 runů = ~60 zbytečných LLM callů.
+**Klíčový finding:** L4 helpery mají `assert r.status_code == 201` v těle — selhání v setupu je viditelné okamžitě. L0-L1 helpery nemají asserty → setup tiše selhává a kaskáduje.
+
+### 5.3 Instruction compliance
+
+| Level | Missing timeout (avg %) | Compliance score (avg) |
+|-------|------------------------|------------------------|
+| L0 | 100% | 80 |
+| L1 | 85% | 80 |
+| L2 | 100% | 80 |
+| L3 | 64% | **87** |
+| L4 | 34% | **93** |
+
+**Finding — in-context learning efekt na compliance:**
+
+L0-L2 ignorují framework_rule "Timeout=30 na každém HTTP volání" na 85-100% callů. Model čte pravidlo ale neimplementuje ho.
+
+L3 Run 3 má compliance=100 (timeout na všech 75 callech), Run 1+2 mají 80 — nedeterministické.
+
+L4 Run 2+3 mají compliance=100 — model kopíruje `timeout=30` z referenčních testů. Run 1 nemá timeout přesto že referenční testy ho obsahují.
+
+**Implikace:** Referenční testy (L4) jsou výrazně efektivnější nástroj pro vynucení coding standards než textové instrukce (framework_rules). Toto je měřitelný in-context learning efekt.
+
+### 5.4 Status code halucinace
+
+| Level | Kódy v OpenAPI spec | Halucinované v kódu | Korektní? |
+|-------|-------------------|--------------------|-----------| 
+| L0 | 200, 201, 204, 422 | **404**, 400 | 404 ✅ (HTTP konvence), 400 ✅ (generic error) |
+| L1 | +400, 404, 409 | žádné | — |
+| L2 | +400, 404, 409 | žádné | — |
+| L3 | +400, 404, 409 | žádné | — |
+| L4 | +400, 404, 409 | žádné | — |
+
+**L0 halucinuje 404** — ale je to **korektní halucinace**. OpenAPI spec definuje jen 422 pro chyby, ale API skutečně vrací 404 pro not-found. Model odvodil správné HTTP konvence z obecných znalostí. L1+ dostávají 404 v dokumentaci → nehalucinují.
+
+### 5.5 Test type distribution
+
+| Level | Happy % | Error % | Edge % | Error-focused EP (avg) |
+|-------|---------|---------|--------|------------------------|
+| L0 | **69.3%** | 28.7% | 2.0% | 13.7 |
+| L1 | 55.3% | **44.7%** | 0% | 17.3 |
+| L2 | 56.0% | **44.0%** | 0% | 16.3 |
+| L3 | 53.3% | **46.7%** | 0% | 14.7 |
+| L4 | 60.7% | 36.0% | **3.3%** | 15.0 |
+
+**Trend:** L0 generuje 69% happy path — bez kontextu model neví jaké error scénáře testovat. L1+ dramaticky zvyšuje error testy (44-47%) protože dokumentace popisuje business rules. L4 má nejvíce edge case testů (3.3%) — referenční testy inspirují k boundary testing.
+
+### 5.6 Plan-code drift
+
+| Level | Drift count (avg) | Plan adherence (avg) |
+|-------|-------------------|---------------------|
+| L0 | 4.7 | 81.3% |
+| L1 | 1.7 | 82.7% |
+| L2 | 2.3 | 100% |
+| L3 | 1.0 | 100% |
+| L4 | 2.7 | 99.3% |
+
+**L0 má nejvyšší drift (4.7)** a nejnižší plan adherence (81.3%). Model při generování kódu přejmenuje a předělá testy oproti plánu — bez kontextu je plán vágní a kód se odchyluje.
+
+**L2-L4 mají 99-100% plan adherence** — model se zdrojovým kódem generuje přesně to co naplánoval.
+
+### 5.7 Code patterns — komplexita testů
+
+| Level | Avg HTTP calls | Avg helper calls | Side-effect % | Chaining % |
+|-------|---------------|-----------------|---------------|------------|
+| L0 | 1.35 | 0.72 | 9.3% | 24.0% |
+| L1 | 1.37 | 2.07 | 6.0% | 12.7% |
+| L2 | 1.33 | 2.05 | 5.3% | 24.0% |
+| L3 | 1.34 | 2.07 | 4.7% | 18.0% |
+| L4 | 1.16 | **2.25** | 3.3% | **33.3%** |
+
+**L0 má nejméně helper callů (0.72)** — Run 2 nemá žádné domain helpery → průměr klesá. Model bez kontextu méně často používá helpery a dělá víc setup inline.
+
+**L4 má nejvíce helper callů (2.25) a chaining (33.3%)** — referenční testy ukazují pattern `data = r.json()["field"]` → model to kopíruje. Více chaining = testy ověřují response body, ne jen status kódy.
+
+### 5.8 Repair trajectory
+
+| Level | Avg 1st iter fails | Avg final fails | Avg fixed | Avg never-fixed | Repair úspěšnost |
+|-------|--------------------|-----------------|-----------|-----------------|-----------------| 
+| L0 | 17.7 | 8.7 | 9.0 | 8.7 | 50.8% |
+| L1 | 4.7 | 3.7 | 1.0 | 3.7 | 21.3% |
+| L2 | 0.7 | 0.3 | 0.3 | 0.3 | 50.0% |
+| L3 | 0.3 | 0.3 | 0 | 0.3 | 0% |
+| L4 | 0 | 0 | 0 | 0 | — |
+
+**Otázka oponenta:** "Funguje váš repair loop?"
+
+**Odpověď:** Repair loop je nejefektivnější pro L0 kde opravuje ~51% failing testů (17.7→8.7 průměrně). Typický pattern: iter 1 = helper_fallback (opraví helper funkce), iter 2 = isolated (opraví prvních 10 jednotlivých testů), iter 3+ = stale detection (zbývající testy jsou neopravitelné).
+
+Pro L1 repair loop opraví jen ~21% — selhání jsou sémantická (wrong_status_code) a model nemá informaci k opravě.
+
+L4 repair loop nepotřebuje — 0 selhání ve všech runech.
+
+**Konvergence:** L0 konverguje průměrně ve 2.7 iteraci (failing count se stabilizuje). L1 konverguje ve 2.0. L2-L4 konvergují v 1-2 iteracích.
+
+### 5.9 Response validation
+
+| Level | Avg response validation % |
+|-------|--------------------------|
+| L0 | 52.0% |
+| L1 | 30.7% |
+| L2 | 36.7% |
+| L3 | 29.3% |
+| L4 | **46.7%** |
+
+**Paradox:** L0 má nejvyšší response validation (52%) protože model bez kontextu kontroluje response body aby ověřil správnost — "nedůvěřuje" API. L1 má nejnižší (30.7%) protože model s dokumentací věří že API dělá co dokumentace říká → kontroluje jen status kódy. L4 opět zvyšuje (46.7%) protože referenční testy obsahují body checks.
 
 ---
 
-## Klíčové závěry
+## 6. Bugy a limitace
 
-1. **Více kontextu nekoreluje s vyšší validity.** L0 (96.6%) > L1 (90.0%). L3 run2 dosáhl 100% ale run1 jen 93.3%.
+### 6.1 L3 Run 2 EP coverage outlier (52.9%)
 
-2. **Hlavní bottleneck je create_book helper bez stocku.** Způsobuje kaskádová selhání order testů. Opravitelné v promptu.
+Model soustředil 13 testů na GET /authors/9999 pattern (not-found pro různé entity) → pokryl jen 18 unikátních endpointů. Toto je artefakt modelu, ne bugu ve frameworku — plan_analysis ukazuje `"GET /authors/9999": 13` testů.
 
-3. **Discount "new book" test je nejčastější stuck failure** — objevuje se v 5/10 runech. Model neumí správně vytvořit knihu s aktuálním rokem vydání (používá PATCH/PUT místo POST s parametrem).
+**Dopad:** Zkresluje L3 EP coverage průměr. Medián (88.24%) by byl reprezentativnější.
 
-4. **Repair loop je efektivní jen 2–3 iterace.** Po iteraci 3 se výsledky stabilizují. 5 iterací je zbytečných pro většinu runů.
+### 6.2 L1 Run 1 — 8 never-fixed testů
 
-5. **Endpoint coverage klesá s kontextem** (67.65% → 57.35%) — více kontextu vede k užšímu ale hlubšímu testování.
+Run 1 měl 8 testů které selhaly od první iterace a nikdy nebyly opraveny. Repair loop je zkusil 2× (isolated), pak je označil jako stale. Příčina: testují endpointy s filtrováním/paginací kde model špatně chápe API chování (GET /books?author_id= vrací jiný formát než očekáváno).
 
-6. **Variance je příliš vysoká pro 2 runy.** L1 má rozptyl 6.67 p.p. — potřeba minimálně 3 runy pro spolehlivé závěry.
+### 6.3 Timeout chain v L0
+
+Run 3 měl 78.3% timeout chyb (18/23 failing testů). Generic HTTP wrapper helpery (post_resource, get_resource) nemají specifický error handling → první selhání zablokuje DB → chain timeoutů. Framework detekuje infra chyby a restartuje, ale s generickými helpery se chyba opakuje.
+
+---
+
+## 7. Srovnání v6 vs v7
+
+| Metrika | v6 (stale_threshold=3) | v7 (stale_threshold=3) | Změna |
+|---------|----------------------|----------------------|-------|
+| L0 validity | 85.3% ± 7.7 | 82.7% ± 8.1 | ↓ -2.6 p.p. (v rámci variance) |
+| L1 validity | 95.3% ± 4.1 | 92.7% ± 8.1 | ↓ -2.6 p.p. (vyšší variance) |
+| L2 validity | 96.0% ± 3.3 | **99.3% ± 1.2** | ↑ +3.3 p.p. |
+| L3 validity | 100.0% ± 0.0 | 99.3% ± 1.2 | ↓ -0.7 p.p. (1 stale v Run 3) |
+| L4 validity | 98.7% ± 1.9 | **100.0% ± 0.0** | ↑ +1.3 p.p. (perfektní) |
+
+**Hlavní změny v7:**
+- L2 zlepšení: 2 ze 3 runů perfektní (vs 1 v v6)
+- L4 perfektní: všechny 3 runy 100% (vs 2 v v6)
+- L0/L1 mírně horší ale v rámci variance
+- failure_taxonomy nyní funguje (v6 mělo 100% unknown_no_error_captured bug)
+
+---
+
+## 8. Code coverage (manuální měření — coverage.py)
+
+### 8.1 Celkové code coverage per level (app/ celkem, 635 statements)
+
+| Level | Code Cov (avg) | Std | crud.py (avg) | main.py (avg) |
+|-------|---------------|-----|---------------|---------------|
+| L0 | 86.3%          | 6.2 | 71.0%       | 93.3%       |
+| L1 | 91.0%          | 1.7 | 81.3%       | 95.3%       |
+| L2 | 93.9%          | 1.0 | 87.1%       | 96.7%       |
+| L3 | 92.7%          | 3.5 | 84.8%       | 95.6%       |
+| L4 | 95.0%          | 1.1 | 89.7%       | 96.7%       |
+
+### 8.2 Analýza code coverage
+
+**L0 (86.3%):** Nejnižší code coverage a nejvyšší variance (std 6.2). Hlavní příčina: failing testy nedostanou kód přes happy path — timeout chain způsobí že celé domény (tags, orders, stock update) zůstanou nepokryté. crud.py avg 71% je výrazně nižší než main.py 93% protože crud.py obsahuje business logiku (discount pravidla, stock aritmetika, order validace) kterou failing testy neproexecuují. Nejhůře pokryté CRUD funkce: update_order_status (avg 21%), get_book_average_rating (avg 22%), remove_tags_from_book (avg 29%), delete_order (avg 33%). To přesně odpovídá doménám kde L0 selhává — order management a tag operace.
+
+**L1 (91.0%):** Vyšší coverage (+4.7 p.p.) a výrazně stabilnější (std 1.7). Dokumentace poskytuje korektní stock setup → order testy procházejí → CRUD logika pro orders pokrytá (create_order 96%, delete_order 97% vs L0 72% a 33%). Nepokryté zůstávají některé update/delete funkce pro category a author — model soustředí testy na business-critical endpointy (books, orders, discounts) a jednoduché CRUD update operace přeskakuje. update_category avg 18% a update_tag avg 30% — model s dokumentací testuje create/delete ale ne update pro tyto entity.
+
+**Paradox EP coverage vs code coverage:** L0 má EP coverage 96.1% ale code coverage jen 86.3%. L1 má EP coverage 84.3% ale code coverage 91.0%. Vysvětlení: L0 "zavolá" endpoint ale test failne (špatný status kód, timeout) → endpoint je pokrytý v EP coverage ale kód za error handling path není executed. L1 pokrývá méně endpointů ale testy procházejí → kód je proexecutovaný hlouběji. Code coverage lépe odráží skutečnou kvalitu testů než EP coverage.
+
+---
+
+## 9. Appendix — surová data per run
+
+### L0
+
+<details>
+<summary>L0 — Run 1 (76.0%)</summary>
+
+```
+Validity: 76.0% (38/50)
+EP Coverage: 97.06% (33/34)
+Assert Depth: 1.94
+Stale: 8
+Iterations: 5
+Helpers: 5 (unique, create_author, create_category, create_book stock=10 year=2020, delete_resource)
+Plan adherence: 46% (27 testů jen v kódu, 27 jen v plánu)
+Failure taxonomy (iter 1): wrong_status_code 8 (40%), timeout 8 (40%), other 3 (15%), assertion_mismatch 1 (5%)
+Repair: iter1=20F→helper_fallback, iter2=14F→isolated(10), iter3=12F→helper_fallback, iter4=12F→isolated(10), iter5=12F
+Never-fixed (12): test_update_stock_success, test_update_author_name_only, test_list_book_reviews,
+  test_book_price_update, test_create_category_duplicate_name, test_list_books_filter_by_author,
+  test_update_order_status_invalid, test_get_books_pagination_limit, test_create_author_missing_required_fields,
+  test_update_category_description, test_create_review_for_nonexistent_book, test_patch_book_partial_update
+Fixed (8): test_apply_discount_success, test_create_order_success, test_create_review_invalid_rating,
+  test_delete_author_success, test_delete_book, test_get_author_invalid_id, test_get_book_details,
+  test_update_order_status_success
+```
+</details>
+
+<details>
+<summary>L0 — Run 2 (94.0%)</summary>
+
+```
+Validity: 94.0% (47/50)
+EP Coverage: 94.12% (32/34) — chybí PATCH /orders/{order_id}/status
+Assert Depth: 1.56
+Stale: 4
+Iterations: 5
+Helpers: 1 (unique only — veškerý setup inline!)
+Plan adherence: 98% (49/50)
+Failure taxonomy (iter 1): wrong_status_code 4 (40%), timeout 5 (50%), other 1 (10%)
+Repair: iter1=10F→isolated(10), iter2=4F→isolated(4), iter3=3F→stale_skip, iter4=3F→stale_skip, iter5=3F
+Never-fixed (3): test_delete_author_success, test_update_stock_negative, test_get_missing_order
+Fixed (7): test_apply_discount_success, test_create_review_success, test_delete_book_item,
+  test_delete_shipped_order_fail, test_get_book_detail, test_get_nonexistent_author, test_update_book_stock_count
+```
+</details>
+
+<details>
+<summary>L0 — Run 3 (78.0%)</summary>
+
+```
+Validity: 78.0% (39/50)
+EP Coverage: 97.06% (33/34)
+Assert Depth: 1.68
+Stale: 1
+Iterations: 5
+Helpers: 5 (unique, post_resource, get_resource, put_resource, delete_resource — generic wrappers!)
+Plan adherence: 100%
+Failure taxonomy (iter 1): wrong_status_code 5 (21.7%), timeout 18 (78.3%)
+Repair: iter1=23F→helper_fallback, iter2=23F→isolated(10), iter3=14F→helper_fallback, iter4=14F→isolated(10), iter5=11F
+Never-fixed (11): test_list_books_page_overflow, test_get_rating_success, test_apply_discount_too_high,
+  test_remove_tags_from_book, test_create_order_success, test_get_order_detail, test_delete_pending_order,
+  test_delete_invalid_order_status, test_update_order_to_shipped, test_update_order_to_cancelled,
+  test_update_order_invalid_transition
+Fixed (12): test_add_tags_to_book, test_apply_discount_success, test_create_review_invalid_rating,
+  test_create_review_success, test_delete_author_success, test_delete_book_success, test_get_book_detail,
+  test_get_nonexistent_author, test_get_nonexistent_book, test_list_reviews_success, test_update_book_title,
+  test_update_stock_increase
+```
+</details>
+
+### L1
+
+<details>
+<summary>L1 — Run 1 (84.0%)</summary>
+
+```
+Validity: 84.0% (42/50)
+EP Coverage: 82.35% (28/34)
+Assert Depth: 1.60
+Stale: 8
+Iterations: 5
+Helpers: 4 (unique, create_author, create_category, create_book stock=10 year=2020)
+Plan adherence: 48%
+Failure taxonomy (iter 1): assertion_mismatch 1, wrong_status_code 7
+Repair: iter1=8F→isolated(8), iter2=8F→isolated(8), iter3=8F→stale_skip, iter4=8F→stale_skip, iter5=8F
+Never-fixed (8): test_list_books_filtering_by_category, test_create_review_nonexistent_book,
+  test_create_order_insufficient_stock, test_update_author_name, test_apply_discount_valid,
+  test_get_author_books, test_list_books_invalid_pagination, test_get_category_books_empty
+Fixed: 0 (žádný test nebyl opraven)
+```
+</details>
+
+<details>
+<summary>L1 — Run 2 (100.0%) ✅</summary>
+
+```
+Validity: 100.0% (50/50)
+EP Coverage: 82.35% (28/34)
+Iterations: 2 (1 repair iterace)
+Helpers: 4 (unique, create_author, create_category, create_book stock=10 year=2020)
+Plan adherence: 100%
+Failure taxonomy (iter 1): wrong_status_code 2
+Fixed (2): test_create_book_no_author, test_apply_discount_new_book_error
+```
+</details>
+
+<details>
+<summary>L1 — Run 3 (94.0%)</summary>
+
+```
+Validity: 94.0% (47/50)
+EP Coverage: 88.24% (30/34)
+Stale: 4
+Iterations: 5
+Helpers: 4 (unique, create_author, create_category, create_book stock=10 year=2020)
+Plan adherence: 100%
+Failure taxonomy (iter 1): wrong_status_code 4
+Repair: iter1=4F→isolated(4), iter2=4F→isolated(4), iter3=3F→stale_skip, iter4=3F→stale_skip, iter5=3F
+Never-fixed (3): test_list_books_invalid_query_params, test_apply_discount_new_book_fails,
+  test_update_book_stock_nullable
+Fixed (1): test_create_order_malformed_json
+```
+</details>
+
+### L2
+
+<details>
+<summary>L2 — Run 1 (98.0%)</summary>
+
+```
+Validity: 98.0% (49/50)
+EP Coverage: 85.29% (29/34)
+Stale: 1 (test_login_with_malformed_json — POST /auth/login neexistuje)
+Iterations: 5
+Helpers: 4 (unique, create_test_author, create_test_category, create_test_book)
+Plan adherence: 100%
+Compliance: 80
+```
+</details>
+
+<details>
+<summary>L2 — Run 2 (100.0%) ✅</summary>
+
+```
+Validity: 100.0% (50/50)
+EP Coverage: 88.24% (30/34)
+Iterations: 2 (1 repair)
+Helpers: 4 (unique, create_author, create_category, create_book)
+Fixed (1): test_create_book_nonexistent_author (422→404)
+```
+</details>
+
+<details>
+<summary>L2 — Run 3 (100.0%) ✅</summary>
+
+```
+Validity: 100.0% (50/50)
+EP Coverage: 88.24% (30/34)
+Iterations: 1 (perfektní na první pokus)
+Helpers: 4 (unique, create_author, create_category, create_book) — has_assertion=true
+Compliance: 80
+```
+</details>
+
+### L3
+
+<details>
+<summary>L3 — Run 1 (100.0%) ✅</summary>
+
+```
+Validity: 100.0% (50/50)
+EP Coverage: 91.18% (31/34)
+Iterations: 1
+Helpers: 4 (unique, create_author, create_category, create_book)
+Compliance: 80
+```
+</details>
+
+<details>
+<summary>L3 — Run 2 (100.0%) ✅ — nízká EP coverage</summary>
+
+```
+Validity: 100.0% (50/50)
+EP Coverage: 52.94% (18/34) — OUTLIER
+Iterations: 1
+Helpers: 5 (+create_tag, has_assertion=true, name=None params)
+Compliance: 80
+Domain focus: authors 17/50 (34%) — 13 testů na not-found pattern
+Test type: 38% happy, 62% error
+```
+</details>
+
+<details>
+<summary>L3 — Run 3 (98.0%)</summary>
+
+```
+Validity: 98.0% (49/50)
+EP Coverage: 88.24% (30/34)
+Stale: 1 (test_apply_discount_new_book_error)
+Iterations: 5
+Helpers: 4 (unique, create_author, create_category, create_book)
+Compliance: 100 (timeout na všech 75 callech!)
+```
+</details>
+
+### L4
+
+<details>
+<summary>L4 — Run 1 (100.0%) ✅</summary>
+
+```
+Validity: 100.0% (50/50)
+EP Coverage: 91.18% (31/34)
+Iterations: 1
+Helpers: 5 (unique, create_test_author, create_test_category, create_test_book, create_test_tag) — all with assertion
+Compliance: 80
+Response validation: 62% (highest across all runs)
+Chaining: 46% (highest across all runs)
+```
+</details>
+
+<details>
+<summary>L4 — Run 2 (100.0%) ✅</summary>
+
+```
+Validity: 100.0% (50/50)
+EP Coverage: 82.35% (28/34)
+Iterations: 1
+Helpers: 6 (+create_test_order) — all with assertion
+Compliance: 100 (timeout na všech 61 callech)
+```
+</details>
+
+<details>
+<summary>L4 — Run 3 (100.0%) ✅</summary>
+
+```
+Validity: 100.0% (50/50)
+EP Coverage: 82.35% (28/34)
+Iterations: 1
+Helpers: 5 (unique, create_test_author, create_test_category, create_test_book, create_test_tag) — all with assertion
+Compliance: 100 (timeout na všech 62 callech)
+```
+</details>
