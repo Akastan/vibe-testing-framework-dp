@@ -1,5 +1,6 @@
 # Skryté soubory s klíči
 .env
+.coverage
 
 # Virtuální prostředí
 .venv/

@@ -1,0 +1,387 @@
+{
+  "meta": {
+    "timestamp": "2026-03-25T00:00:29.601124",
+    "version": "7.13.4"
+  },
+  "files": {
+    "app\\__init__.py": {
+      "covered_lines": 0,
+      "num_statements": 0,
+      "percent_covered": 100.0
+    },
+    "app\\crud.py": {
+      "covered_lines": 200,
+      "num_statements": 272,
+      "percent_covered": 73.53,
+      "functions": {
+        "create_author": {
+          "covered": 5,
+          "total": 5,
+          "pct": 100.0
+        },
+        "get_author": {
+          "covered": 4,
+          "total": 4,
+          "pct": 100.0
+        },
+        "get_authors": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "update_author": {
+          "covered": 0,
+          "total": 6,
+          "pct": 0.0
+        },
+        "delete_author": {
+          "covered": 4,
+          "total": 6,
+          "pct": 66.7
+        },
+        "create_category": {
+          "covered": 7,
+          "total": 7,
+          "pct": 100.0
+        },
+        "get_category": {
+          "covered": 3,
+          "total": 4,
+          "pct": 75.0
+        },
+        "get_categories": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "update_category": {
+          "covered": 0,
+          "total": 11,
+          "pct": 0.0
+        },
+        "delete_category": {
+          "covered": 0,
+          "total": 6,
+          "pct": 0.0
+        },
+        "create_book": {
+          "covered": 9,
+          "total": 9,
+          "pct": 100.0
+        },
+        "get_book": {
+          "covered": 4,
+          "total": 4,
+          "pct": 100.0
+        },
+        "get_books": {
+          "covered": 12,
+          "total": 15,
+          "pct": 80.0
+        },
+        "update_book": {
+          "covered": 0,
+          "total": 15,
+          "pct": 0.0
+        },
+        "delete_book": {
+          "covered": 0,
+          "total": 3,
+          "pct": 0.0
+        },
+        "create_review": {
+          "covered": 6,
+          "total": 6,
+          "pct": 100.0
+        },
+        "get_reviews": {
+          "covered": 0,
+          "total": 2,
+          "pct": 0.0
+        },
+        "get_book_average_rating": {
+          "covered": 4,
+          "total": 6,
+          "pct": 66.7
+        },
+        "apply_discount": {
+          "covered": 6,
+          "total": 6,
+          "pct": 100.0
+        },
+        "update_stock": {
+          "covered": 8,
+          "total": 8,
+          "pct": 100.0
+        },
+        "create_tag": {
+          "covered": 6,
+          "total": 7,
+          "pct": 85.7
+        },
+        "get_tag": {
+          "covered": 3,
+          "total": 4,
+          "pct": 75.0
+        },
+        "get_tags": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "update_tag": {
+          "covered": 0,
+          "total": 11,
+          "pct": 0.0
+        },
+        "delete_tag": {
+          "covered": 4,
+          "total": 6,
+          "pct": 66.7
+        },
+        "add_tags_to_book": {
+          "covered": 8,
+          "total": 8,
+          "pct": 100.0
+        },
+        "remove_tags_from_book": {
+          "covered": 8,
+          "total": 8,
+          "pct": 100.0
+        },
+        "create_order": {
+          "covered": 19,
+          "total": 19,
+          "pct": 100.0
+        },
+        "get_order": {
+          "covered": 3,
+          "total": 4,
+          "pct": 75.0
+        },
+        "get_orders": {
+          "covered": 11,
+          "total": 13,
+          "pct": 84.6
+        },
+        "update_order_status": {
+          "covered": 14,
+          "total": 14,
+          "pct": 100.0
+        },
+        "delete_order": {
+          "covered": 10,
+          "total": 10,
+          "pct": 100.0
+        },
+        "get_order_response": {
+          "covered": 2,
+          "total": 2,
+          "pct": 100.0
+        }
+      }
+    },
+    "app\\database.py": {
+      "covered_lines": 17,
+      "num_statements": 17,
+      "percent_covered": 100.0
+    },
+    "app\\main.py": {
+      "covered_lines": 110,
+      "num_statements": 122,
+      "percent_covered": 90.16,
+      "functions": {
+        "health_check": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "create_author": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "list_authors": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "get_author": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "update_author": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "delete_author": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "create_category": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "list_categories": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "get_category": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "update_category": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "delete_category": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "create_book": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "list_books": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "get_book": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "update_book": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "delete_book": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "create_review": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "list_reviews": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "get_book_rating": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "apply_discount": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "update_stock": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "create_tag": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "list_tags": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "get_tag": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "update_tag": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "delete_tag": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "add_tags_to_book": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "remove_tags_from_book": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "create_order": {
+          "covered": 2,
+          "total": 2,
+          "pct": 100.0
+        },
+        "list_orders": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "get_order": {
+          "covered": 2,
+          "total": 2,
+          "pct": 100.0
+        },
+        "update_order_status": {
+          "covered": 2,
+          "total": 2,
+          "pct": 100.0
+        },
+        "delete_order": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "reset_database": {
+          "covered": 10,
+          "total": 10,
+          "pct": 100.0
+        }
+      }
+    },
+    "app\\models.py": {
+      "covered_lines": 70,
+      "num_statements": 70,
+      "percent_covered": 100.0
+    },
+    "app\\schemas.py": {
+      "covered_lines": 154,
+      "num_statements": 154,
+      "percent_covered": 100.0
+    }
+  },
+  "totals": {
+    "covered_lines": 551,
+    "num_statements": 635,
+    "percent_covered": 86.77165354330708,
+    "percent_covered_display": "87",
+    "missing_lines": 84,
+    "excluded_lines": 0,
+    "percent_statements_covered": 86.77165354330708,
+    "percent_statements_covered_display": "87"
+  }
+}
