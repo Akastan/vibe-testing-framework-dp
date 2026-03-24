@@ -1,0 +1,292 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "check_service_health",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Overeni, ze API odpovida 200 pro stav zivota"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_valid_author",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni noveho autora s platnymi daty"
+        },
+        {
+          "name": "create_author_invalid_data",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o vytvoreni autora bez povinneho jmena"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_default",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani seznamu autoru s defaultnimi parametry"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani detailu existujiciho autora"
+        },
+        {
+          "name": "get_author_invalid_id",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Ziskani autora s neplatnym formatem ID"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_existing_author",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Uspesne smazani autora"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_valid_category",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni nove kategorie"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_valid_book",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni knihy s platnymi parametry"
+        },
+        {
+          "name": "create_book_missing_fields",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Chyba validace pri chybejicich polich knihy"
+        },
+        {
+          "name": "create_book_negative_price",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Chyba validace pro negativni cenu knihy"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani knih se strankovanim"
+        },
+        {
+          "name": "list_books_invalid_page_size",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Ziskani knih s neplatnou velikosti stranky"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_detail",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani detailu knihy vcetne autoru a tagu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_valid_review",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Pridani recenze ke knize"
+        },
+        {
+          "name": "create_review_out_of_bounds_rating",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Recenze s hodnocenim mimo rozsah 1-5"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/rating",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_rating",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani prumerneho hodnoceni knihy"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_valid_discount",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Aplikace slevy v ramci limitu"
+        },
+        {
+          "name": "apply_discount_too_high",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Sleva presahujici 50 procent"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Uspesna aktualizace skladu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_too_long",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Tag s nazvem delsim nez 30 znaku"
+        },
+        {
+          "name": "create_valid_tag",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni validniho tagu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_to_book_empty_list",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o pridani prazdneho seznamu tagu"
+        },
+        {
+          "name": "add_valid_tags_to_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Pridani platnych tagu ke knize"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_no_items",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Vytvoreni objednavky bez polozek"
+        },
+        {
+          "name": "create_order_valid_items",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Uspesne vytvoreni objednavky"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_valid",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Zmena stavu objednavky na povolenou hodnotu"
+        },
+        {
+          "name": "update_order_status_invalid",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Zmena stavu na neexistujici stav"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_pending_order",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Smazani objednavky ve stavu pending"
+        },
+        {
+          "name": "delete_non_existent_order",
+          "type": "edge_case",
+          "expected_status": 422,
+          "description": "Smazani neexistujici objednavky"
+        }
+      ]
+    }
+  ]
+}

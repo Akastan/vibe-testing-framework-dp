@@ -1,0 +1,322 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_happy_path",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoří nového autora s platnými daty. Ověří, že autor je vytvořen a vrácen s ID a createdAt."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Aktualizuje existujícího autora. Ověří, že data byla správně změněna v odpovědi."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_with_books_conflict",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Pokus o smazání autora, který má přiřazené knihy, by měl vrátit 409 Conflict."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_happy_path",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoří novou kategorii s platnými daty. Ověří, že kategorie je vytvořena a vrácena s ID."
+        },
+        {
+          "name": "create_category_duplicate_name_conflict",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Pokus o vytvoření kategorie s již existujícím názvem by měl vrátit 409 Conflict."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories/{category_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_category_name_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Aktualizuje název existující kategorie. Ověří, že název byl správně změněn."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories/{category_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_category_with_books_conflict",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Pokus o smazání kategorie, která má přiřazené knihy, by měl vrátit 409 Conflict."
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_happy_path",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoří nový tag s platnými daty. Ověří, že tag je vytvořen a vrácen s ID."
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags/{tag_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_tag_with_books_conflict",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Pokus o smazání tagu, který je přiřazen k alespoň jedné knize, by měl vrátit 409 Conflict."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_happy_path",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoří novou knihu s platnými daty a počátečním skladem 10 (dle helperu). Ověří, že kniha je vytvořena."
+        },
+        {
+          "name": "create_book_invalid_author_id_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Pokus o vytvoření knihy s neexistujícím author_id by měl vrátit 404 Not Found."
+        },
+        {
+          "name": "create_book_duplicate_isbn_conflict",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Pokus o vytvoření knihy s již existujícím ISBN by měl vrátit 409 Conflict."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_all_filters",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získá seznam knih s použitím všech možných filtrů (search, author_id, category_id, min_price, max_price, page, page_size). Ověří, že filtry fungují správně a vrátí relevantní data."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Pokus o získání knihy s neexistujícím ID by měl vrátit 404 Not Found."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_book_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Aktualizuje existující knihu s platnými daty. Ověří, že data byla správně změněna v odpovědi."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_book_happy_path",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Smaže existující knihu. Ověří, že kniha a její přidružené recenze/vazby na tagy byly smazány."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_happy_path",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoří novou recenzi pro knihu s platnými daty. Ověří, že recenze je vytvořena a vrácena."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/rating",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_rating_no_reviews",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Získá rating pro knihu bez recenzí. Ověří, že 'average_rating' je null a 'review_count' je 0."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Aplikuje slevu na starší knihu (published_year > aktuální_rok - 1). Ověří, že zlevněná cena je správně vypočítána."
+        },
+        {
+          "name": "apply_discount_new_book_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Pokus o aplikaci slevy na knihu vydanou v posledním roce (published_year = aktuální_rok) by měl vrátit 400 Bad Request."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_increase_quantity",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Zvýší skladovou zásobu knihy s kladnou hodnotou quantity (delta). Ověří, že se stock správně aktualizoval."
+        },
+        {
+          "name": "update_stock_insufficient_stock_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Pokus o snížení skladu tak, aby výsledná hodnota byla záporná, by měl vrátit 400 Bad Request."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_to_book_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Přidá existující tagy ke knize (pomocí těla požadavku). Ověří, že kniha má přiřazené tagy v odpovědi."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "remove_tags_from_book_non_existent_tag_id",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Pokus o odebrání neexistujícího tag_id z knihy (pomocí těla požadavku) by měl vrátit 404 Not Found, pokud tag_id neexistuje."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_happy_path",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoří novou objednávku s více položkami, u kterých je dostatek skladu. Ověří, že sklad se snížil a total_price je správně spočítána."
+        },
+        {
+          "name": "create_order_insufficient_stock_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Pokus o vytvoření objednávky s nedostatečným skladem pro některou knihu by měl vrátit 400 Bad Request."
+        },
+        {
+          "name": "create_order_duplicate_book_id_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Pokus o vytvoření objednávky s duplicitním book_id v položkách by měl vrátit 400 Bad Request."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_orders_filter_by_status",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získá seznam objednávek filtrovaných podle stavu (např. 'pending'). Ověří, že výsledky odpovídají filtru."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_order_details_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získá detaily konkrétní objednávky. Ověří správnost vrácených dat, včetně total_price a položek."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_to_cancelled_returns_stock",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Změní stav objednávky na 'cancelled'. Ověří, že se skladové zásoby knih, které byly objednány, vrátily."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,310 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "check_api_health",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověření dostupnosti API"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_valid_author",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření nového autora s platnými údaji"
+        },
+        {
+          "name": "create_invalid_author",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Chyba při vytvoření autora bez jména"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_existing_author",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Načtení detailu existujícího autora"
+        },
+        {
+          "name": "get_nonexistent_author",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Chyba při dotazu na neplatné ID"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_name",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Úprava jména autora"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Úspěšné přidání nové knihy"
+        },
+        {
+          "name": "create_book_invalid_isbn",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Chyba při zadání krátkého ISBN"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Seznam knih s výchozí stránkováním"
+        },
+        {
+          "name": "list_books_invalid_page",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Chyba při zadání neplatného čísla stránky"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_details",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Načtení detailu knihy"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_review",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Přidání recenze ke knize"
+        },
+        {
+          "name": "create_invalid_rating",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Recenze s hodnocením mimo rozsah 1-5"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/rating",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_rating_value",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získání průměrného hodnocení"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_valid_discount",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Aplikace slevy v limitu 50%"
+        },
+        {
+          "name": "apply_invalid_discount",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Sleva vyšší než 50% je zakázána"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "increase_stock_level",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Navýšení skladových zásob"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_new_category",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření nové kategorie"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories/{category_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_category_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Smazání kategorie"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_valid_tag",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření platného tagu"
+        },
+        {
+          "name": "create_empty_tag",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Chyba při vytvoření prázdného tagu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_to_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Přiřazení seznamu tagů ke knize"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_valid_order",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření objednávky s knihami"
+        },
+        {
+          "name": "create_order_zero_quantity",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Objednávka s nulovým množstvím knih"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_all_orders",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Výpis všech objednávek"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_single_order",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Detailní zobrazení objednávky"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_to_shipped",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Změna stavu objednávky na shipped"
+        },
+        {
+          "name": "invalid_status_transition",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o neplatný přechod stavu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_successful",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Úspěšné odstranění autora"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_book_successful",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Úspěšné odstranění knihy"
+        }
+      ]
+    }
+  ]
+}
