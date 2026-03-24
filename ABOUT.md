@@ -6,33 +6,37 @@ Framework přijme OpenAPI spec + kontext → LLM vygeneruje test plán + pytest 
 
 ## Výzkumné otázky
 
-- **RQ1:** Jak úroveň kontextu (L0–L4) ovlivňuje test validity rate a liší se vliv mezi LLM modely?
-- **RQ2:** Jak se liší code coverage a endpoint coverage mezi modely a úrovněmi?
-- **RQ3:** Jaké typy selhání vznikají (halucinace, sémantické nepochopení, helper bugy) a liší se mezi modely/úrovněmi?
+- **RQ1:** Jak úroveň poskytnutého kontextu (L0–L4) ovlivňuje kvalitu LLM-generovaných API testů, měřenou pomocí test validity rate, hloubky asercí a míry validace response body?
+- **RQ2:** Jak se liší endpoint coverage a code coverage vygenerovaných testů mezi jednotlivými úrovněmi kontextu?
+- **RQ3:** Jaké typy selhání (halucinace, špatné status kódy, timeouty, sémantické chyby) se vyskytují ve vygenerovaných testech a jak se jejich distribuce mění s rostoucím kontextem?
 
 ## Rozměry experimentu
 
-5 LLM × 5 úrovní kontextu × 1 API (bookstore, plánované 3) × 5 iterací × 3 runy na kombinaci
+5 LLM × 5 úrovní kontextu × 1 API (bookstore) × 5 iterací × 3 runy na kombinaci
+
+---
 
 ## Struktura projektu
 
 ```
 prompts/
-  prompt_templates.py    # Unified prompt framework — PromptBuilder třída
-  phase1_context.py      # Sestavení kontextového stringu (L0–L4)
-  phase2_planning.py     # Generování JSON test plánu
-  phase3_generation.py   # Generování pytest kódu + AST utility + opravy + stale detection
-  phase4_validation.py   # Server management (Docker/lokální) + pytest runner
-  phase5_metrics.py      # 10 automatických metrik
-  phase6_diagnostics.py  # 10 diagnostik pro obhajobu (proč jsou výsledky takové)
-main.py                  # Experiment runner — iteruje LLM × API × Level × Run
-llm_provider.py          # LLM abstrakce (Gemini/OpenAI/Claude/DeepSeek), retry + backoff
-run_coverage_manual.py   # Manuální code coverage měření
-config.py                # Konfigurace pro manuální skripty
-experiment.yaml          # Konfigurace experimentu + framework_rules + api_knowledge
-inputs/                  # OpenAPI spec, dokumentace, zdrojový kód, DB schéma, referenční testy
-outputs/                 # Vygenerované testy + pytest logy
-results/                 # JSON výsledky experimentů (metrics + diagnostics)
+  __init__.py              # Package init
+  prompt_templates.py      # Unified prompt framework — PromptBuilder třída
+  phase1_context.py        # Sestavení kontextového stringu (L0–L4)
+  phase2_planning.py       # Generování JSON test plánu
+  phase3_generation.py     # Generování pytest kódu + AST utility + opravy + stale detection
+  phase4_validation.py     # Server management (Docker/lokální) + pytest runner
+  phase5_metrics.py        # 9 automatických metrik
+  phase6_diagnostics.py    # 10 diagnostik pro obhajobu
+main.py                    # Experiment runner — iteruje LLM × API × Level × Run
+llm_provider.py            # LLM abstrakce (Gemini/OpenAI/Claude/DeepSeek), retry + backoff
+generate_report.py         # Generátor Markdown reportu z JSON výsledků
+run_coverage_manual.py     # Manuální code coverage měření
+config.py                  # Konfigurace pro manuální skripty
+experiment.yaml            # Konfigurace experimentu + framework_rules + api_knowledge
+inputs/                    # OpenAPI spec, dokumentace, zdrojový kód, DB schéma, referenční testy
+outputs/                   # Vygenerované testy + plány + pytest logy
+results/                   # JSON výsledky experimentů (metrics + diagnostics)
 ```
 
 ---
@@ -47,19 +51,27 @@ results/                 # JSON výsledky experimentů (metrics + diagnostics)
 2. Vytvoří `StaleTracker` (per run) + `DiagRepairTracker` (per run)
 3. Spustí `run_pipeline()` — volá fáze 1–6 sekvenčně
 4. Po dokončení všech úrovní pro dané API zastaví server (`stop_managed_server`)
-5. Uloží výsledky do `results/experiment_{name}_{timestamp}.json` (metrics + diagnostics)
+5. Uloží výsledky do `results/experiment_{name}_{timestamp}.json`
 
 Klíčový flow v repair loop:
 ```python
-test_code, repair_info = repair_failing_tests(...)  # vrací tuple
-diag_repair_tracker.annotate_last(
-    repair_type=repair_info["repair_type"],
-    repaired_count=repair_info["repaired_count"],
-    stale_skipped=repair_info["stale_skipped"],
-)
+while iteration < max_iterations and not success:
+    success, output_log = run_tests_and_validate(...)
+    if not success and iteration < max_iterations:
+        test_code, repair_info = repair_failing_tests(
+            ...,
+            stale_tracker=stale_tracker,
+            previous_repair_type=last_repair_type,  # alternace strategií
+        )
+        last_repair_type = repair_info["repair_type"]
+        diag_repair_tracker.annotate_last(
+            repair_type=repair_info["repair_type"],
+            repaired_count=repair_info["repaired_count"],
+            stale_skipped=repair_info["stale_skipped"],
+        )
 ```
 
-`repair_failing_tests()` vrací `tuple[str, dict]` — opravený kód + metadata o provedené opravě. Metadata se zapisují do `DiagRepairTracker` přes `annotate_last()`.
+`last_repair_type` se předává mezi iteracemi — pokud helper repair nepomohl, další iterace automaticky přepne na izolovanou opravu (zabraňuje opakování nefunkční strategie).
 
 ---
 
@@ -71,59 +83,49 @@ Třída `PromptBuilder` — centrální bod pro generování všech promptů.
 
 Dva typy instrukcí striktně oddělené:
 
-1. **`framework_rules`** — JAK psát testy (pytest/requests technikálie). Platí pro VŠECHNY levely. Neobsahují žádnou znalost o tom CO API dělá. Příklady: "timeout=30", "nepoužívej fixtures", "na DELETE 204 nevolej .json()". Oponent nemůže namítnout bias — je to ekvivalent "napiš to v Pythonu".
+1. **`framework_rules`** — JAK psát testy (pytest/requests technikálie). Platí pro VŠECHNY levely. Neobsahují žádnou znalost o tom CO API dělá. Příklady: "timeout=30", "nepoužívej fixtures", "na DELETE 204 nevolej .json()".
 
-2. **`api_knowledge`** — CO API dělá (chování, pravidla, defaulty). Injektují se POUZE do L1+ (kde tato znalost přirozeně existuje v kontextu — je to v dokumentaci). L0 toto NEDOSTANE. Příklady: "stock default je 0, nastav 10", "not found vrací 404 ne 422", "quantity je delta ne absolutní hodnota".
+2. **`api_knowledge`** — CO API dělá (chování, pravidla, defaulty). Injektují se POUZE do L1+. L0 toto NEDOSTANE. Příklady: "stock default je 0, nastav 10", "not found vrací 404 ne 422".
 
 Tím je zajištěno: **jediná proměnná mezi levely je KONTEXT**, ne skryté hinty.
 
-Implementace: konstruktor `PromptBuilder(api_cfg, level)` — pokud `level == "L0"`, `self.api_knowledge` je prázdný list. Pro L1+ se načte z YAML.
-
-Metody:
-- `planning_prompt(context, test_count)` — fáze 2
-- `planning_fill_prompt(plan_json, actual, target)` — doplnění plánu
-- `generation_prompt(plan_json, context, base_url)` — fáze 3
-- `repair_single_prompt(...)` — mikro-oprava jednoho testu
-- `repair_helpers_prompt(...)` — oprava helper funkcí
-- `fill_tests_prompt(...)` — doplnění chybějících testů
+Implementace: konstruktor `PromptBuilder(api_cfg, level)` — pokud `level == "L0"`, `self.api_knowledge` je prázdný list. Knowledge levels jsou definovány jako `("L1", "L2", "L3", "L4")`.
 
 Interní bloky:
-- `_framework_block()` — formátuje `framework_rules` (vždy)
-- `_knowledge_block()` — formátuje `api_knowledge` (prázdný pro L0)
-- `_stale_block()` — seznam zamrzlých testů
+- `_framework_block()` — technické požadavky, injektovány vždy
+- `_knowledge_block()` — znalost API, prázdný pro L0
+- `_stale_block()` — informuje LLM o zamrzlých testech, které nemá opravovat
 
-**Proč toto oddělení existuje:** V předchozí verzi (v4) existovaly `helper_hints` které se injektovaly do všech levelů včetně L0. Hint "stock: 10" je ale znalost z L1 dokumentace — L0 má mít jen OpenAPI spec. To znehodnocovalo srovnání L0 vs L1. Oponent by řekl: "Váš L0 není čistý black-box."
+Metody: `planning_prompt()`, `planning_fill_prompt()`, `generation_prompt()`, `repair_single_prompt()`, `repair_helpers_prompt()`, `fill_tests_prompt()`.
 
 ---
 
 ### phase1_context.py — sestavení kontextu
 
-Funkce `analyze_context()` — čistě mechanická, načítá soubory podle úrovně:
+Funkce `analyze_context()` — načítá soubory podle úrovně:
 
 | Úroveň | Co načte |
 |---|---|
-| **L0** | Pouze OpenAPI spec (YAML/JSON → string) |
-| **L1** | + byznys dokumentace (`documentation.md`) |
-| **L2** | + zdrojový kód endpointů (`source_code.py`) |
-| **L3** | + DB schéma (`db_schema.sql`) |
-| **L4** | + existující referenční testy (`existing_tests.py`) |
+| **L0** | Pouze OpenAPI spec |
+| **L1** | + byznys dokumentace |
+| **L2** | + zdrojový kód endpointů |
+| **L3** | + DB schéma |
+| **L4** | + existující referenční testy |
 
-Vrací jeden kontextový string s oddělenými sekcemi (`--- OPENAPI SPECIFIKACE ---`, `--- ZDROJOVÝ KÓD ---` atd.). Phase6 diagnostika `context_size` pak měří velikost každé sekce.
+Vrací jeden kontextový string s oddělenými sekcemi (`--- NÁZEV SEKCE ---`). Podporuje YAML i JSON formát OpenAPI specifikace. Pokud soubor pro požadovanou úroveň neexistuje, vypíše varování ale pokračuje.
 
 ---
 
-### phase2_planning.py — generování test plánu
+### phase2_planning.py — generování testovacího plánu
 
-Funkce `generate_test_plan()`:
+Funkce `generate_test_plan()` — iterativní proces (max 4 pokusy) k dosažení přesného počtu testů:
 
-1. Zavolá LLM s planning promptem (z `PromptBuilder` — L0 bez api_knowledge, L1+ s ním)
-2. Parsuje JSON odpověď (`_parse_plan_json` — strip markdown fences)
-3. **Retry loop** (max 4 pokusů): plán má méně testů → doplní, více → ořízne
-4. **Post-processing**: `_filter_reset_tests()` PŘED count validací, pak `_trim_plan()`
+1. Vygeneruje plán přes LLM s `planning_prompt()`
+2. Odfiltruje testy na `/reset` endpoint (`_filter_reset_tests()`)
+3. Pokud je testů málo → doplní přes `planning_fill_prompt()`
+4. Pokud je testů moc → ořízne od konce přes `_trim_plan()`
 
-Výstup: JSON dict s `test_plan` → list endpointů → list `test_cases`.
-
-Bug fix z v3→v4: filtrování reset testů se dříve volalo PO count validaci → plán měl méně testů než požadováno.
+Výstup: JSON s klíčem `test_plan`, obsahující pole endpointů s vnořenými `test_cases`. Každý test_case má `name`, `type` (happy_path/edge_case/error), `expected_status`, `description`.
 
 ---
 
@@ -131,158 +133,181 @@ Bug fix z v3→v4: filtrování reset testů se dříve volalo PO count validaci
 
 Největší modul. Tři části:
 
-**1. AST utility:**
-- `count_test_functions()`, `_get_test_function_names()`
-- `_extract_function_code()` / `_replace_function_code()` — per-funkce manipulace
-- `_extract_helpers_code()` / `_replace_helpers()` — vše nad prvním testem
-- `_remove_last_n_tests()` — deterministické ořezání
-
-Known limitation: `_extract_helpers_code()` předpokládá helpery NAD testy. Pokud LLM vloží helper MEZI testy, helper repair ho nenajde. Phase6 diagnostika `instruction_compliance.helper_between_tests` to detekuje.
+**1. AST utility** — bezpečná manipulace s Python kódem přes Abstract Syntax Tree:
+- `count_test_functions()` — počítání testů
+- `_get_test_function_names()` — seřazený seznam názvů
+- `_extract_function_code()` / `_replace_function_code()` — extrakce/nahrazení per-funkce
+- `_extract_helpers_code()` / `_replace_helpers()` — manipulace helperů (vše nad prvním testem)
+- `_remove_last_n_tests()` — ořezání přebytku
 
 **2. Generování + validace počtu:**
 - `generate_test_code()` — LLM call, strip markdown fences
-- `validate_test_count()` — méně → doplň přes LLM, více → ořízni
+- `validate_test_count()` — AST kontrola, ořez přebytečných / doplnění chybějících testů
 
 **3. Opravná strategie** (`repair_failing_tests()`):
 
-Vrací `tuple[str, dict]` — opravený kód + `repair_info`:
-```python
-repair_info = {
-    "repair_type": "helper_root_cause" | "helper_fallback" | "isolated" | "skipped_all_stale" | None,
-    "repaired_count": int,
-    "stale_skipped": int,
-}
-```
-
 Rozhodovací strom:
-1. Parsuj failing testy z pytest logu
+1. Parsuj failing testy z pytest logu (`_parse_failing_test_names()`)
 2. Aktualizuj StaleTracker → přeskoč zamrzlé testy
-3. Pokud `_detect_helper_root_cause()` (≥70% stejná chyba) → `_repair_helpers()` → `repair_type="helper_root_cause"`
-4. Pokud > MAX_INDIVIDUAL_REPAIRS (10) repairable → `_repair_helpers()` → `repair_type="helper_fallback"`
-5. Jinak → `_repair_single_test()` per test → `repair_type="isolated"`
-6. Pokud všechny failing jsou stale → `repair_type="skipped_all_stale"`
+3. Zkontroluj `previous_repair_type`: pokud předchozí iterace zkoušela helper repair a nepomohlo → přeskoč kroky 4–5, jdi rovnou na 6
+4. Pokud `_detect_helper_root_cause()` (≥70 % stejná normalizovaná chyba) → oprav helpery (`repair_helpers_prompt`)
+5. Pokud > `MAX_INDIVIDUAL_REPAIRS` (10) repairable testů → fallback na helper repair
+6. Jinak → per-test izolované opravy (max 10, s 5s delay mezi voláními)
+7. Pokud všechny failing jsou stale → přeskoč celou opravu
 
-Invariant: **počet testů se nikdy nemění**. AST validace před/po, revert při neshodě.
+Invariant: **počet testů se nikdy nemění**. AST validace před/po, pokud se změní → revert.
 
-**StaleTracker** — normalizuje chyby (čísla→N, stringy→STR), porovnává mezi iteracemi. Test se stejnou chybou ≥2× po sobě = stale → přeskočen při repair, zůstává v kódu (failed test v metrikách).
-
-**Hardcoded konstanty a jejich zdůvodnění:**
-
-| Konstanta | Hodnota | Zdůvodnění |
-|---|---|---|
-| `StaleTracker.threshold` | 2 | Nejnižší smysluplná hodnota. 1 = jakýkoli fail je stale. |
-| `MAX_INDIVIDUAL_REPAIRS` | 10 | ~1/3 test suite (při 30 testech). Víc = drahé per-test LLM cally. |
-| `_detect_helper_root_cause` ratio | 0.7 | 50% = příliš agresivní, 90% = příliš konzervativní. |
-| `max_iterations` | 5 | Z dat v3: iterace 4–5 přináší minimální zlepšení, ale zachováváme pro úplnost dat. |
-| `test_count` | 50 | Zvýšeno z 30: dramaticky zlepšuje EP coverage (91% vs 58% na L0). |
+**StaleTracker** — normalizuje chyby (čísla→N, stringy→STR, adresy→ADDR), porovnává mezi iteracemi. Test se stejnou chybou ≥ `threshold` (default 2) po sobě jdoucích iterací **kde byl pokus o opravu** = stale → přeskočen při repair. Testy přeskočené kvůli capu nenabírají stale historii.
 
 ---
 
 ### phase4_validation.py — spuštění testů
 
-Funkce `run_tests_and_validate()`:
+Podporuje dva režimy: lokální (Python subprocess z .venv) a Docker (docker compose).
 
-1. Uloží kód do `outputs/`, zajistí server (Docker/lokální)
-2. Resetuje DB (`POST /reset`)
-3. Spustí pytest s `--timeout=30`
-4. Detekce infra chyb (DB locked, connection refused) → retry (max 2×)
-5. Detekce single root cause (≥80% stejná chyba) → FRAMEWORK HINT do logu
+1. Uloží kód do `outputs/`, zajistí server (start/restart podle potřeby)
+2. Resetuje DB (`POST /reset`) před každým spuštěním
+3. Spustí pytest s `--timeout=30 --timeout-method=thread`, celkový subprocess timeout 900s
+4. Detekce infra chyb (DB locked, connection refused, timeout) → restart serveru + retry (max 2×)
+5. Detekce single root cause (≥80 % stejná chyba) → přidá hint do logu pro LLM
+6. Pytest logy se appendují do `{output}_log.txt` pro každou iteraci
 
-Server běží napříč iteracemi — restartuje se jen při výpadku.
+Server management: globální slovníky `_managed_servers` (lokální) a `_docker_servers` (Docker) drží reference napříč iteracemi. Server se restartuje jen když přestane odpovídat na `/health`.
 
 ---
 
 ### phase5_metrics.py — automatické metriky
 
-10 metrik počítaných z vygenerovaného kódu + pytest logu + test plánu:
+9 metrik mapovaných na výzkumné otázky:
 
-1. **Test Validity Rate** — passed / total
-2. **Endpoint Coverage** — endpointy v plánu vs OpenAPI spec
-3. **Assertion Depth** — průměr AST assert statementů na test
-4. **Response Validation** — % testů ověřujících response body
-5. **Test Type Distribution** — happy_path / error / edge_case z plánu
-6. **Status Code Diversity** — unique status kódy v kódu
-7. **Empty Test Detection** — testy s 0 asercemi
-8. **Avg Test Length** — průměrný počet řádků na test
-9. **HTTP Method Coverage** — GET/POST/PUT/DELETE/PATCH distribuce
-10. **Plan Adherence** — shoda názvů plán vs kód
+**RQ1 (validita):**
+- `test_validity` — passed/failed/errors z pytest výstupu, validity_rate_pct
+- `assertion_depth` — průměrný počet asercí na test (AST: assert statementy + funkce s "assert" v názvu)
+- `response_validation` — % testů kontrolujících response body (regex detekce: `.json()[`, `data[`, `"id" in` atd.)
+- `test_type_distribution` — rozložení happy_path/error/edge_case z plánu
 
-Plus `stale_tests` metrika přidávaná v main.py.
+**RQ2 (pokrytí):**
+- `endpoint_coverage` — % endpointů z OpenAPI specifikace pokrytých v plánu
+- `plan_adherence` — shoda plánovaných vs skutečně vygenerovaných testů (porovnání názvů)
 
-Manuální metriky mimo pipeline: code coverage (coverage.py), mutation score (mutmut).
+**RQ3 (selhání):**
+- `status_code_diversity` — počet unikátních HTTP status kódů v testech
+
+**Doplňkové:**
+- `empty_tests` — testy bez asercí
+- `avg_test_length` — průměrný počet řádků na test
+
+Plus `stale_tests` (z StaleTracker) — přidáno v `main.py`.
+
+Manuální metriky mimo pipeline: code coverage (`run_coverage_manual.py` + coverage.py), mutation score (mutmut).
 
 ---
 
 ### phase6_diagnostics.py — diagnostika pro obhajobu
 
-**Účel:** Neměří kvalitu testů (to dělá phase5). Měří PROČ jsou výsledky takové jaké jsou. Data pro odpovědi na otázky oponenta u obhajoby.
+10 diagnostik — neměří kvalitu testů (to dělá phase5), ale PROČ jsou výsledky takové jaké jsou:
 
-10 diagnostik:
+**RQ1:**
+- `context_size` — znaky, řádky, odhadované tokeny, rozpad po sekcích
+- `helper_snapshot` — signatury helperů, délky, zda obsahují stock field, default published_year
+- `instruction_compliance` — missing timeout, uses_unique, calls_reset, uses_fixtures → compliance_score (0–100)
+- `prompt_budget` — odhad tokenů (kontext + plán + overhead) vs context window modelu
+- `repair_trajectory` — průběh oprav přes iterace (passed/failed, repair_type, konvergenční iterace, never_fixed/fixed testy, failure categories z 1. iterace)
 
-| # | Diagnostika | Otázka oponenta | Co měří |
-|---|---|---|---|
-| 1 | `context_size` | "Nepřetížili jste model kontextem?" | Znaky, řádky, odhadované tokeny per sekce kontextu |
-| 2 | `plan_analysis` | "Proč L2 má víc error testů?" | Distribuce testů per endpoint, per domain, per typ; concentration score |
-| 3 | `helper_snapshot` | "Proč L0 order testy selhávají?" | Signatury helperů, default hodnoty, přítomnost stock/unique polí |
-| 4 | `prompt_budget` | "Nenarážíte na token limit?" | Využití kontextového okna (kontext + plán + instrukce vs window) |
-| 5 | `instruction_compliance` | "Dodržel model vaše instrukce?" | Chybějící timeout, použití unique(), volání /reset, helper mezi testy |
-| 6 | `repair_trajectory` | "Kolik iterací bylo potřeba?" | Failing count per iterace, typ opravy, konvergence, never-fixed testy, per-iteration failure details |
-| 7 | `failure_taxonomy` | "Jaké typy chyb vznikají?" | Automatická klasifikace: wrong_status_code, helper_cascade, key_error, value_mismatch, unknown_no_error_captured |
-| 8 | `code_patterns` | "Jak komplexní jsou testy?" | HTTP callů per test, helper callů, side-effect checks, chaining |
-| 9 | `plan_code_drift` | "Generoval model co plánoval?" | Testy jen v plánu / jen v kódu, status kód drift (plán≠kód) |
-| 10 | `context_utilization` | "Využil model kontext?" | Pole z kontextu použitá v kódu, halucinované status kódy |
+**RQ2:**
+- `plan_analysis` — distribuce testů per endpoint/doména, top3 koncentrace, přeskočené endpointy
 
-**RepairTracker** (v phase6):
-- `record_iteration()` — zaznamenává pytest výsledek + sbírá per-iteration `failure_details` (volá `_extract_error_block` + `_classify_single_failure` pro každý failing test v dané iteraci)
-- `annotate_last()` — doplní repair metadata (`repair_type`, `repaired_count`, `stale_skipped`) k poslední iteraci. Volá se v main.py po `repair_failing_tests()`.
-- `get_trajectory()` — vrací kompletní trajektorii včetně `failure_categories` (agregace ze všech iterací)
-
-**Failure taxonomy strategie:**
-`collect_all_diagnostics()` bere taxonomii z **první iterace** RepairTrackeru (tam jsou čerstvé tracebacky). Pozdější iterace mají stale testy s identickými/zkrácenými chybami. Fallback: parsuj z posledního pytest logu pokud RepairTracker nemá data.
-
-**Error extraction (`_extract_error_block`)** má tři fallback strategie:
-1. FAILURES sekce (plný traceback s `_{2,} test_name _{2,}`)
-2. Short test summary řádek (`FAILED ...::test_name - error message`)
-3. Jakýkoli řádek obsahující test_name + "assert"
+**RQ3:**
+- `failure_taxonomy` — kategorizace selhání: wrong_status_code, helper_cascade, key_error, attribute_error, connection_error, timeout, type_error, json_decode_error, assertion_value_mismatch, other, unknown_no_error_captured. Bere data z **první iterace** RepairTrackeru (čerstvé tracebacky).
+- `code_patterns` — avg HTTP calls, avg helper calls, % side effect checks, % chaining
+- `plan_code_drift` — planned vs actual count, matched/extra, status_code_drift
+- `context_utilization` — endpointy z kontextu vs v plánu, status kódy halucinované vs z kontextu
 
 ---
 
-## experiment.yaml — konfigurace (v5)
+### llm_provider.py — LLM abstrakce
+
+Abstraktní třída `LLMProvider` s metodou `generate_text(prompt) → str`.
+
+**RetryMixin** — sdílená retry logika: exponenciální backoff (base 10s, max 5 pokusů). Retryable kódy: `503`, `429`, `UNAVAILABLE`, `RESOURCE_EXHAUSTED`, `high demand`, `rate_limit`.
+
+**Pozor:** `"Server disconnected"` a podobné connection errory aktuálně NEJSOU v retryable kódech — spadnou při prvním pokusu.
+
+Globální `time.sleep(15)` na úrovni modulu — zpomalení pro free Gemini API (max 15 RPM).
+
+4 providery:
+- `GeminiProvider` — `google.genai`, `generate_content()`, **nenastavuje temperature** (Google default)
+- `OpenAIProvider` — `openai`, `chat.completions.create()`, temperature=0.7
+- `ClaudeProvider` — `anthropic`, `messages.create()`, max_tokens=8192, **nenastavuje temperature**
+- `DeepSeekProvider` — OpenAI-kompatibilní API, base_url=`https://api.deepseek.com`, temperature=0.7
+
+Factory: `create_llm(provider, api_key, model)` → instancíruje správný provider.
+
+---
+
+### generate_report.py — Markdown report
+
+Načte JSON výsledky z `results/`, agreguje data per-run i průměry per-level. Generuje dvousekční Markdown:
+
+1. **Detailní výsledky** — tabulka pro každý run se všemi levely a metrikami
+2. **Průměry pro výzkumné otázky** — RQ1 (validity, stale, iterace, empty, adherence) a RQ2 (endpoint coverage, assertion depth, avg length, response validation)
+
+---
+
+### run_coverage_manual.py — manuální code coverage
+
+Dvou-terminálový workflow (testy běží proti externímu serveru → coverage se sbírá na straně serveru):
+
+1. `run_tests(test_file)` — ověří server, resetuje DB, spustí pytest
+2. `slim_coverage(input, output)` — zredukuje coverage JSON z ~3000+ řádků na ~100 řádků (per-file summary + per-function detail jen pro `crud.py` a `main.py`)
+
+---
+
+### config.py — konfigurace pro manuální skripty
+
+Cesty k adresářům (`outputs/`, `results/`, `inputs/`), cesta k OpenAPI spec, Python interpret v .venv API projektu. Hlavní experiment tyto hodnoty nepoužívá — řídí se `experiment.yaml`.
+
+---
+
+## experiment.yaml — konfigurace (v9)
 
 ```yaml
 experiment:
-  name: "diplomka_v5"
+  name: "diplomka_v9"
   levels: ["L0", "L1", "L2", "L3", "L4"]
   max_iterations: 5
   runs_per_combination: 3
-  test_count: 50
+  test_count: 30
 
 llms:
-  - name: "gemini-2.0-flash"
+  - name: "gemini-3.1-flash-lite-preview"
     provider: "gemini"
-    model: "gemini-2.0-flash"
+    model: "gemini-3.1-flash-lite-preview"
     api_key_env: "GEMINI_API_KEY"
-  # + gpt-4o-mini, claude-sonnet, deepseek-chat, gemini-3.1-flash-lite
 
 apis:
   - name: "bookstore"
     docker: true
     source_dir: "../bookstore-api"
     base_url: "http://localhost:8000"
-    inputs: { openapi, documentation, source_code, db_schema, existing_tests }
+    startup_wait: 20.0
+    inputs:
+      openapi: "inputs/openapi.yaml"
+      documentation: "inputs/documentation.md"
+      source_code: "inputs/source_code.py"
+      db_schema: "inputs/db_schema.sql"
+      existing_tests: "inputs/existing_tests.py"
 
-    # JAK psát testy — platí pro VŠECHNY levely:
     framework_rules:
       - "Timeout=30 na každém HTTP volání."
-      - "Unikátní stringy přes uuid4."
-      - "Na DELETE s 204 nevolej .json()."
+      - "Unikátní stringy přes uuid4: unique(prefix) → f'{prefix}_{uuid.uuid4().hex[:8]}'"
       - "Nepoužívej fixtures, conftest, setup_module."
-      - "Nevolej /reset endpoint."
-      - "Každý test musí být self-contained."
+      - "Nevolej /reset endpoint — framework resetuje DB automaticky."
+      - "Každý test musí být self-contained (vytvoří si data přes helpery)."
+      - "Na DELETE s 204 nevolej .json() — tělo je prázdné."
 
-    # CO API dělá — jen pro L1+ (L0 to nedostane):
     api_knowledge:
-      - "create_book helper MUSÍ nastavit 'stock': 10, jinak objednávky selžou (API default je 0)."
+      - "create_book helper MUSÍ nastavit 'stock': 10, jinak objednávky selžou na insufficient stock (API default je 0)."
       - "Helper create_book má mít default published_year=2020. Pro test discountu na NOVOU knihu vytvoř knihu s published_year aktuálního roku PŘÍMO V TESTU."
       - "DELETE /books/{id}/tags používá REQUEST BODY: json={\"tag_ids\": [...]}."
       - "PATCH /books/{id}/stock používá QUERY parametr: params={\"quantity\": N}, ne JSON body."
@@ -293,95 +318,30 @@ apis:
 
 ---
 
+## Hardcoded konstanty
+
+| Konstanta | Hodnota | Kde | Zdůvodnění |
+|---|---|---|---|
+| `StaleTracker.threshold` | 2 | `phase3_generation.py` | Test musí selhat 2× se stejnou chybou než je označen jako stale |
+| `MAX_INDIVIDUAL_REPAIRS` | 10 | `phase3_generation.py` | ~1/3 test suite (při 30 testech) |
+| `_detect_helper_root_cause` ratio | 0.7 | `phase3_generation.py` | Práh pro detekci společné příčiny selhání |
+| `_detect_single_root_cause` ratio | 0.8 | `phase4_validation.py` | Práh pro hint o jednotné root cause |
+| `max_iterations` | 5 | `experiment.yaml` | Iterace 4–5 přináší minimální zlepšení |
+| `test_count` | 30 | `experiment.yaml` | Počet testů na run |
+| `MAX_ATTEMPTS` (plánování) | 4 | `phase2_planning.py` | Max pokusů pro dosažení cílového počtu testů v plánu |
+| `INFRA_RETRY_MAX` | 2 | `phase4_validation.py` | Max retry při infra chybách (DB locked, connection) |
+| `INFRA_RETRY_DELAY` | 5s | `phase4_validation.py` | Pauza mezi retry při infra chybách |
+| `RetryMixin.max_retries` | 5 | `llm_provider.py` | Max retry při LLM API chybách |
+| `RetryMixin.base_delay` | 10s | `llm_provider.py` | Base delay pro exponenciální backoff |
+| `time.sleep(15)` | 15s | `llm_provider.py` (module-level) | Globální zpomalení pro free Gemini API (15 RPM) |
+| `pytest --timeout` | 30s | `phase4_validation.py` | Timeout na jednotlivý test |
+| `subprocess timeout` | 900s | `phase4_validation.py` | Celkový timeout na pytest proces |
+
+---
+
 ## Testované API
 
-**Bookstore API** — FastAPI + SQLite, 34 endpointů (autoři, kategorie, knihy, recenze, tagy, objednávky). Byznys logika: slevy, stock management, order status transitions, kaskádové mazání, unique ISBN, discount omezení (kniha starší než rok). Docker režim.
-
----
-
-## Známé poznatky z experimentů
-
-### Vliv kontextu (v5 data — 1 run, gemini-3.1-flash-lite, 50 testů)
-
-| Level | Validity | EP Coverage | Stale | Iter | Compliance | Poznámka |
-|---|---|---|---|---|---|---|
-| L0 | 90.0% | 91.18% | 5 | 5 | 80 | Nemá helpery, inline setup |
-| L1 | 96.0% | **97.06%** | 2 | 5 | 80 | Nejširší pokrytí endpointů |
-| L2 | 98.0% | 82.35% | 1 | 5 | 80 | 46% error testů, vidí zdrojový kód |
-| L3 | **100%** | 91.18% | 0 | **2** | 80 | Jediný 100%, repair opravil oba failing |
-| L4 | 98.0% | 94.12% | 1 | 5 | **100** | Plný compliance díky referenčním testům |
-
-### Klíčová zjištění z diagnostik
-
-**Context size:** L0=20k tokenů (1 sekce), L4=41k tokenů (5 sekcí). Prompt budget max 36% okna — model má dostatek prostoru.
-
-**Helper snapshot:** L0 nemá create_* helpery — generuje inline setup. L1–L3 mají 4 helpery. L4 má 6 helperů (+tag, +order) s asserty v těle.
-
-**Instruction compliance:** L0–L3 ignorují timeout=30 na 100% HTTP callů. L4 dodržuje díky referenčním testům (in-context learning efekt). Měřitelný finding pro diplomku.
-
-**Status code hallucination:** L0 "halucinoval" 404 (není v OpenAPI spec). Ale 404 je správný! Model odvodil korektní HTTP konvenci z obecných znalostí.
-
-**EP coverage s 50 testy:** Trend "klesá s kontextem" z v4 (30 testů) se nepotvrdil. Byl artefakt malého počtu testů. S 50 testy L1 pokrývá 97%.
-
-**Test type distribution:** L0=68% happy_path, L4=54% error. Více kontextu → více error testů. `plan_analysis.error_focused_endpoints` ukazuje že L4 testuje error na 23 endpointech (vs L0 na 14).
-
-**Plan-code drift:** Opakující se pattern: plán říká 400 (business rule), kód assertuje 422 (Pydantic validace). Model při generování kódu přehodnotí plánovaný status kód.
-
-### Repair loop
-
-- L3 je jediný level kde repair opravil **oba** failing testy (iter 1→2)
-- L0: repair opravil 1/6 (stock_negative), zbylých 5 stale
-- L1/L2/L4: 0 oprav, failing testy jsou stale od první iterace
-- Stale detection funguje: identifikuje neopravitelné testy po 2 iteracích
-
-### Srovnání v4 (30 testů) vs v5 (50 testů)
-
-| Metrika | v4 | v5 | Změna |
-|---|---|---|---|
-| L0 EP coverage | 58.82% | 91.18% | +32 p.p. (víc testů = víc endpointů) |
-| L1 EP coverage | 55.88% | 97.06% | +41 p.p. |
-| L0 validity | 80% | 90% | +10 p.p. (bez api_knowledge hints) |
-| L3 validity | 100% | 100% | stabilní |
-
----
-
-## Výstupní JSON struktura
-
-Každý run produkuje objekt s:
-
-```json
-{
-  "llm": "gemini-2.0-flash",
-  "api": "bookstore",
-  "level": "L2",
-  "run_id": 1,
-  "iterations_used": 5,
-  "all_tests_passed": false,
-  "metrics": {
-    "test_validity": { "validity_rate_pct": 98.0 },
-    "endpoint_coverage": { "endpoint_coverage_pct": 82.35 },
-    "assertion_depth": { "assertion_depth": 1.34 },
-    "stale_tests": { "stale_count": 1, "stale_names": ["test_..."] }
-  },
-  "diagnostics": {
-    "context_size": { "total_est_tokens": 34023, "sections": {"OPENAPI": {...}, "SOURCE": {...}} },
-    "plan_analysis": { "domain_distribution": {"books": 24, "orders": 10}, "top3_concentration_pct": 20.0 },
-    "helper_snapshot": { "helpers": {"create_book": {"has_stock_field": true, "default_published_year": 2020}} },
-    "failure_taxonomy": { "categories": {"wrong_status_code": 1}, "per_test": {"test_x": {"category": "...", "error_summary": "..."}} },
-    "code_patterns": { "summary": {"avg_http_calls": 1.32, "pct_side_effect_checks": 4.0} },
-    "repair_trajectory": {
-      "convergence_iteration": 2,
-      "never_fixed_tests": ["test_..."],
-      "fixed_tests": ["test_..."],
-      "failure_categories": {"test_x": "wrong_status_code"},
-      "iterations": [{"iteration": 1, "failed": 2, "repair_type": "isolated", "failure_details": {...}}]
-    },
-    "instruction_compliance": { "missing_timeout": 69, "compliance_score": 80 },
-    "context_utilization": { "status_codes_hallucinated": [] },
-    "plan_code_drift": { "drift_count": 3, "status_code_drift": {"test_x": {"planned": 400, "actual_in_code": [422]}} }
-  }
-}
-```
+**Bookstore API** — FastAPI + SQLite, 34 endpointů (autoři, kategorie, knihy, recenze, tagy, objednávky). Byznys logika: slevy, stock management, order status transitions, kaskádové mazání, unique ISBN, discount omezení. Docker režim s `docker-compose.yml`.
 
 ---
 
@@ -406,6 +366,16 @@ python run_coverage_manual.py outputs/test_generated_{tag}.py
 # Terminál 1: Ctrl+C, pak:
 coverage json -o coverage_{tag}.json
 coverage report
+
+# Slim:
+python run_coverage_manual.py --slim ../bookstore-api/coverage_full.json coverage_{tag}.json
+```
+
+## Generování reportu
+
+```bash
+python generate_report.py
+# → last_run_auto.md
 ```
 
 ## Tech stack
@@ -413,4 +383,5 @@ coverage report
 - Python 3.12+, pytest, requests, coverage.py, mutmut
 - LLM: Gemini, OpenAI, Claude, DeepSeek (abstrakce v `llm_provider.py`)
 - Konfigurace: YAML + dotenv
-- Server: Docker compose (doporučený) nebo lokální subprocess
+- Server: Docker compose nebo lokální subprocess
+- AST manipulace: Python `ast` modul pro bezpečnou práci s kódem
