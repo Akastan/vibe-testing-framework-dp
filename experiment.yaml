@@ -3,12 +3,12 @@
 # ══════════════════════════════════════════════════════════
 
 experiment:
-  name: "diplomka_v3"
+  name: "diplomka_v8"
   levels: ["L0", "L1", "L2", "L3", "L4"]
-  #levels: ["L2"]
+  #levels: ["L0"]
   max_iterations: 5        # Feedback loop iterací
-  runs_per_combination: 2 #3  # Opakování pro statistickou validitu
-  test_count: 30           # Kolik testů LLM vygeneruje
+  runs_per_combination: 1 #3  # Opakování pro statistickou validitu
+  test_count: 50           # Kolik testů LLM vygeneruje
 
 # ── LLM modely ───────────────────────────────────────────
 # Každý model musí mít provider a api_key_env (název env proměnné)
@@ -43,8 +43,11 @@ llms:
   #   model: "deepseek-chat"
   #   api_key_env: "DEEPSEEK_API_KEY"
 
+
 # ── Testovaná API ────────────────────────────────────────
-# Pro každé API definuj cesty ke vstupům a server konfiguraci
+# api_rules: instrukce pro LLM jak volat endpointy (bez těchto testy padnou)
+# helper_hints: jak správně nastavit helper funkce (default hodnoty, povinná pole)
+
 apis:
   - name: "bookstore"
     docker: true
@@ -57,6 +60,32 @@ apis:
       source_code: "inputs/source_code.py"
       db_schema: "inputs/db_schema.sql"
       existing_tests: "inputs/existing_tests.py"
+
+    # ── FRAMEWORK RULES ─────────────────────────────────
+    # JAK psát testy. Platí pro VŠECHNY levely.
+    # Nesmí obsahovat žádnou znalost o tom CO API dělá.
+    # Jen technické instrukce pro pytest + requests.
+    # ────────────────────────────────────────────────────
+    framework_rules:
+      - "Timeout=30 na každém HTTP volání."
+      - "Unikátní stringy přes uuid4: unique(prefix) → f'{prefix}_{uuid.uuid4().hex[:8]}'"
+      - "Nepoužívej fixtures, conftest, setup_module."
+      - "Nevolej /reset endpoint — framework resetuje DB automaticky."
+      - "Každý test musí být self-contained (vytvoří si data přes helpery)."
+      - "Na DELETE s 204 nevolej .json() — tělo je prázdné."
+
+    # ── API KNOWLEDGE ───────────────────────────────────
+    # CO API dělá. Injektuje se POUZE do L1+.
+    # Na L0 model toto NEDOSTANE — musí si to odvodit z OpenAPI spec.
+    # ────────────────────────────────────────────────────
+    api_knowledge:
+      - "create_book helper MUSÍ nastavit 'stock': 10, jinak objednávky selžou na insufficient stock (API default je 0)."
+      - "Helper create_book má mít default published_year=2020. Pro test discountu na NOVOU knihu (mladší 1 roku) vytvoř knihu s published_year aktuálního roku PŘÍMO V TESTU."
+      - "DELETE /books/{id}/tags používá REQUEST BODY: json={\"tag_ids\": [...]}."
+      - "PATCH /books/{id}/stock používá QUERY parametr: params={\"quantity\": N}, ne JSON body."
+      - "Stock quantity je DELTA (přičte/odečte), ne absolutní hodnota. Stock=10, quantity=5 → výsledek 15."
+      - "Pro 'not found' endpointy API vrací 404, ne 422."
+      - "POST endpointy vracejí 201 při úspěchu, ne 200."
 
   # - name: "todo-api"
   #   source_dir: "../todo-api"
