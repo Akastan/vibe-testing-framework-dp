@@ -45,9 +45,12 @@ class GeminiProvider(LLMProvider, RetryMixin):
         self.base_delay = base_delay
 
     def generate_text(self, prompt: str) -> str:
+        from google.genai import types
         def _call():
             return self.client.models.generate_content(
-                model=self.model_name, contents=prompt
+                model=self.model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(temperature=1),
             ).text
         return self._retry_call(_call)
 
