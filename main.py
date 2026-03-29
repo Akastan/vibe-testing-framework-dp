@@ -5,6 +5,10 @@ Změny oproti v1:
 - PromptBuilder se vytváří z api_cfg a předává do všech fází
 - StaleTracker žije per run (resetuje se mezi runy)
 - phase2 dostává prompt_builder místo raw promptu
+
+v2.1:
+- Temperature jako další rozměr experimentu (RQ4)
+- create_llm() se volá per-temperature (ne per-LLM)
 """
 import os
 import json
@@ -48,13 +52,21 @@ def _sanitize_tag(name: str) -> str:
     return name.replace(".", "_").replace(" ", "_")
 
 
+def _temp_tag(temperature) -> str:
+    """Vrátí tag pro temperature do názvu souboru. None → prázdný string."""
+    if temperature is None:
+        return ""
+    return f"__t{str(temperature).replace('.', '_')}"
+
+
 def run_pipeline(
     llm, llm_name: str, api_cfg: dict, level: str,
     run_id: int, test_count: int, max_iterations: int,
+    temperature=None,
 ) -> dict:
-    """Spustí jednu kombinaci: 1 LLM × 1 API × 1 Level × 1 Run."""
+    """Spustí jednu kombinaci: 1 LLM × 1 API × 1 Level × 1 Run (× 1 Temperature)."""
     api_name = api_cfg["name"]
-    tag = f"{_sanitize_tag(llm_name)}__{api_name}__{level}__run{run_id}"
+    tag = f"{_sanitize_tag(llm_name)}__{api_name}__{level}__run{run_id}{_temp_tag(temperature)}"
     output_filename = f"test_generated_{tag}.py"
     plan_filename = f"test_plan_{tag}.json"
     output_path = os.path.join(OUTPUTS_DIR, output_filename)
@@ -64,8 +76,9 @@ def run_pipeline(
     # ── Unified prompt builder (z api_cfg + level) ──────
     prompt_builder = PromptBuilder(api_cfg, level=level)
 
+    temp_str = f" | temp={temperature}" if temperature is not None else ""
     print(f"\n{'=' * 65}")
-    print(f"  {llm_name} | {api_name} | {level} | Běh {run_id}")
+    print(f"  {llm_name} | {api_name} | {level} | Běh {run_id}{temp_str}")
     print(f"{'=' * 65}")
 
     start_time = time.time()
@@ -147,10 +160,9 @@ def run_pipeline(
                 prompt_builder=prompt_builder,
                 base_url=api_cfg["base_url"],
                 stale_tracker=stale_tracker,
-                previous_repair_type=last_repair_type,  # ← NOVÉ
+                previous_repair_type=last_repair_type,
             )
-            last_repair_type = repair_info["repair_type"]  # ← NOVÉ
-            # Zapiš repair metadata do DALŠÍ iterace (ta co poběží s opraveným kódem)
+            last_repair_type = repair_info["repair_type"]
             diag_repair_tracker.annotate_last(
                 repair_type=repair_info["repair_type"],
                 repaired_count=repair_info["repaired_count"],
@@ -211,6 +223,7 @@ def run_pipeline(
         "api": api_name,
         "level": level,
         "run_id": run_id,
+        "temperature": temperature,
         "iterations_used": iteration,
         "all_tests_passed": success,
         "elapsed_seconds": elapsed,
@@ -231,11 +244,16 @@ def main():
     max_iter = exp["max_iterations"]
     runs = exp["runs_per_combination"]
     test_count = exp["test_count"]
+    temperatures = exp.get("temperatures", [None])
 
-    total = len(cfg["llms"]) * len(cfg["apis"]) * len(levels) * runs
+    total = len(cfg["llms"]) * len(cfg["apis"]) * len(levels) * runs * len(temperatures)
+    temp_info = f" × {len(temperatures)} temps" if temperatures != [None] else ""
     print(f"\n🔬 EXPERIMENT: {exp['name']}")
-    print(f"   {len(cfg['llms'])} LLMs × {len(cfg['apis'])} APIs × {len(levels)} levels × {runs} runs = {total} běhů")
-    print(f"   Max iterací: {max_iter} | Testů na plán: {test_count}\n")
+    print(f"   {len(cfg['llms'])} LLMs × {len(cfg['apis'])} APIs × {len(levels)} levels × {runs} runs{temp_info} = {total} běhů")
+    print(f"   Max iterací: {max_iter} | Testů na plán: {test_count}")
+    if temperatures != [None]:
+        print(f"   Temperatures: {temperatures}")
+    print()
 
     all_results = []
     done = 0
@@ -246,37 +264,45 @@ def main():
             print(f"⚠️ {llm_cfg['api_key_env']} nenalezen, přeskakuji {llm_cfg['name']}")
             continue
 
-        llm = create_llm(llm_cfg["provider"], api_key, llm_cfg["model"])
         print(f"\n🤖 LLM: {llm_cfg['name']}")
 
         for api_cfg in cfg["apis"]:
             print(f"\n📦 API: {api_cfg['name']}")
 
             for level in levels:
-                for run_id in range(1, runs + 1):
-                    done += 1
-                    print(f"\n[{done}/{total}] ", end="")
+                for temp in temperatures:
+                    # Vytvoř LLM instanci s konkrétní teplotou
+                    llm = create_llm(
+                        llm_cfg["provider"], api_key, llm_cfg["model"],
+                        temperature=temp,
+                    )
 
-                    try:
-                        result = run_pipeline(
-                            llm=llm,
-                            llm_name=llm_cfg["name"],
-                            api_cfg=api_cfg,
-                            level=level,
-                            run_id=run_id,
-                            test_count=test_count,
-                            max_iterations=max_iter,
-                        )
-                        all_results.append(result)
-                    except Exception as e:
-                        print(f"  ❌ CHYBA: {e}")
-                        all_results.append({
-                            "llm": llm_cfg["name"],
-                            "api": api_cfg["name"],
-                            "level": level,
-                            "run_id": run_id,
-                            "error": str(e),
-                        })
+                    for run_id in range(1, runs + 1):
+                        done += 1
+                        print(f"\n[{done}/{total}] ", end="")
+
+                        try:
+                            result = run_pipeline(
+                                llm=llm,
+                                llm_name=llm_cfg["name"],
+                                api_cfg=api_cfg,
+                                level=level,
+                                run_id=run_id,
+                                test_count=test_count,
+                                max_iterations=max_iter,
+                                temperature=temp,
+                            )
+                            all_results.append(result)
+                        except Exception as e:
+                            print(f"  ❌ CHYBA: {e}")
+                            all_results.append({
+                                "llm": llm_cfg["name"],
+                                "api": api_cfg["name"],
+                                "level": level,
+                                "run_id": run_id,
+                                "temperature": temp,
+                                "error": str(e),
+                            })
 
             stop_managed_server(api_cfg)
 

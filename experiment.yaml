@@ -10,6 +10,12 @@ experiment:
   runs_per_combination: 3 #3  # Opakování pro statistickou validitu
   test_count: 30           # Kolik testů LLM vygeneruje
 
+  # ── Temperature experiment (RQ3) ─────────────────────
+  # Pokud je temperatures list přítomen a má víc než 1 hodnotu,
+  # pipeline iteruje přes všechny teploty jako další rozměr.
+  # Pokud chybí nebo je [null], použije se default teplota provideru.
+  temperatures: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+
 # ── LLM modely ───────────────────────────────────────────
 # Každý model musí mít provider a api_key_env (název env proměnné)
 llms:
