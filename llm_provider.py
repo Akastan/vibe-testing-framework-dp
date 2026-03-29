@@ -1,6 +1,6 @@
 """
 Abstrakce nad LLM providery.
-Podporuje: Gemini, OpenAI, Claude, DeepSeek.
+Podporuje: Gemini, OpenAI, Claude, DeepSeek, OllamaCompat (lokální modely).
 
 Model se vždy nastavuje přes experiment.yaml → create_llm().
 Temperature se předává z experiment.yaml; None = default provideru.
@@ -129,6 +129,41 @@ class DeepSeekProvider(LLMProvider, RetryMixin):
         return self._retry_call(_call)
 
 
+class OllamaCompatProvider(LLMProvider, RetryMixin):
+    def __init__(self, api_key: str, model_name: str,
+                 temperature: float | None = None,
+                 max_retries: int = 5, base_delay: float = 10.0,
+                 base_url: str = "",
+                 max_tokens: int = 8192,
+                 num_ctx: int = 32768,
+                 verify_ssl: bool = False):
+        import httpx
+        from openai import OpenAI
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url=base_url,
+            http_client=httpx.Client(verify=verify_ssl),
+        )
+        self.model_name = model_name
+        self.temperature = temperature if temperature is not None else 0.4
+        self.max_tokens = max_tokens
+        self.num_ctx = num_ctx
+        self.max_retries = max_retries
+        self.base_delay = base_delay
+
+    def generate_text(self, prompt: str) -> str:
+        def _call():
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+                extra_body={"options": {"num_ctx": self.num_ctx}},
+            )
+            return response.choices[0].message.content
+        return self._retry_call(_call)
+
+
 # ── Factory ──────────────────────────────────────────────
 
 PROVIDERS = {
@@ -136,12 +171,24 @@ PROVIDERS = {
     "openai": OpenAIProvider,
     "claude": ClaudeProvider,
     "deepseek": DeepSeekProvider,
+    "ollama_compat": OllamaCompatProvider,
 }
 
 def create_llm(provider: str, api_key: str, model: str,
-               temperature: float | None = None) -> LLMProvider:
-    """Vytvoří LLM provider podle názvu. Model a temperature se berou z experiment.yaml."""
+               temperature: float | None = None,
+               **kwargs) -> LLMProvider:
+    """
+    Vytvoří LLM provider podle názvu. Model a temperature se berou z experiment.yaml.
+    Extra kwargs (base_url, max_tokens, num_ctx, verify_ssl) se předají jen providerům,
+    které je podporují.
+    """
     cls = PROVIDERS.get(provider)
     if not cls:
         raise ValueError(f"Neznámý provider: {provider}. Dostupné: {list(PROVIDERS.keys())}")
-    return cls(api_key=api_key, model_name=model, temperature=temperature)
+
+    # Předej jen kwargs které konstruktor přijímá
+    import inspect
+    valid_params = inspect.signature(cls.__init__).parameters
+    filtered = {k: v for k, v in kwargs.items() if k in valid_params}
+
+    return cls(api_key=api_key, model_name=model, temperature=temperature, **filtered)

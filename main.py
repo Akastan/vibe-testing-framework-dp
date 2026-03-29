@@ -264,6 +264,14 @@ def main():
             print(f"⚠️ {llm_cfg['api_key_env']} nenalezen, přeskakuji {llm_cfg['name']}")
             continue
 
+        # Extra kwargs pro provider (base_url, max_tokens, num_ctx, verify_ssl)
+        llm_extra = {}
+        if "base_url_env" in llm_cfg:
+            llm_extra["base_url"] = os.environ.get(llm_cfg["base_url_env"], "")
+        for k in ("max_tokens", "num_ctx", "verify_ssl"):
+            if k in llm_cfg:
+                llm_extra[k] = llm_cfg[k]
+
         print(f"\n🤖 LLM: {llm_cfg['name']}")
 
         for api_cfg in cfg["apis"]:
@@ -274,7 +282,7 @@ def main():
                     # Vytvoř LLM instanci s konkrétní teplotou
                     llm = create_llm(
                         llm_cfg["provider"], api_key, llm_cfg["model"],
-                        temperature=temp,
+                        temperature=temp, **llm_extra,
                     )
 
                     for run_id in range(1, runs + 1):
