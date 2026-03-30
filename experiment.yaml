@@ -3,11 +3,11 @@
 # ══════════════════════════════════════════════════════════
 
 experiment:
-  name: "diplomka_v9"
+  name: "diplomka_v10"
   #levels: ["L0", "L1", "L2", "L3", "L4"]
-  levels: ["L2"]
+  levels: ["L4"]
   max_iterations: 5        # Feedback loop iterací
-  runs_per_combination: 2 #3  # Opakování pro statistickou validitu
+  runs_per_combination: 5 #3  # Opakování pro statistickou validitu
   test_count: 30           # Kolik testů LLM vygeneruje
 
   # ── Temperature experiment (RQ3) ─────────────────────
@@ -25,13 +25,11 @@ llms:
     model: "gemini-3.1-flash-lite-preview"
     api_key_env: "GEMINI_API_KEY"
 
-
-  # ── Firemní lokální modely (Ollama-compatible) ───────
   # - name: "deepseek-r1-32b"
   #   provider: "ollama_compat"
   #   model: "deepseek-r1:32b-fast"
   #   api_key_env: "LOCAL_LLM_KEY"
-  #   base_url_env: "LOCAL_LLM_URL"    # .env: LOCAL_LLM_URL=https://...
+  #   base_url_env: "LOCAL_LLM_URL"
   #   max_tokens: 8192
   #   num_ctx: 32768
   #   verify_ssl: false
