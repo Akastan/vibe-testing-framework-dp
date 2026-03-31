@@ -67,13 +67,44 @@ def _filter_reset_tests(plan: dict) -> dict:
 
 def _parse_plan_json(raw: str) -> dict:
     clean = raw.strip()
+    # Strip markdown code blocks
     clean = re.sub(r'^```(?:json)?\s*', '', clean)
     clean = re.sub(r'\s*```$', '', clean)
+
+    # 1. Try direct parse
     try:
         return json.loads(clean)
-    except json.JSONDecodeError as e:
-        print(f"  ❌ JSON parse error: {e}")
-        return {"test_plan": []}
+    except json.JSONDecodeError:
+        pass
+
+    # 2. Try to find JSON object with test_plan key
+    #    (model may wrap JSON in prose before/after)
+    match = re.search(
+        r'\{\s*"test_plan"\s*:\s*\[.*\]\s*\}',
+        clean, re.DOTALL
+    )
+    if match:
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError:
+            pass
+
+    # 3. Try to find any top-level JSON object (greedy, last resort)
+    #    Find the first { and last } that could form valid JSON
+    first_brace = clean.find('{')
+    last_brace = clean.rfind('}')
+    if first_brace != -1 and last_brace > first_brace:
+        candidate = clean[first_brace:last_brace + 1]
+        try:
+            parsed = json.loads(candidate)
+            if "test_plan" in parsed:
+                return parsed
+        except json.JSONDecodeError:
+            pass
+
+    print(f"  ❌ JSON parse error: no valid JSON found in response ({len(raw)} chars)")
+    print(f"  ❌ First 200 chars: {raw[:200]}")
+    return {"test_plan": []}
 
 
 def generate_test_plan(context_data: str, llm,

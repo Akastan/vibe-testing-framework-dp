@@ -160,7 +160,11 @@ class OllamaCompatProvider(LLMProvider, RetryMixin):
                 max_tokens=self.max_tokens,
                 extra_body={"options": {"num_ctx": self.num_ctx}},
             )
-            return response.choices[0].message.content
+            raw = response.choices[0].message.content or ""
+            import re
+            text = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL).strip()
+            return text
+
         return self._retry_call(_call)
 
 

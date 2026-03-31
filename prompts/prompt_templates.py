@@ -73,10 +73,27 @@ class PromptBuilder:
     # ══════════════════════════════════════════════════
 
     def planning_prompt(self, context: str, test_count: int) -> str:
-        return f"""Analyzuj toto API a vytvoř testovací plán s PŘESNĚ {test_count} testy.
+        # ZMĚNA: Kontext je nahoře. Znalosti uprostřed. Tvrdá pravidla a JSON vynucení úplně dole.
+        return f"""Analyzuj toto API a připrav se na vytvoření testovacího plánu.
+
+API KONTEXT:
+{context}
+{self._knowledge_block()}
+=========================================
+CRITICAL INSTRUCTIONS FOR OUTPUT:
+Na základě API kontextu výše vytvoř testovací plán s PŘESNĚ {test_count} testy.
 Rozhodni sám, které endpointy a scénáře jsou nejdůležitější pro otestování.
 
-Vrať POUZE validní JSON:
+PRAVIDLA PRO TESTY:
+- type = "happy_path" | "edge_case" | "error"
+- name = snake_case bez diakritiky, unikátní napříč celým plánem
+- endpoint musí být přesná cesta z API specifikace (s path parametry jako {{book_id}})
+- method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+- Jeden endpoint (method+path) = jeden objekt v poli, s více test_cases uvnitř
+- PŘESNĚ {test_count} testů celkem, ani více ani méně
+- NEGENERUJ test na reset databáze ani /reset endpoint
+
+POŽADOVANÁ JSON STRUKTURA:
 {{
   "test_plan": [
     {{
@@ -94,27 +111,24 @@ Vrať POUZE validní JSON:
   ]
 }}
 
-PRAVIDLA:
-- type = "happy_path" | "edge_case" | "error"
-- name = snake_case bez diakritiky, unikátní napříč celým plánem
-- endpoint musí být přesná cesta z API specifikace (s path parametry jako {{book_id}})
-- method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
-- Jeden endpoint (method+path) = jeden objekt v poli, s více test_cases uvnitř
-- PŘESNĚ {test_count} testů celkem, ani více ani méně
-- NEGENERUJ test na reset databáze ani /reset endpoint
-{self._knowledge_block()}
-Kontext:
-{context}
+YOU MUST RESPOND WITH ONLY VALID JSON. 
+NO MARKDOWN, NO PROSE, NO EXPLANATIONS.
+Start your response with {{ and end with }}.
 """
 
     def planning_fill_prompt(self, current_plan_json: str, actual: int, target: int) -> str:
         missing = target - actual
         return (
-            f"Tento testovací plán má {actual} testů, ale potřebuji PŘESNĚ {target}. "
+            f"Tento testovací plán má {actual} testů, ale potřebuji PŘESNĚ {target}.\n\n"
+            f"AKTUÁLNÍ PLÁN:\n{current_plan_json}\n\n"
+            f"=========================================\n"
+            f"CRITICAL INSTRUCTIONS FOR OUTPUT:\n"
             f"Přidej {missing} nových testů. Zaměř se na endpointy a scénáře které ještě "
-            f"nejsou dostatečně pokryté (edge cases, error handling, validace).\n\n"
-            f"Vrať CELÝ plán (starý + nový) jako validní JSON.\n\n"
-            f"Aktuální plán:\n{current_plan_json}"
+            f"nejsou dostatečně pokryté (edge cases, error handling, validace).\n"
+            f"Vrať CELÝ plán (starý + nový).\n\n"
+            f"YOU MUST RESPOND WITH ONLY VALID JSON.\n"
+            f"NO MARKDOWN, NO PROSE, NO EXPLANATIONS.\n"
+            f"Start your response with {{ and end with }}."
         )
 
     # ══════════════════════════════════════════════════
@@ -122,29 +136,28 @@ Kontext:
     # ══════════════════════════════════════════════════
 
     def generation_prompt(self, plan_json: str, context: str, base_url: str) -> str:
-        return f"""Napiš pytest testy v Pythonu (requests knihovna) pro toto REST API.
+        return f"""Budeš psát pytest testy v Pythonu (requests knihovna) pro toto REST API.
 BASE_URL = "{base_url}"
 
-PLÁN:
-{plan_json}
-
-KONTEXT:
+KONTEXT API:
 {context}
-{self._framework_block()}
-UNIKÁTNÍ NÁZVY (povinné, jinak testy kolidují):
-- Pro unikátní názvy použij uuid4 suffix:
-    def unique(prefix="test"):
-        return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
-- V KAŽDÉM helper volání generuj unikátní názvy.
-{self._knowledge_block()}
-KVALITA ASERCÍ:
-- Nekontroluj POUZE status kód. Každý test by měl ověřit i odpověď:
-  - Happy path (201/200): ověř klíče v response body (assert "id" in data, assert data["name"] == ...)
-  - Error: ověř assert "detail" in r.json()
-  - GET seznam: ověř strukturu (assert "items" in data nebo assert isinstance(data, list))
-  - Side effects: po vytvoření objednávky ověř snížení skladu, po smazání ověř 404 na GET
 
-Vrať POUZE Python kód, žádný markdown.
+PLÁN TESTŮ:
+{plan_json}
+{self._knowledge_block()}{self._framework_block()}
+=========================================
+CRITICAL CODING INSTRUCTIONS:
+1. UNIKÁTNÍ NÁZVY (povinné, jinak testy kolidují):
+   - Pro unikátní názvy použij uuid4 suffix: def unique(prefix="test"): return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
+   - V KAŽDÉM helper volání generuj unikátní názvy.
+2. KVALITA ASERCÍ: Nekontroluj POUZE status kód. Každý test by měl ověřit i odpověď:
+   - Happy path (201/200): ověř klíče v response body (assert "id" in data)
+   - Error: ověř detail (assert "detail" in r.json())
+   - GET seznam: ověř strukturu (assert "items" in data nebo assert isinstance(data, list))
+   - Side effects: po vytvoření ověř snížení skladu, po smazání ověř 404 na GET
+
+YOU MUST RESPOND WITH ONLY VALID PYTHON CODE.
+NO MARKDOWN BLOCKS (do not use ```python), NO PROSE, NO EXPLANATIONS.
 """
 
     # ══════════════════════════════════════════════════
@@ -156,8 +169,7 @@ Vrať POUZE Python kód, žádný markdown.
         helpers: str, base_url: str,
         stale_tests: list[str] | None = None,
     ) -> str:
-        return f"""Oprav POUZE tuto jednu testovací funkci. Vrať POUZE opravenou funkci.
-
+        return f"""Oprav tuto jednu selhávající testovací funkci.
 BASE_URL = "{base_url}"
 
 DOSTUPNÉ HELPERY:
@@ -166,15 +178,17 @@ DOSTUPNÉ HELPERY:
 SELHÁVAJÍCÍ TEST:
 {test_code}
 
-CHYBA:
+CHYBA PŘI BĚHU:
 {error_msg}
-
-PRAVIDLA:
-- Vrať POUZE opravenou funkci (def test_...(): ...), žádné importy ani helpery.
-- Neměň název funkce.
+{self._knowledge_block()}{self._stale_block(stale_tests)}{self._framework_block()}
+=========================================
+CRITICAL CODING INSTRUCTIONS:
+- Oprav funkci, neměň její název.
 - Používej existující helper funkce, nevymýšlej nové.
 - Pokud test ověřuje jen status kód, přidej i kontrolu response body.
-{self._framework_block()}{self._knowledge_block()}{self._stale_block(stale_tests)}
+
+YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (the fixed function only).
+NO MARKDOWN BLOCKS, NO PROSE, NO IMPORTS, NO EXPLANATIONS.
 """
 
     def repair_helpers_prompt(
@@ -183,7 +197,6 @@ PRAVIDLA:
     ) -> str:
         errors_text = "\n".join(sample_errors)
         return f"""Většina testů padá kvůli bugu v helper funkcích. Oprav helpery.
-
 BASE_URL = "{base_url}"
 
 AKTUÁLNÍ HELPERY:
@@ -191,13 +204,14 @@ AKTUÁLNÍ HELPERY:
 
 UKÁZKY CHYB ({failing_count} testů celkem padá):
 {errors_text}
-{self._knowledge_block()}
-PRAVIDLA:
-- Vrať POUZE opravené helpery a importy (vše co je nad test funkcemi).
+{self._knowledge_block()}{self._framework_block()}
+=========================================
+CRITICAL CODING INSTRUCTIONS:
 - Zachovej signatury helperů kompatibilní s existujícími testy.
 - Zajisti unikátní názvy přes uuid4 (unique() helper).
-- Žádný markdown, jen Python kód.
-{self._framework_block()}
+
+YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (the fixed helpers and imports).
+NO MARKDOWN BLOCKS, NO PROSE, NO EXPLANATIONS.
 """
 
     def fill_tests_prompt(
@@ -205,23 +219,25 @@ PRAVIDLA:
         context: str, base_url: str,
     ) -> str:
         names_str = ", ".join(existing_names)
-        return f"""Vygeneruj PŘESNĚ {missing} nových pytest testů pro toto REST API.
+        return f"""Vygeneruj nové pytest testy pro toto REST API.
 BASE_URL = "{base_url}"
-
-DOSTUPNÉ HELPERY (použi je, nevymýšlej nové):
-{helpers}
-
-EXISTUJÍCÍ TESTY (tyto názvy NEPOUŽÍVEJ):
-{names_str}
 
 KONTEXT API:
 {context[:3000]}
 
-PRAVIDLA:
-- Vrať POUZE {missing} nových test funkcí (def test_...(): ...).
-- Žádné importy, žádné helpery, žádný markdown.
+DOSTUPNÉ HELPERY (použij je, nevymýšlej nové):
+{helpers}
+
+EXISTUJÍCÍ TESTY (tyto názvy NEPOUŽÍVEJ):
+{names_str}
+{self._knowledge_block()}{self._framework_block()}
+=========================================
+CRITICAL CODING INSTRUCTIONS:
+- Vygeneruj PŘESNĚ {missing} nových test funkcí (def test_...(): ...).
 - Každý test musí být self-contained.
 - Zaměř se na scénáře které existující testy nepokrývají.
 - Nekontroluj jen status kód — ověřuj i response body.
-{self._framework_block()}{self._knowledge_block()}
+
+YOU MUST RESPOND WITH ONLY VALID PYTHON CODE ({missing} new functions).
+NO MARKDOWN BLOCKS, NO IMPORTS, NO HELPERS, NO PROSE, NO EXPLANATIONS.
 """
