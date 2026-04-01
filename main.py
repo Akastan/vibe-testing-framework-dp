@@ -63,6 +63,7 @@ def run_pipeline(
     llm, llm_name: str, api_cfg: dict, level: str,
     run_id: int, test_count: int, max_iterations: int,
     temperature=None,
+    use_slim_context: bool = False,
 ) -> dict:
     """Spustí jednu kombinaci: 1 LLM × 1 API × 1 Level × 1 Run (× 1 Temperature)."""
     api_name = api_cfg["name"]
@@ -72,6 +73,19 @@ def run_pipeline(
     output_path = os.path.join(OUTPUTS_DIR, output_filename)
 
     inputs = api_cfg["inputs"]
+
+    # ── Výběr OpenAPI cesty ─────────────────────────────
+    # Slim context pro modely s omezeným context window
+    openapi_for_context = inputs["openapi"]  # default: plná spec
+    if use_slim_context and inputs.get("openapi_slim"):
+        if os.path.exists(inputs["openapi_slim"]):
+            openapi_for_context = inputs["openapi_slim"]
+            print(f"  [Context] Používám slim OpenAPI spec: {openapi_for_context}")
+        else:
+            print(f"  [Context] ⚠️ Slim spec nenalezena ({inputs['openapi_slim']}), používám plnou")
+
+    # Plná spec se VŽDY používá pro metriky (endpoint coverage)
+    openapi_for_metrics = inputs["openapi"]
 
     # ── Unified prompt builder (z api_cfg + level) ──────
     prompt_builder = PromptBuilder(api_cfg, level=level)
@@ -85,7 +99,7 @@ def run_pipeline(
 
     # ── FÁZE 1: Kontext ──────────────────────────────────
     context = analyze_context(
-        openapi_path=inputs["openapi"],
+        openapi_path=openapi_for_context,
         doc_path=inputs.get("documentation"),
         level=level,
         source_code_path=inputs.get("source_code"),
@@ -179,7 +193,7 @@ def run_pipeline(
     metrics = calculate_all_metrics(
         file_path=output_path,
         pytest_output=output_log,
-        openapi_path=inputs["openapi"],
+        openapi_path=openapi_for_metrics,
         test_plan=test_plan,
     )
 
@@ -212,7 +226,7 @@ def run_pipeline(
         test_plan=test_plan,
         code=test_code,
         pytest_log=output_log,
-        openapi_path=inputs["openapi"],
+        openapi_path=openapi_for_metrics,
         plan_json_str=plan_json_str,
         repair_tracker=diag_repair_tracker,
     )
@@ -224,6 +238,7 @@ def run_pipeline(
         "level": level,
         "run_id": run_id,
         "temperature": temperature,
+        "use_slim_context": use_slim_context,
         "iterations_used": iteration,
         "all_tests_passed": success,
         "elapsed_seconds": elapsed,
@@ -274,6 +289,8 @@ def main():
 
         print(f"\n🤖 LLM: {llm_cfg['name']}")
 
+        use_slim = llm_cfg.get("use_slim_context", False)
+
         for api_cfg in cfg["apis"]:
             print(f"\n📦 API: {api_cfg['name']}")
 
@@ -299,6 +316,7 @@ def main():
                                 test_count=test_count,
                                 max_iterations=max_iter,
                                 temperature=temp,
+                                use_slim_context=use_slim,
                             )
                             all_results.append(result)
                         except Exception as e:

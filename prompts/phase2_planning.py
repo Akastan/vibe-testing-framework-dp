@@ -65,6 +65,29 @@ def _filter_reset_tests(plan: dict) -> dict:
     return plan
 
 
+def _repair_json_string(raw: str) -> str:
+    """Opraví běžné chyby v JSON od LLM: nequotované stringy, trailing commas."""
+    import re
+    s = raw
+
+    # 1. Fix unquoted string values after colon
+    #    "name": health_check_successful  →  "name": "health_check_successful"
+    s = re.sub(
+        r':\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*([,\n\r\}])',
+        lambda m: f': "{m.group(1)}"{m.group(2)}',
+        s
+    )
+
+    # 2. Fix trailing commas before } or ]
+    s = re.sub(r',\s*([}\]])', r'\1', s)
+
+    # 3. Fix single quotes → double quotes (but not inside strings)
+    # Simple heuristic: replace ' with " when it looks like JSON structure
+    if '"test_plan"' not in s and "'test_plan'" in s:
+        s = s.replace("'", '"')
+
+    return s
+
 def _parse_plan_json(raw: str) -> dict:
     clean = raw.strip()
     # Strip markdown code blocks
@@ -77,27 +100,26 @@ def _parse_plan_json(raw: str) -> dict:
     except json.JSONDecodeError:
         pass
 
-    # 2. Try to find JSON object with test_plan key
-    #    (model may wrap JSON in prose before/after)
-    match = re.search(
-        r'\{\s*"test_plan"\s*:\s*\[.*\]\s*\}',
-        clean, re.DOTALL
-    )
-    if match:
-        try:
-            return json.loads(match.group(0))
-        except json.JSONDecodeError:
-            pass
-
-    # 3. Try to find any top-level JSON object (greedy, last resort)
-    #    Find the first { and last } that could form valid JSON
+    # 2. Try to extract JSON object from prose
     first_brace = clean.find('{')
     last_brace = clean.rfind('}')
     if first_brace != -1 and last_brace > first_brace:
         candidate = clean[first_brace:last_brace + 1]
+
+        # 2a. Try direct parse of extracted block
         try:
             parsed = json.loads(candidate)
             if "test_plan" in parsed:
+                return parsed
+        except json.JSONDecodeError:
+            pass
+
+        # 2b. Try with JSON repair (unquoted strings, trailing commas)
+        repaired = _repair_json_string(candidate)
+        try:
+            parsed = json.loads(repaired)
+            if "test_plan" in parsed:
+                print(f"  [Plán] JSON opraven (nequotované stringy/trailing commas)")
                 return parsed
         except json.JSONDecodeError:
             pass
