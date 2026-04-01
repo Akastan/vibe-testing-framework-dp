@@ -1,0 +1,1719 @@
+[
+  {
+    "timestamp": "2026-03-31T00:47:28.853175",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L0",
+    "run_id": 1,
+    "temperature": 0.4,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 138.44,
+    "plan_test_count": 30,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1__t0_4.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L0__run1__t0_4.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 27,
+        "tests_failed": 3,
+        "tests_errors": 0,
+        "total_executed": 30,
+        "validity_rate_pct": 90.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 23,
+        "uncovered_endpoints": [
+          "DELETE /tags/{tag_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /categories/{category_id}",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "PATCH /orders/{order_id}/status",
+          "POST /reset",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "endpoint_coverage_pct": 67.65
+      },
+      "assertion_depth": {
+        "total_test_functions": 30,
+        "total_assertions": 61,
+        "assertion_depth": 2.03
+      },
+      "response_validation": {
+        "tests_with_body_check": 19,
+        "total_test_functions": 30,
+        "response_validation_pct": 63.33
+      },
+      "test_type_distribution": {
+        "total_planned": 30,
+        "distribution": {
+          "happy_path": {
+            "count": 23,
+            "pct": 76.67
+          },
+          "error": {
+            "count": 7,
+            "pct": 23.33
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          404,
+          422
+        ],
+        "diversity_count": 5,
+        "code_distribution": {
+          "200": 13,
+          "201": 6,
+          "204": 4,
+          "404": 3,
+          "422": 7
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0
+      },
+      "avg_test_length": {
+        "avg_lines": 8.9,
+        "total_test_functions": 30
+      },
+      "plan_adherence": {
+        "planned": 30,
+        "found_in_code": 30,
+        "extra_in_code": 0,
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 3,
+        "stale_names": [
+          "test_create_order_success",
+          "test_delete_pending_order",
+          "test_remove_tags_from_book_success"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 62211,
+        "total_lines": 2535,
+        "total_est_tokens": 20737,
+        "section_count": 1,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 30,
+        "unique_endpoints_in_plan": 23,
+        "total_api_endpoints": 34,
+        "top3_concentration_pct": 20.0,
+        "error_focused_endpoints": 7,
+        "skipped_endpoints": [
+          "DELETE /tags/{tag_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /categories/{category_id}",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "PATCH /orders/{order_id}/status",
+          "POST /reset",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "domain_distribution": {
+          "authors": 6,
+          "categories": 3,
+          "books": 15,
+          "tags": 1,
+          "orders": 4,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "api_get": {
+            "signature": "api_get(endpoint)",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "api_post": {
+            "signature": "api_post(endpoint, data)",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "api_put": {
+            "signature": "api_put(endpoint, data)",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "api_delete": {
+            "signature": "api_delete(endpoint)",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_resource": {
+            "signature": "create_resource(endpoint, data=None)",
+            "lines": 5,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "delete_resource": {
+            "signature": "delete_resource(endpoint, resource_id)",
+            "lines": 5,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          }
+        },
+        "helper_count": 7
+      },
+      "prompt_budget": {
+        "context_tokens_est": 20737,
+        "plan_tokens_est": 2736,
+        "total_prompt_tokens_est": 24273,
+        "remaining_for_output_est": 103727,
+        "prompt_budget_pct": 19.0
+      },
+      "instruction_compliance": {
+        "total_http_calls": 34,
+        "missing_timeout": 34,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 11,
+        "categories": {
+          "timeout": 10,
+          "other": 1
+        },
+        "category_pct": {
+          "timeout": 90.9,
+          "other": 9.1
+        },
+        "per_test": {
+          "test_update_book_stock": {
+            "category": "timeout",
+            "error_summary": "r = requests.put(f\"{BASE_URL}/books/{book['id']}\", json={\"stock\": 50}, timeout=TIMEOUT)"
+          },
+          "test_delete_book_success": {
+            "category": "timeout",
+            "error_summary": "r = requests.delete(f\"{BASE_URL}/books/{book['id']}\", timeout=TIMEOUT)"
+          },
+          "test_add_review_valid": {
+            "category": "timeout",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{book['id']}/reviews\", json={\"rating\": 5, \"reviewer_name\": \"Tester\"}, timeout=TIMEO"
+          },
+          "test_get_book_average_rating": {
+            "category": "timeout",
+            "error_summary": "r = requests.get(f\"{BASE_URL}/books/{book['id']}/rating\", timeout=TIMEOUT)"
+          },
+          "test_apply_valid_discount": {
+            "category": "timeout",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{book['id']}/discount\", json={\"discount_percent\": 20}, timeout=TIMEOUT)"
+          },
+          "test_apply_excessive_discount": {
+            "category": "timeout",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{book['id']}/discount\", json={\"discount_percent\": 60}, timeout=TIMEOUT)"
+          },
+          "test_update_stock_quantity": {
+            "category": "timeout",
+            "error_summary": "r = requests.patch(f\"{BASE_URL}/books/{book['id']}/stock?quantity=5\", timeout=TIMEOUT)"
+          },
+          "test_add_tags_to_book_success": {
+            "category": "timeout",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{book['id']}/tags\", json={\"tag_ids\": [tag[\"id\"]]}, timeout=TIMEOUT)"
+          },
+          "test_remove_tags_from_book_success": {
+            "category": "timeout",
+            "error_summary": "requests.post(f\"{BASE_URL}/books/{book['id']}/tags\", json={\"tag_ids\": [tag[\"id\"]]}, timeout=TIMEOUT)"
+          },
+          "test_create_order_success": {
+            "category": "other",
+            "error_summary": "\"items\": [{\"book_id\": book[\"id\"], \"quantity\": 1}]"
+          },
+          "test_delete_pending_order": {
+            "category": "timeout",
+            "error_summary": "order = requests.post(f\"{BASE_URL}/orders\", json={\"customer_name\": \"Test\", \"customer_email\": \"t@t.com\", \"items\": [{\"book"
+          }
+        }
+      },
+      "code_patterns": {
+        "total_tests": 30,
+        "avg_http_calls": 1.0,
+        "avg_helper_calls": 1.5,
+        "pct_side_effect_checks": 10.0,
+        "pct_chaining": 30.0
+      },
+      "plan_code_drift": {
+        "planned_count": 30,
+        "actual_count": 30,
+        "matched": 30,
+        "only_in_plan_count": 0,
+        "only_in_code_count": 0,
+        "status_code_drift_count": 0
+      },
+      "context_utilization": {
+        "context_endpoints_found": 47,
+        "plan_endpoints_used": 15,
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "422"
+        ],
+        "status_codes_hallucinated": [
+          "404"
+        ]
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 19,
+            "failed": 11,
+            "repair_type": "helper_fallback",
+            "repaired_count": 11,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 19,
+            "failed": 11,
+            "repair_type": "isolated",
+            "repaired_count": 10,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 26,
+            "failed": 4,
+            "repair_type": "isolated",
+            "repaired_count": 4,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 4,
+            "passed": 27,
+            "failed": 3,
+            "repair_type": "isolated",
+            "repaired_count": 1,
+            "stale_skipped": 3
+          },
+          {
+            "iteration": 5,
+            "passed": 27,
+            "failed": 3,
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 2,
+        "never_fixed_tests": [
+          "test_create_order_success",
+          "test_delete_pending_order",
+          "test_remove_tags_from_book_success"
+        ],
+        "fixed_tests": [
+          "test_add_review_valid",
+          "test_add_tags_to_book_success",
+          "test_apply_excessive_discount",
+          "test_apply_valid_discount",
+          "test_delete_book_success",
+          "test_get_book_average_rating",
+          "test_update_book_stock",
+          "test_update_stock_quantity"
+        ],
+        "failure_categories": {
+          "test_update_book_stock": "timeout",
+          "test_delete_book_success": "timeout",
+          "test_add_review_valid": "timeout",
+          "test_get_book_average_rating": "timeout",
+          "test_apply_valid_discount": "timeout",
+          "test_apply_excessive_discount": "timeout",
+          "test_update_stock_quantity": "timeout",
+          "test_add_tags_to_book_success": "timeout",
+          "test_remove_tags_from_book_success": "timeout",
+          "test_create_order_success": "other",
+          "test_delete_pending_order": "timeout"
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-31T00:48:34.888040",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L0",
+    "run_id": 2,
+    "temperature": 0.4,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 65.82,
+    "plan_test_count": 30,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run2__t0_4.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L0__run2__t0_4.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 29,
+        "tests_failed": 1,
+        "tests_errors": 0,
+        "total_executed": 30,
+        "validity_rate_pct": 96.67
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 24,
+        "uncovered_endpoints": [
+          "DELETE /categories/{category_id}",
+          "DELETE /tags/{tag_id}",
+          "GET /books/{book_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /categories/{category_id}"
+        ],
+        "endpoint_coverage_pct": 70.59
+      },
+      "assertion_depth": {
+        "total_test_functions": 30,
+        "total_assertions": 47,
+        "assertion_depth": 1.57
+      },
+      "response_validation": {
+        "tests_with_body_check": 12,
+        "total_test_functions": 30,
+        "response_validation_pct": 40.0
+      },
+      "test_type_distribution": {
+        "total_planned": 30,
+        "distribution": {
+          "happy_path": {
+            "count": 10,
+            "pct": 33.33
+          },
+          "error": {
+            "count": 19,
+            "pct": 63.33
+          },
+          "edge_case": {
+            "count": 1,
+            "pct": 3.33
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          404,
+          422
+        ],
+        "diversity_count": 5,
+        "code_distribution": {
+          "200": 7,
+          "201": 3,
+          "204": 1,
+          "404": 5,
+          "422": 15
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0
+      },
+      "avg_test_length": {
+        "avg_lines": 5.13,
+        "total_test_functions": 30
+      },
+      "plan_adherence": {
+        "planned": 30,
+        "found_in_code": 30,
+        "extra_in_code": 0,
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 1,
+        "stale_names": [
+          "test_update_stock_negative"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 62211,
+        "total_lines": 2535,
+        "total_est_tokens": 20737,
+        "section_count": 1,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 30,
+        "unique_endpoints_in_plan": 24,
+        "total_api_endpoints": 34,
+        "top3_concentration_pct": 20.0,
+        "error_focused_endpoints": 17,
+        "skipped_endpoints": [
+          "DELETE /categories/{category_id}",
+          "DELETE /tags/{tag_id}",
+          "GET /books/{book_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /categories/{category_id}"
+        ],
+        "domain_distribution": {
+          "authors": 6,
+          "categories": 3,
+          "books": 13,
+          "tags": 2,
+          "orders": 5,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_author": {
+            "signature": "create_author()",
+            "lines": 5,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_category": {
+            "signature": "create_category()",
+            "lines": 5,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_book": {
+            "signature": "create_book(author_id, category_id)",
+            "lines": 12,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": 2020
+          }
+        },
+        "helper_count": 4
+      },
+      "prompt_budget": {
+        "context_tokens_est": 20737,
+        "plan_tokens_est": 2805,
+        "total_prompt_tokens_est": 24342,
+        "remaining_for_output_est": 103658,
+        "prompt_budget_pct": 19.0
+      },
+      "instruction_compliance": {
+        "total_http_calls": 35,
+        "missing_timeout": 35,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 11,
+        "categories": {
+          "wrong_status_code": 4,
+          "timeout": 7
+        },
+        "category_pct": {
+          "wrong_status_code": 36.4,
+          "timeout": 63.6
+        },
+        "per_test": {
+          "test_get_nonexistent_author": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 422"
+          },
+          "test_delete_book_success": {
+            "category": "timeout",
+            "error_summary": "r = requests.delete(f\"{BASE_URL}/books/{book['id']}\", timeout=TIMEOUT)"
+          },
+          "test_create_review_invalid_rating": {
+            "category": "timeout",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{book['id']}/reviews\", json={\"rating\": 10, \"reviewer_name\": \"Tester\"}, timeout=TIME"
+          },
+          "test_get_book_rating_success": {
+            "category": "timeout",
+            "error_summary": "r = requests.get(f\"{BASE_URL}/books/{book['id']}/rating\", timeout=TIMEOUT)"
+          },
+          "test_apply_discount_too_high": {
+            "category": "timeout",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{book['id']}/discount\", json={\"discount_percent\": 60}, timeout=TIMEOUT)"
+          },
+          "test_update_stock_negative": {
+            "category": "timeout",
+            "error_summary": "r = requests.patch(f\"{BASE_URL}/books/{book['id']}/stock?quantity=-5\", timeout=TIMEOUT)"
+          },
+          "test_add_tags_empty_list": {
+            "category": "timeout",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{book['id']}/tags\", json={\"tag_ids\": []}, timeout=TIMEOUT)"
+          },
+          "test_delete_order_invalid_id": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 422"
+          },
+          "test_get_category_not_found": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 422"
+          },
+          "test_remove_tags_valid": {
+            "category": "timeout",
+            "error_summary": "r = requests.delete(f\"{BASE_URL}/books/{book['id']}/tags\", json={\"tag_ids\": [1]}, timeout=TIMEOUT)"
+          },
+          "test_delete_author_invalid_id": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 422"
+          }
+        }
+      },
+      "code_patterns": {
+        "total_tests": 30,
+        "avg_http_calls": 1.07,
+        "avg_helper_calls": 1.33,
+        "pct_side_effect_checks": 3.3,
+        "pct_chaining": 13.3
+      },
+      "plan_code_drift": {
+        "planned_count": 30,
+        "actual_count": 30,
+        "matched": 30,
+        "only_in_plan_count": 0,
+        "only_in_code_count": 0,
+        "status_code_drift_count": 4
+      },
+      "context_utilization": {
+        "context_endpoints_found": 47,
+        "plan_endpoints_used": 17,
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "422"
+        ],
+        "status_codes_hallucinated": [
+          "404"
+        ]
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 19,
+            "failed": 11,
+            "repair_type": "helper_fallback",
+            "repaired_count": 11,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 24,
+            "failed": 6,
+            "repair_type": "isolated",
+            "repaired_count": 6,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "isolated",
+            "repaired_count": 1,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 4,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "skipped_all_stale",
+            "repaired_count": 0,
+            "stale_skipped": 1
+          },
+          {
+            "iteration": 5,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 4,
+        "never_fixed_tests": [
+          "test_update_stock_negative"
+        ],
+        "fixed_tests": [
+          "test_add_tags_empty_list",
+          "test_apply_discount_too_high",
+          "test_create_review_invalid_rating",
+          "test_delete_author_invalid_id",
+          "test_delete_book_success",
+          "test_delete_order_invalid_id",
+          "test_get_book_rating_success",
+          "test_get_category_not_found",
+          "test_get_nonexistent_author",
+          "test_remove_tags_valid"
+        ],
+        "failure_categories": {
+          "test_get_nonexistent_author": "wrong_status_code",
+          "test_delete_book_success": "timeout",
+          "test_create_review_invalid_rating": "timeout",
+          "test_get_book_rating_success": "timeout",
+          "test_apply_discount_too_high": "timeout",
+          "test_update_stock_negative": "timeout",
+          "test_add_tags_empty_list": "timeout",
+          "test_delete_order_invalid_id": "wrong_status_code",
+          "test_get_category_not_found": "wrong_status_code",
+          "test_remove_tags_valid": "timeout",
+          "test_delete_author_invalid_id": "wrong_status_code"
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-31T00:49:53.557459",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L0",
+    "run_id": 3,
+    "temperature": 0.4,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 78.42,
+    "plan_test_count": 30,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run3__t0_4.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L0__run3__t0_4.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 27,
+        "tests_failed": 3,
+        "tests_errors": 0,
+        "total_executed": 30,
+        "validity_rate_pct": 90.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 23,
+        "uncovered_endpoints": [
+          "DELETE /authors/{author_id}",
+          "DELETE /books/{book_id}/tags",
+          "DELETE /categories/{category_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /categories/{category_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "endpoint_coverage_pct": 67.65
+      },
+      "assertion_depth": {
+        "total_test_functions": 30,
+        "total_assertions": 54,
+        "assertion_depth": 1.8
+      },
+      "response_validation": {
+        "tests_with_body_check": 19,
+        "total_test_functions": 30,
+        "response_validation_pct": 63.33
+      },
+      "test_type_distribution": {
+        "total_planned": 30,
+        "distribution": {
+          "happy_path": {
+            "count": 19,
+            "pct": 63.33
+          },
+          "error": {
+            "count": 11,
+            "pct": 36.67
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          404,
+          422
+        ],
+        "diversity_count": 5,
+        "code_distribution": {
+          "200": 11,
+          "201": 6,
+          "204": 2,
+          "404": 2,
+          "422": 10
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0
+      },
+      "avg_test_length": {
+        "avg_lines": 6.83,
+        "total_test_functions": 30
+      },
+      "plan_adherence": {
+        "planned": 30,
+        "found_in_code": 30,
+        "extra_in_code": 0,
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 3,
+        "stale_names": [
+          "test_delete_order_invalid_status",
+          "test_update_order_status_success",
+          "test_update_stock_success"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 62211,
+        "total_lines": 2535,
+        "total_est_tokens": 20737,
+        "section_count": 1,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 30,
+        "unique_endpoints_in_plan": 23,
+        "total_api_endpoints": 34,
+        "top3_concentration_pct": 20.0,
+        "error_focused_endpoints": 11,
+        "skipped_endpoints": [
+          "DELETE /authors/{author_id}",
+          "DELETE /books/{book_id}/tags",
+          "DELETE /categories/{category_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /categories/{category_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "domain_distribution": {
+          "authors": 4,
+          "categories": 2,
+          "books": 14,
+          "tags": 2,
+          "orders": 7,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_author": {
+            "signature": "create_author()",
+            "lines": 5,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_category": {
+            "signature": "create_category()",
+            "lines": 5,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_book": {
+            "signature": "create_book(author_id, category_id)",
+            "lines": 13,
+            "has_stock_field": true,
+            "has_assertion": false,
+            "default_published_year": 2020
+          }
+        },
+        "helper_count": 4
+      },
+      "prompt_budget": {
+        "context_tokens_est": 20737,
+        "plan_tokens_est": 2670,
+        "total_prompt_tokens_est": 24207,
+        "remaining_for_output_est": 103793,
+        "prompt_budget_pct": 18.9
+      },
+      "instruction_compliance": {
+        "total_http_calls": 42,
+        "missing_timeout": 42,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 15,
+        "categories": {
+          "wrong_status_code": 1,
+          "timeout": 7,
+          "other": 7
+        },
+        "category_pct": {
+          "wrong_status_code": 6.7,
+          "timeout": 46.7,
+          "other": 46.7
+        },
+        "per_test": {
+          "test_get_author_not_found": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 422"
+          },
+          "test_update_book_price_negative": {
+            "category": "timeout",
+            "error_summary": "r = requests.put(f\"{BASE_URL}/books/{b['id']}\", json={\"price\": -10.0}, timeout=TIMEOUT)"
+          },
+          "test_delete_book_success": {
+            "category": "timeout",
+            "error_summary": "r = requests.delete(f\"{BASE_URL}/books/{b['id']}\", timeout=TIMEOUT)"
+          },
+          "test_create_review_success": {
+            "category": "other",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{b['id']}/reviews\", json={"
+          },
+          "test_create_review_invalid_rating": {
+            "category": "other",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{b['id']}/reviews\", json={"
+          },
+          "test_get_book_rating_success": {
+            "category": "timeout",
+            "error_summary": "r = requests.get(f\"{BASE_URL}/books/{b['id']}/rating\", timeout=TIMEOUT)"
+          },
+          "test_apply_discount_success": {
+            "category": "timeout",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{b['id']}/discount\", json={\"discount_percent\": 20}, timeout=TIMEOUT)"
+          },
+          "test_apply_discount_too_high": {
+            "category": "timeout",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{b['id']}/discount\", json={\"discount_percent\": 60}, timeout=TIMEOUT)"
+          },
+          "test_update_stock_success": {
+            "category": "timeout",
+            "error_summary": "r = requests.patch(f\"{BASE_URL}/books/{b['id']}/stock?quantity=50\", timeout=TIMEOUT)"
+          },
+          "test_add_tags_to_book_success": {
+            "category": "timeout",
+            "error_summary": "r = requests.post(f\"{BASE_URL}/books/{b['id']}/tags\", json={\"tag_ids\": [tag[\"id\"]]}, timeout=TIMEOUT)"
+          },
+          "test_create_order_success": {
+            "category": "other",
+            "error_summary": "\"items\": [{\"book_id\": b[\"id\"], \"quantity\": 1}]"
+          },
+          "test_get_order_details": {
+            "category": "other",
+            "error_summary": "\"items\": [{\"book_id\": b[\"id\"], \"quantity\": 1}]"
+          },
+          "test_delete_order_invalid_status": {
+            "category": "other",
+            "error_summary": "\"items\": [{\"book_id\": b[\"id\"], \"quantity\": 1}]"
+          },
+          "test_update_order_status_success": {
+            "category": "other",
+            "error_summary": "\"items\": [{\"book_id\": b[\"id\"], \"quantity\": 1}]"
+          },
+          "test_update_order_status_invalid": {
+            "category": "other",
+            "error_summary": "\"items\": [{\"book_id\": b[\"id\"], \"quantity\": 1}]"
+          }
+        }
+      },
+      "code_patterns": {
+        "total_tests": 30,
+        "avg_http_calls": 1.3,
+        "avg_helper_calls": 1.93,
+        "pct_side_effect_checks": 10.0,
+        "pct_chaining": 30.0
+      },
+      "plan_code_drift": {
+        "planned_count": 30,
+        "actual_count": 30,
+        "matched": 30,
+        "only_in_plan_count": 0,
+        "only_in_code_count": 0,
+        "status_code_drift_count": 1
+      },
+      "context_utilization": {
+        "context_endpoints_found": 47,
+        "plan_endpoints_used": 17,
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "422"
+        ],
+        "status_codes_hallucinated": [
+          "404"
+        ]
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 15,
+            "failed": 15,
+            "repair_type": "helper_fallback",
+            "repaired_count": 15,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 25,
+            "failed": 5,
+            "repair_type": "isolated",
+            "repaired_count": 5,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 27,
+            "failed": 3,
+            "repair_type": "isolated",
+            "repaired_count": 3,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 4,
+            "passed": 27,
+            "failed": 3,
+            "repair_type": "skipped_all_stale",
+            "repaired_count": 0,
+            "stale_skipped": 3
+          },
+          {
+            "iteration": 5,
+            "passed": 27,
+            "failed": 3,
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 4,
+        "never_fixed_tests": [
+          "test_delete_order_invalid_status",
+          "test_update_order_status_success",
+          "test_update_stock_success"
+        ],
+        "fixed_tests": [
+          "test_add_tags_to_book_success",
+          "test_apply_discount_success",
+          "test_apply_discount_too_high",
+          "test_create_order_success",
+          "test_create_review_invalid_rating",
+          "test_create_review_success",
+          "test_delete_book_success",
+          "test_get_author_not_found",
+          "test_get_book_rating_success",
+          "test_get_order_details",
+          "test_update_book_price_negative",
+          "test_update_order_status_invalid"
+        ],
+        "failure_categories": {
+          "test_get_author_not_found": "wrong_status_code",
+          "test_update_book_price_negative": "timeout",
+          "test_delete_book_success": "timeout",
+          "test_create_review_success": "other",
+          "test_create_review_invalid_rating": "other",
+          "test_get_book_rating_success": "timeout",
+          "test_apply_discount_success": "timeout",
+          "test_apply_discount_too_high": "timeout",
+          "test_update_stock_success": "timeout",
+          "test_add_tags_to_book_success": "timeout",
+          "test_create_order_success": "other",
+          "test_get_order_details": "other",
+          "test_delete_order_invalid_status": "other",
+          "test_update_order_status_success": "other",
+          "test_update_order_status_invalid": "other"
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-31T00:51:46.259339",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L0",
+    "run_id": 4,
+    "temperature": 0.4,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 112.44,
+    "plan_test_count": 30,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run4__t0_4.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L0__run4__t0_4.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 25,
+        "tests_failed": 5,
+        "tests_errors": 0,
+        "total_executed": 30,
+        "validity_rate_pct": 83.33
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 26,
+        "uncovered_endpoints": [
+          "DELETE /tags/{tag_id}",
+          "GET /books/{book_id}",
+          "GET /categories/{category_id}",
+          "GET /orders/{order_id}",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "endpoint_coverage_pct": 76.47
+      },
+      "assertion_depth": {
+        "total_test_functions": 30,
+        "total_assertions": 55,
+        "assertion_depth": 1.83
+      },
+      "response_validation": {
+        "tests_with_body_check": 14,
+        "total_test_functions": 30,
+        "response_validation_pct": 46.67
+      },
+      "test_type_distribution": {
+        "total_planned": 30,
+        "distribution": {
+          "happy_path": {
+            "count": 16,
+            "pct": 53.33
+          },
+          "error": {
+            "count": 14,
+            "pct": 46.67
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          404,
+          422
+        ],
+        "diversity_count": 5,
+        "code_distribution": {
+          "200": 12,
+          "201": 2,
+          "204": 3,
+          "404": 3,
+          "422": 12
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0
+      },
+      "avg_test_length": {
+        "avg_lines": 5.73,
+        "total_test_functions": 30
+      },
+      "plan_adherence": {
+        "planned": 30,
+        "found_in_code": 30,
+        "extra_in_code": 0,
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 6,
+        "stale_names": [
+          "test_create_order_invalid_email",
+          "test_delete_order_invalid_id",
+          "test_get_book_rating_success",
+          "test_list_reviews_success",
+          "test_remove_tags_success",
+          "test_update_stock_success"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 62211,
+        "total_lines": 2535,
+        "total_est_tokens": 20737,
+        "section_count": 1,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 30,
+        "unique_endpoints_in_plan": 26,
+        "total_api_endpoints": 34,
+        "top3_concentration_pct": 20.0,
+        "error_focused_endpoints": 12,
+        "skipped_endpoints": [
+          "DELETE /tags/{tag_id}",
+          "GET /books/{book_id}",
+          "GET /categories/{category_id}",
+          "GET /orders/{order_id}",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "domain_distribution": {
+          "authors": 6,
+          "categories": 3,
+          "books": 13,
+          "tags": 2,
+          "orders": 5,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          }
+        },
+        "helper_count": 1
+      },
+      "prompt_budget": {
+        "context_tokens_est": 20737,
+        "plan_tokens_est": 2804,
+        "total_prompt_tokens_est": 24341,
+        "remaining_for_output_est": 103659,
+        "prompt_budget_pct": 19.0
+      },
+      "instruction_compliance": {
+        "total_http_calls": 45,
+        "missing_timeout": 45,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 8,
+        "categories": {
+          "wrong_status_code": 8
+        },
+        "category_pct": {
+          "wrong_status_code": 100.0
+        },
+        "per_test": {
+          "test_get_nonexistent_author": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 422"
+          },
+          "test_get_book_rating_success": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 200"
+          },
+          "test_update_stock_success": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 200"
+          },
+          "test_create_order_invalid_email": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 422"
+          },
+          "test_delete_order_invalid_id": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 422"
+          },
+          "test_remove_tags_success": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 200"
+          },
+          "test_delete_book_success": {
+            "category": "wrong_status_code",
+            "error_summary": "assert requests.get(f\"{BASE_URL}/books/{book['id']}\", timeout=TIMEOUT).status_code == 422"
+          },
+          "test_list_reviews_success": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 200"
+          }
+        }
+      },
+      "code_patterns": {
+        "total_tests": 30,
+        "avg_http_calls": 1.5,
+        "avg_helper_calls": 0.3,
+        "pct_side_effect_checks": 13.3,
+        "pct_chaining": 13.3
+      },
+      "plan_code_drift": {
+        "planned_count": 30,
+        "actual_count": 30,
+        "matched": 30,
+        "only_in_plan_count": 0,
+        "only_in_code_count": 0,
+        "status_code_drift_count": 2
+      },
+      "context_utilization": {
+        "context_endpoints_found": 47,
+        "plan_endpoints_used": 16,
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "422"
+        ],
+        "status_codes_hallucinated": [
+          "404"
+        ]
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 22,
+            "failed": 8,
+            "repair_type": "isolated",
+            "repaired_count": 8,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 24,
+            "failed": 6,
+            "repair_type": "isolated",
+            "repaired_count": 6,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 25,
+            "failed": 5,
+            "repair_type": "skipped_all_stale",
+            "repaired_count": 0,
+            "stale_skipped": 6
+          },
+          {
+            "iteration": 4,
+            "passed": 25,
+            "failed": 5,
+            "repair_type": "skipped_all_stale",
+            "repaired_count": 0,
+            "stale_skipped": 6
+          },
+          {
+            "iteration": 5,
+            "passed": 25,
+            "failed": 5,
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 4,
+        "never_fixed_tests": [
+          "test_create_order_invalid_email",
+          "test_get_book_rating_success",
+          "test_list_reviews_success",
+          "test_remove_tags_success",
+          "test_update_stock_success"
+        ],
+        "fixed_tests": [
+          "test_delete_book_success",
+          "test_delete_order_invalid_id",
+          "test_get_nonexistent_author"
+        ],
+        "failure_categories": {
+          "test_get_nonexistent_author": "wrong_status_code",
+          "test_get_book_rating_success": "wrong_status_code",
+          "test_update_stock_success": "wrong_status_code",
+          "test_create_order_invalid_email": "wrong_status_code",
+          "test_delete_order_invalid_id": "wrong_status_code",
+          "test_remove_tags_success": "wrong_status_code",
+          "test_delete_book_success": "wrong_status_code",
+          "test_list_reviews_success": "wrong_status_code"
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-31T00:52:37.353463",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L0",
+    "run_id": 5,
+    "temperature": 0.4,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 50.87,
+    "plan_test_count": 30,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run5__t0_4.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L0__run5__t0_4.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 29,
+        "tests_failed": 1,
+        "tests_errors": 0,
+        "total_executed": 30,
+        "validity_rate_pct": 96.67
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 23,
+        "uncovered_endpoints": [
+          "DELETE /categories/{category_id}",
+          "DELETE /orders/{order_id}",
+          "DELETE /tags/{tag_id}",
+          "GET /categories",
+          "GET /categories/{category_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "PATCH /orders/{order_id}/status",
+          "POST /reset",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "endpoint_coverage_pct": 67.65
+      },
+      "assertion_depth": {
+        "total_test_functions": 30,
+        "total_assertions": 54,
+        "assertion_depth": 1.8
+      },
+      "response_validation": {
+        "tests_with_body_check": 20,
+        "total_test_functions": 30,
+        "response_validation_pct": 66.67
+      },
+      "test_type_distribution": {
+        "total_planned": 30,
+        "distribution": {
+          "happy_path": {
+            "count": 23,
+            "pct": 76.67
+          },
+          "error": {
+            "count": 6,
+            "pct": 20.0
+          },
+          "edge_case": {
+            "count": 1,
+            "pct": 3.33
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          404,
+          422
+        ],
+        "diversity_count": 5,
+        "code_distribution": {
+          "200": 16,
+          "201": 6,
+          "204": 2,
+          "404": 2,
+          "422": 5
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0
+      },
+      "avg_test_length": {
+        "avg_lines": 6.2,
+        "total_test_functions": 30
+      },
+      "plan_adherence": {
+        "planned": 30,
+        "found_in_code": 30,
+        "extra_in_code": 0,
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 1,
+        "stale_names": [
+          "test_update_stock_quantity"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 62211,
+        "total_lines": 2535,
+        "total_est_tokens": 20737,
+        "section_count": 1,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 30,
+        "unique_endpoints_in_plan": 23,
+        "total_api_endpoints": 34,
+        "top3_concentration_pct": 20.0,
+        "error_focused_endpoints": 7,
+        "skipped_endpoints": [
+          "DELETE /categories/{category_id}",
+          "DELETE /orders/{order_id}",
+          "DELETE /tags/{tag_id}",
+          "GET /categories",
+          "GET /categories/{category_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "PATCH /orders/{order_id}/status",
+          "POST /reset",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "domain_distribution": {
+          "authors": 7,
+          "categories": 1,
+          "books": 16,
+          "tags": 1,
+          "orders": 4,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_author": {
+            "signature": "create_author()",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_category": {
+            "signature": "create_category()",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_book": {
+            "signature": "create_book(author_id, category_id)",
+            "lines": 11,
+            "has_stock_field": true,
+            "has_assertion": false,
+            "default_published_year": 2020
+          }
+        },
+        "helper_count": 4
+      },
+      "prompt_budget": {
+        "context_tokens_est": 20737,
+        "plan_tokens_est": 2703,
+        "total_prompt_tokens_est": 24240,
+        "remaining_for_output_est": 103760,
+        "prompt_budget_pct": 18.9
+      },
+      "instruction_compliance": {
+        "total_http_calls": 38,
+        "missing_timeout": 38,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 3,
+        "categories": {
+          "wrong_status_code": 2,
+          "assertion_value_mismatch": 1
+        },
+        "category_pct": {
+          "wrong_status_code": 66.7,
+          "assertion_value_mismatch": 33.3
+        },
+        "per_test": {
+          "test_get_author_nonexistent": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 422"
+          },
+          "test_delete_author_success": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r_get.status_code == 422"
+          },
+          "test_update_stock_quantity": {
+            "category": "assertion_value_mismatch",
+            "error_summary": "assert r.json()[\"stock\"] == 5"
+          }
+        }
+      },
+      "code_patterns": {
+        "total_tests": 30,
+        "avg_http_calls": 1.17,
+        "avg_helper_calls": 1.9,
+        "pct_side_effect_checks": 6.7,
+        "pct_chaining": 36.7
+      },
+      "plan_code_drift": {
+        "planned_count": 30,
+        "actual_count": 30,
+        "matched": 30,
+        "only_in_plan_count": 0,
+        "only_in_code_count": 0,
+        "status_code_drift_count": 1
+      },
+      "context_utilization": {
+        "context_endpoints_found": 47,
+        "plan_endpoints_used": 14,
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "422"
+        ],
+        "status_codes_hallucinated": [
+          "404"
+        ]
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 27,
+            "failed": 3,
+            "repair_type": "isolated",
+            "repaired_count": 3,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "isolated",
+            "repaired_count": 1,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "skipped_all_stale",
+            "repaired_count": 0,
+            "stale_skipped": 1
+          },
+          {
+            "iteration": 4,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "skipped_all_stale",
+            "repaired_count": 0,
+            "stale_skipped": 1
+          },
+          {
+            "iteration": 5,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 3,
+        "never_fixed_tests": [
+          "test_update_stock_quantity"
+        ],
+        "fixed_tests": [
+          "test_delete_author_success",
+          "test_get_author_nonexistent"
+        ],
+        "failure_categories": {
+          "test_get_author_nonexistent": "wrong_status_code",
+          "test_delete_author_success": "wrong_status_code",
+          "test_update_stock_quantity": "assertion_value_mismatch"
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,1363 @@
+[
+  {
+    "timestamp": "2026-03-31T00:41:57.790788",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L1",
+    "run_id": 1,
+    "temperature": 0.4,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 84.22,
+    "plan_test_count": 30,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L1__run1__t0_4.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L1__run1__t0_4.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 29,
+        "tests_failed": 1,
+        "tests_errors": 0,
+        "total_executed": 30,
+        "validity_rate_pct": 96.67
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 19,
+        "uncovered_endpoints": [
+          "DELETE /books/{book_id}",
+          "DELETE /categories/{category_id}",
+          "GET /authors",
+          "GET /authors/{author_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /categories/{category_id}",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /books/{book_id}",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "endpoint_coverage_pct": 55.88
+      },
+      "assertion_depth": {
+        "total_test_functions": 30,
+        "total_assertions": 40,
+        "assertion_depth": 1.33
+      },
+      "response_validation": {
+        "tests_with_body_check": 10,
+        "total_test_functions": 30,
+        "response_validation_pct": 33.33
+      },
+      "test_type_distribution": {
+        "total_planned": 30,
+        "distribution": {
+          "happy_path": {
+            "count": 16,
+            "pct": 53.33
+          },
+          "error": {
+            "count": 14,
+            "pct": 46.67
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          400,
+          404,
+          409,
+          422
+        ],
+        "diversity_count": 7,
+        "code_distribution": {
+          "200": 9,
+          "201": 5,
+          "204": 1,
+          "400": 6,
+          "404": 1,
+          "409": 3,
+          "422": 4
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0
+      },
+      "avg_test_length": {
+        "avg_lines": 7.17,
+        "total_test_functions": 30
+      },
+      "plan_adherence": {
+        "planned": 30,
+        "found_in_code": 30,
+        "extra_in_code": 0,
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 1,
+        "stale_names": [
+          "test_apply_discount_new_book_fails"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 67615,
+        "total_lines": 2660,
+        "total_est_tokens": 22538,
+        "section_count": 2,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          },
+          "TECHNICKÁ A BYZNYS DOKUMENTACE": {
+            "chars": 5364,
+            "lines": 124,
+            "est_tokens": 1788
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 30,
+        "unique_endpoints_in_plan": 19,
+        "total_api_endpoints": 34,
+        "top3_concentration_pct": 23.3,
+        "error_focused_endpoints": 12,
+        "skipped_endpoints": [
+          "DELETE /books/{book_id}",
+          "DELETE /categories/{category_id}",
+          "GET /authors",
+          "GET /authors/{author_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /categories/{category_id}",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /books/{book_id}",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "domain_distribution": {
+          "authors": 3,
+          "categories": 1,
+          "books": 14,
+          "tags": 2,
+          "orders": 9,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_author": {
+            "signature": "create_author()",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_category": {
+            "signature": "create_category()",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_book": {
+            "signature": "create_book(author_id, category_id)",
+            "lines": 11,
+            "has_stock_field": true,
+            "has_assertion": false,
+            "default_published_year": 2020
+          }
+        },
+        "helper_count": 4
+      },
+      "prompt_budget": {
+        "context_tokens_est": 22538,
+        "plan_tokens_est": 2540,
+        "total_prompt_tokens_est": 25878,
+        "remaining_for_output_est": 102122,
+        "prompt_budget_pct": 20.2
+      },
+      "instruction_compliance": {
+        "total_http_calls": 46,
+        "missing_timeout": 46,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 1,
+        "categories": {
+          "wrong_status_code": 1
+        },
+        "category_pct": {
+          "wrong_status_code": 100.0
+        },
+        "per_test": {
+          "test_apply_discount_new_book_fails": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 400"
+          }
+        }
+      },
+      "code_patterns": {
+        "total_tests": 30,
+        "avg_http_calls": 1.43,
+        "avg_helper_calls": 2.27,
+        "pct_side_effect_checks": 3.3,
+        "pct_chaining": 16.7
+      },
+      "plan_code_drift": {
+        "planned_count": 30,
+        "actual_count": 30,
+        "matched": 30,
+        "only_in_plan_count": 0,
+        "only_in_code_count": 0,
+        "status_code_drift_count": 1
+      },
+      "context_utilization": {
+        "context_endpoints_found": 53,
+        "plan_endpoints_used": 16,
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_hallucinated": []
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "isolated",
+            "repaired_count": 1,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "isolated",
+            "repaired_count": 1,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "skipped_all_stale",
+            "repaired_count": 0,
+            "stale_skipped": 1
+          },
+          {
+            "iteration": 4,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "skipped_all_stale",
+            "repaired_count": 0,
+            "stale_skipped": 1
+          },
+          {
+            "iteration": 5,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 2,
+        "never_fixed_tests": [
+          "test_apply_discount_new_book_fails"
+        ],
+        "fixed_tests": [],
+        "failure_categories": {
+          "test_apply_discount_new_book_fails": "wrong_status_code"
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-31T00:42:40.751573",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L1",
+    "run_id": 2,
+    "temperature": 0.4,
+    "iterations_used": 1,
+    "all_tests_passed": true,
+    "elapsed_seconds": 42.57,
+    "plan_test_count": 30,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L1__run2__t0_4.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L1__run2__t0_4.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 30,
+        "tests_failed": 0,
+        "tests_errors": 0,
+        "total_executed": 30,
+        "validity_rate_pct": 100.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 19,
+        "uncovered_endpoints": [
+          "DELETE /books/{book_id}",
+          "DELETE /categories/{category_id}",
+          "GET /authors",
+          "GET /authors/{author_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /categories/{category_id}",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /books/{book_id}",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "endpoint_coverage_pct": 55.88
+      },
+      "assertion_depth": {
+        "total_test_functions": 30,
+        "total_assertions": 40,
+        "assertion_depth": 1.33
+      },
+      "response_validation": {
+        "tests_with_body_check": 9,
+        "total_test_functions": 30,
+        "response_validation_pct": 30.0
+      },
+      "test_type_distribution": {
+        "total_planned": 30,
+        "distribution": {
+          "happy_path": {
+            "count": 16,
+            "pct": 53.33
+          },
+          "error": {
+            "count": 14,
+            "pct": 46.67
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          400,
+          404,
+          409,
+          422
+        ],
+        "diversity_count": 7,
+        "code_distribution": {
+          "200": 9,
+          "201": 5,
+          "204": 1,
+          "400": 6,
+          "404": 1,
+          "409": 4,
+          "422": 3
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0
+      },
+      "avg_test_length": {
+        "avg_lines": 8.17,
+        "total_test_functions": 30
+      },
+      "plan_adherence": {
+        "planned": 30,
+        "found_in_code": 30,
+        "extra_in_code": 0,
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 0,
+        "stale_names": []
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 67615,
+        "total_lines": 2660,
+        "total_est_tokens": 22538,
+        "section_count": 2,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          },
+          "TECHNICKÁ A BYZNYS DOKUMENTACE": {
+            "chars": 5364,
+            "lines": 124,
+            "est_tokens": 1788
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 30,
+        "unique_endpoints_in_plan": 19,
+        "total_api_endpoints": 34,
+        "top3_concentration_pct": 23.3,
+        "error_focused_endpoints": 13,
+        "skipped_endpoints": [
+          "DELETE /books/{book_id}",
+          "DELETE /categories/{category_id}",
+          "GET /authors",
+          "GET /authors/{author_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /categories/{category_id}",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /books/{book_id}",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "domain_distribution": {
+          "authors": 3,
+          "categories": 1,
+          "books": 13,
+          "tags": 3,
+          "orders": 9,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          }
+        },
+        "helper_count": 1
+      },
+      "prompt_budget": {
+        "context_tokens_est": 22538,
+        "plan_tokens_est": 2547,
+        "total_prompt_tokens_est": 25885,
+        "remaining_for_output_est": 102115,
+        "prompt_budget_pct": 20.2
+      },
+      "instruction_compliance": {
+        "total_http_calls": 98,
+        "missing_timeout": 98,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 0,
+        "categories": {},
+        "per_test": {}
+      },
+      "code_patterns": {
+        "total_tests": 30,
+        "avg_http_calls": 3.27,
+        "avg_helper_calls": 0.37,
+        "pct_side_effect_checks": 6.7,
+        "pct_chaining": 10.0
+      },
+      "plan_code_drift": {
+        "planned_count": 30,
+        "actual_count": 30,
+        "matched": 30,
+        "only_in_plan_count": 0,
+        "only_in_code_count": 0,
+        "status_code_drift_count": 1
+      },
+      "context_utilization": {
+        "context_endpoints_found": 53,
+        "plan_endpoints_used": 16,
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_hallucinated": []
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 30,
+            "failed": 0,
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 2,
+        "never_fixed_tests": [],
+        "fixed_tests": [],
+        "failure_categories": {}
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-31T00:43:34.577941",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L1",
+    "run_id": 3,
+    "temperature": 0.4,
+    "iterations_used": 3,
+    "all_tests_passed": true,
+    "elapsed_seconds": 53.55,
+    "plan_test_count": 30,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L1__run3__t0_4.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L1__run3__t0_4.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 30,
+        "tests_failed": 0,
+        "tests_errors": 0,
+        "total_executed": 30,
+        "validity_rate_pct": 100.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 21,
+        "uncovered_endpoints": [
+          "DELETE /books/{book_id}",
+          "DELETE /categories/{category_id}",
+          "GET /authors",
+          "GET /authors/{author_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "endpoint_coverage_pct": 61.76
+      },
+      "assertion_depth": {
+        "total_test_functions": 30,
+        "total_assertions": 44,
+        "assertion_depth": 1.47
+      },
+      "response_validation": {
+        "tests_with_body_check": 11,
+        "total_test_functions": 30,
+        "response_validation_pct": 36.67
+      },
+      "test_type_distribution": {
+        "total_planned": 30,
+        "distribution": {
+          "happy_path": {
+            "count": 15,
+            "pct": 50.0
+          },
+          "error": {
+            "count": 15,
+            "pct": 50.0
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          400,
+          404,
+          409,
+          422
+        ],
+        "diversity_count": 6,
+        "code_distribution": {
+          "200": 9,
+          "201": 4,
+          "400": 6,
+          "404": 1,
+          "409": 4,
+          "422": 4
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0
+      },
+      "avg_test_length": {
+        "avg_lines": 6.67,
+        "total_test_functions": 30
+      },
+      "plan_adherence": {
+        "planned": 30,
+        "found_in_code": 30,
+        "extra_in_code": 0,
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 1,
+        "stale_names": [
+          "test_update_book_malformed_json"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 67615,
+        "total_lines": 2660,
+        "total_est_tokens": 22538,
+        "section_count": 2,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          },
+          "TECHNICKÁ A BYZNYS DOKUMENTACE": {
+            "chars": 5364,
+            "lines": 124,
+            "est_tokens": 1788
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 30,
+        "unique_endpoints_in_plan": 21,
+        "total_api_endpoints": 34,
+        "top3_concentration_pct": 26.7,
+        "error_focused_endpoints": 12,
+        "skipped_endpoints": [
+          "DELETE /books/{book_id}",
+          "DELETE /categories/{category_id}",
+          "GET /authors",
+          "GET /authors/{author_id}",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "domain_distribution": {
+          "authors": 3,
+          "categories": 2,
+          "books": 14,
+          "tags": 2,
+          "orders": 8,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_author": {
+            "signature": "create_author()",
+            "lines": 4,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_category": {
+            "signature": "create_category()",
+            "lines": 4,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_book": {
+            "signature": "create_book(author_id, category_id, stock=10, published_year=2020)",
+            "lines": 12,
+            "has_stock_field": true,
+            "has_assertion": false,
+            "default_published_year": 2020
+          }
+        },
+        "helper_count": 4
+      },
+      "prompt_budget": {
+        "context_tokens_est": 22538,
+        "plan_tokens_est": 2656,
+        "total_prompt_tokens_est": 25994,
+        "remaining_for_output_est": 102006,
+        "prompt_budget_pct": 20.3
+      },
+      "instruction_compliance": {
+        "total_http_calls": 45,
+        "missing_timeout": 45,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 1,
+        "categories": {
+          "wrong_status_code": 1
+        },
+        "category_pct": {
+          "wrong_status_code": 100.0
+        },
+        "per_test": {
+          "test_update_book_malformed_json": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 400"
+          }
+        }
+      },
+      "code_patterns": {
+        "total_tests": 30,
+        "avg_http_calls": 1.4,
+        "avg_helper_calls": 2.43,
+        "pct_side_effect_checks": 3.3,
+        "pct_chaining": 23.3
+      },
+      "plan_code_drift": {
+        "planned_count": 30,
+        "actual_count": 30,
+        "matched": 30,
+        "only_in_plan_count": 0,
+        "only_in_code_count": 0,
+        "status_code_drift_count": 3
+      },
+      "context_utilization": {
+        "context_endpoints_found": 53,
+        "plan_endpoints_used": 17,
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_hallucinated": []
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "isolated",
+            "repaired_count": 1,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "isolated",
+            "repaired_count": 1,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 30,
+            "failed": 0,
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 2,
+        "never_fixed_tests": [],
+        "fixed_tests": [
+          "test_update_book_malformed_json"
+        ],
+        "failure_categories": {
+          "test_update_book_malformed_json": "wrong_status_code"
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-31T00:44:08.789189",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L1",
+    "run_id": 4,
+    "temperature": 0.4,
+    "iterations_used": 3,
+    "all_tests_passed": true,
+    "elapsed_seconds": 33.96,
+    "plan_test_count": 30,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L1__run4__t0_4.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L1__run4__t0_4.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 30,
+        "tests_failed": 0,
+        "tests_errors": 0,
+        "total_executed": 30,
+        "validity_rate_pct": 100.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 21,
+        "uncovered_endpoints": [
+          "DELETE /books/{book_id}",
+          "DELETE /categories/{category_id}",
+          "GET /authors/{author_id}",
+          "GET /books",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /books/{book_id}",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "endpoint_coverage_pct": 61.76
+      },
+      "assertion_depth": {
+        "total_test_functions": 30,
+        "total_assertions": 39,
+        "assertion_depth": 1.3
+      },
+      "response_validation": {
+        "tests_with_body_check": 9,
+        "total_test_functions": 30,
+        "response_validation_pct": 30.0
+      },
+      "test_type_distribution": {
+        "total_planned": 30,
+        "distribution": {
+          "happy_path": {
+            "count": 17,
+            "pct": 56.67
+          },
+          "error": {
+            "count": 13,
+            "pct": 43.33
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          400,
+          404,
+          409,
+          422
+        ],
+        "diversity_count": 7,
+        "code_distribution": {
+          "200": 10,
+          "201": 5,
+          "204": 1,
+          "400": 6,
+          "404": 2,
+          "409": 3,
+          "422": 2
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0
+      },
+      "avg_test_length": {
+        "avg_lines": 7.67,
+        "total_test_functions": 30
+      },
+      "plan_adherence": {
+        "planned": 30,
+        "found_in_code": 30,
+        "extra_in_code": 0,
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 1,
+        "stale_names": [
+          "test_apply_discount_new_book_fails"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 67615,
+        "total_lines": 2660,
+        "total_est_tokens": 22538,
+        "section_count": 2,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          },
+          "TECHNICKÁ A BYZNYS DOKUMENTACE": {
+            "chars": 5364,
+            "lines": 124,
+            "est_tokens": 1788
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 30,
+        "unique_endpoints_in_plan": 21,
+        "total_api_endpoints": 34,
+        "top3_concentration_pct": 26.7,
+        "error_focused_endpoints": 12,
+        "skipped_endpoints": [
+          "DELETE /books/{book_id}",
+          "DELETE /categories/{category_id}",
+          "GET /authors/{author_id}",
+          "GET /books",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /books/{book_id}",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "domain_distribution": {
+          "authors": 4,
+          "categories": 2,
+          "books": 11,
+          "tags": 2,
+          "orders": 10,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_author": {
+            "signature": "create_author()",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_category": {
+            "signature": "create_category()",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_book": {
+            "signature": "create_book(author_id, category_id, stock=10, published_year=2020)",
+            "lines": 11,
+            "has_stock_field": true,
+            "has_assertion": false,
+            "default_published_year": 2020
+          }
+        },
+        "helper_count": 4
+      },
+      "prompt_budget": {
+        "context_tokens_est": 22538,
+        "plan_tokens_est": 2673,
+        "total_prompt_tokens_est": 26011,
+        "remaining_for_output_est": 101989,
+        "prompt_budget_pct": 20.3
+      },
+      "instruction_compliance": {
+        "total_http_calls": 48,
+        "missing_timeout": 48,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 1,
+        "categories": {
+          "wrong_status_code": 1
+        },
+        "category_pct": {
+          "wrong_status_code": 100.0
+        },
+        "per_test": {
+          "test_apply_discount_new_book_fails": {
+            "category": "wrong_status_code",
+            "error_summary": "assert r.status_code == 400"
+          }
+        }
+      },
+      "code_patterns": {
+        "total_tests": 30,
+        "avg_http_calls": 1.5,
+        "avg_helper_calls": 2.37,
+        "pct_side_effect_checks": 6.7,
+        "pct_chaining": 13.3
+      },
+      "plan_code_drift": {
+        "planned_count": 30,
+        "actual_count": 30,
+        "matched": 30,
+        "only_in_plan_count": 0,
+        "only_in_code_count": 0,
+        "status_code_drift_count": 1
+      },
+      "context_utilization": {
+        "context_endpoints_found": 53,
+        "plan_endpoints_used": 17,
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_hallucinated": []
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "isolated",
+            "repaired_count": 1,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 29,
+            "failed": 1,
+            "repair_type": "isolated",
+            "repaired_count": 1,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 30,
+            "failed": 0,
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 2,
+        "never_fixed_tests": [],
+        "fixed_tests": [
+          "test_apply_discount_new_book_fails"
+        ],
+        "failure_categories": {
+          "test_apply_discount_new_book_fails": "wrong_status_code"
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-31T00:44:42.741732",
+    "llm": "gemini-3.1-flash-lite-preview",
+    "api": "bookstore",
+    "level": "L1",
+    "run_id": 5,
+    "temperature": 0.4,
+    "iterations_used": 1,
+    "all_tests_passed": true,
+    "elapsed_seconds": 33.71,
+    "plan_test_count": 30,
+    "output_filename": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L1__run5__t0_4.py",
+    "plan_filename": "test_plan_gemini-3_1-flash-lite-preview__bookstore__L1__run5__t0_4.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 30,
+        "tests_failed": 0,
+        "tests_errors": 0,
+        "total_executed": 30,
+        "validity_rate_pct": 100.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 21,
+        "uncovered_endpoints": [
+          "DELETE /categories/{category_id}",
+          "GET /authors",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /orders",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /books/{book_id}",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "endpoint_coverage_pct": 61.76
+      },
+      "assertion_depth": {
+        "total_test_functions": 30,
+        "total_assertions": 38,
+        "assertion_depth": 1.27
+      },
+      "response_validation": {
+        "tests_with_body_check": 7,
+        "total_test_functions": 30,
+        "response_validation_pct": 23.33
+      },
+      "test_type_distribution": {
+        "total_planned": 30,
+        "distribution": {
+          "happy_path": {
+            "count": 16,
+            "pct": 53.33
+          },
+          "error": {
+            "count": 14,
+            "pct": 46.67
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          201,
+          204,
+          400,
+          404,
+          409,
+          422
+        ],
+        "diversity_count": 7,
+        "code_distribution": {
+          "200": 7,
+          "201": 6,
+          "204": 1,
+          "400": 6,
+          "404": 4,
+          "409": 4,
+          "422": 1
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [],
+        "empty_count": 0
+      },
+      "avg_test_length": {
+        "avg_lines": 6.53,
+        "total_test_functions": 30
+      },
+      "plan_adherence": {
+        "planned": 30,
+        "found_in_code": 30,
+        "extra_in_code": 0,
+        "adherence_pct": 100.0
+      },
+      "stale_tests": {
+        "stale_count": 0,
+        "stale_names": []
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 67615,
+        "total_lines": 2660,
+        "total_est_tokens": 22538,
+        "section_count": 2,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 62183,
+            "lines": 2534,
+            "est_tokens": 20727
+          },
+          "TECHNICKÁ A BYZNYS DOKUMENTACE": {
+            "chars": 5364,
+            "lines": 124,
+            "est_tokens": 1788
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 30,
+        "unique_endpoints_in_plan": 21,
+        "total_api_endpoints": 34,
+        "top3_concentration_pct": 23.3,
+        "error_focused_endpoints": 13,
+        "skipped_endpoints": [
+          "DELETE /categories/{category_id}",
+          "GET /authors",
+          "GET /books/{book_id}/reviews",
+          "GET /categories",
+          "GET /orders",
+          "GET /orders/{order_id}",
+          "GET /tags",
+          "GET /tags/{tag_id}",
+          "POST /reset",
+          "PUT /authors/{author_id}",
+          "PUT /books/{book_id}",
+          "PUT /categories/{category_id}",
+          "PUT /tags/{tag_id}"
+        ],
+        "domain_distribution": {
+          "authors": 4,
+          "categories": 3,
+          "books": 13,
+          "tags": 2,
+          "orders": 7,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_author": {
+            "signature": "create_author()",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_category": {
+            "signature": "create_category()",
+            "lines": 3,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_book": {
+            "signature": "create_book(author_id, category_id, stock=10, year=2020)",
+            "lines": 11,
+            "has_stock_field": true,
+            "has_assertion": false,
+            "default_published_year": 2020
+          }
+        },
+        "helper_count": 4
+      },
+      "prompt_budget": {
+        "context_tokens_est": 22538,
+        "plan_tokens_est": 2661,
+        "total_prompt_tokens_est": 25999,
+        "remaining_for_output_est": 102001,
+        "prompt_budget_pct": 20.3
+      },
+      "instruction_compliance": {
+        "total_http_calls": 48,
+        "missing_timeout": 48,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 0,
+        "categories": {},
+        "per_test": {}
+      },
+      "code_patterns": {
+        "total_tests": 30,
+        "avg_http_calls": 1.5,
+        "avg_helper_calls": 2.3,
+        "pct_side_effect_checks": 6.7,
+        "pct_chaining": 13.3
+      },
+      "plan_code_drift": {
+        "planned_count": 30,
+        "actual_count": 30,
+        "matched": 30,
+        "only_in_plan_count": 0,
+        "only_in_code_count": 0,
+        "status_code_drift_count": 2
+      },
+      "context_utilization": {
+        "context_endpoints_found": 53,
+        "plan_endpoints_used": 17,
+        "status_codes_from_context": [
+          "200",
+          "201",
+          "204",
+          "400",
+          "404",
+          "409",
+          "422"
+        ],
+        "status_codes_hallucinated": []
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 30,
+            "failed": 0,
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 2,
+        "never_fixed_tests": [],
+        "fixed_tests": [],
+        "failure_categories": {}
+      }
+    }
+  }
+]

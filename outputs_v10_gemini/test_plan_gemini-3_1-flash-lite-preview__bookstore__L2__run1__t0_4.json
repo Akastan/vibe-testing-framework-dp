@@ -1,0 +1,304 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověření, že health check vrací 200 OK"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Úspěšné vytvoření autora"
+        },
+        {
+          "name": "create_author_invalid_data",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Chyba při vytvoření autora bez jména"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_with_books_fails",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Smazání autora s knihami vrací 409"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_duplicate_category_fails",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Vytvoření kategorie se stejným názvem vrací 409"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Úspěšné vytvoření knihy se stock 10"
+        },
+        {
+          "name": "create_book_nonexistent_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Vytvoření knihy s neexistujícím autorem vrací 404"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověření stránkování knih"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Úspěšné přidání recenze"
+        },
+        {
+          "name": "create_review_invalid_rating",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Recenze s ratingem mimo rozsah 1-5"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/rating",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_rating_no_reviews",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Kniha bez recenzí vrací null average_rating"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_new_book_fails",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Sleva na knihu mladší 1 roku vrací 400"
+        },
+        {
+          "name": "apply_discount_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Sleva na starší knihu vrací vypočítanou cenu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_increase",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Navýšení skladu o N"
+        },
+        {
+          "name": "update_stock_negative_result_fails",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Odečtení skladu pod nulu vrací 400"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Úspěšné vytvoření tagu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_to_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Úspěšné přidání tagů ke knize"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "remove_tags_from_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Úspěšné odebrání tagů z knihy"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Úspěšné vytvoření objednávky"
+        },
+        {
+          "name": "create_order_insufficient_stock",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Objednávka s nedostatkem skladu vrací 400"
+        },
+        {
+          "name": "create_order_duplicate_items",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Duplicitní book_id v položkách vrací 400"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_status_pending_to_confirmed",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Validní přechod stavu pending na confirmed"
+        },
+        {
+          "name": "update_status_invalid_transition",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Nepovolený přechod stavu vrací 400"
+        },
+        {
+          "name": "cancel_order_restores_stock",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Zrušení objednávky vrací sklad"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_pending_order_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Smazání pending objednávky"
+        },
+        {
+          "name": "delete_shipped_order_fails",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Smazání odeslané objednávky vrací 400"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_nonexistent_book",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Dotaz na neexistující knihu vrací 404"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags/{tag_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_tag_in_use_fails",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Smazání tagu přiřazeného ke knize vrací 409"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Dotaz na neexistujícího autora vrací 404"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_invalid_payload_schema",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Odeslání nevalidního formátu JSON (např. chybějící povinné pole) vrací 400"
+        }
+      ]
+    }
+  ]
+}

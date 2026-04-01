@@ -1,0 +1,177 @@
+[
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L0__run1",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1__t0_4.py",
+    "coverage": 81.25984251968504,
+    "passed": 27,
+    "failed": 3
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L0__run2",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run2__t0_4.py",
+    "coverage": 74.01574803149606,
+    "passed": 29,
+    "failed": 1
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L0__run3",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run3__t0_4.py",
+    "coverage": 80.94488188976378,
+    "passed": 27,
+    "failed": 3
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L0__run4",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run4__t0_4.py",
+    "coverage": 74.33070866141732,
+    "passed": 25,
+    "failed": 5
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L0__run5",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run5__t0_4.py",
+    "coverage": 83.93700787401575,
+    "passed": 29,
+    "failed": 1
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L1__run1",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L1__run1__t0_4.py",
+    "coverage": 85.98425196850394,
+    "passed": 29,
+    "failed": 1
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L1__run2",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L1__run2__t0_4.py",
+    "coverage": 85.98425196850394,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L1__run3",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L1__run3__t0_4.py",
+    "coverage": 84.40944881889764,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L1__run4",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L1__run4__t0_4.py",
+    "coverage": 84.88188976377953,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L1__run5",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L1__run5__t0_4.py",
+    "coverage": 85.19685039370079,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L2__run1",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L2__run1__t0_4.py",
+    "coverage": 84.09448818897638,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L2__run2",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L2__run2__t0_4.py",
+    "coverage": 85.51181102362204,
+    "passed": 29,
+    "failed": 1
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L2__run3",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L2__run3__t0_4.py",
+    "coverage": 84.09448818897638,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L2__run4",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L2__run4__t0_4.py",
+    "coverage": 84.25196850393701,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L2__run5",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L2__run5__t0_4.py",
+    "coverage": 85.66929133858268,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L3__run1",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L3__run1__t0_4.py",
+    "coverage": 84.25196850393701,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L3__run2",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L3__run2__t0_4.py",
+    "coverage": 85.8267716535433,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L3__run3",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L3__run3__t0_4.py",
+    "coverage": 82.36220472440945,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L3__run4",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L3__run4__t0_4.py",
+    "coverage": 83.30708661417323,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L3__run5",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L3__run5__t0_4.py",
+    "coverage": 84.09448818897638,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L4__run1",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run1__t0_4.py",
+    "coverage": 85.35433070866142,
+    "passed": 29,
+    "failed": 1
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L4__run2",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run2__t0_4.py",
+    "coverage": 83.77952755905511,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L4__run3",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py",
+    "coverage": 84.56692913385827,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L4__run4",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run4__t0_4.py",
+    "coverage": 84.25196850393701,
+    "passed": 30,
+    "failed": 0
+  },
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L4__run5",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run5__t0_4.py",
+    "coverage": 83.77952755905511,
+    "passed": 30,
+    "failed": 0
+  }
+]
