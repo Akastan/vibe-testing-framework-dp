@@ -1,0 +1,941 @@
+# Log pro: test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py
+# Čas spuštění: 2026-04-01T14:05:33.951270
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 1 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 25 items
+
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_author_happy_path PASSED [  4%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_edge_case_invalid_born_year FAILED [  8%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_happy_path PASSED [ 12%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_edge_case_long_name FAILED [ 16%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_happy_path FAILED [ 20%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_invalid_isbn FAILED [ 24%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_happy_path FAILED [ 28%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_edge_case_invalid_rating FAILED [ 32%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_happy_path FAILED [ 36%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_edge_case_invalid_percentage FAILED [ 40%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_happy_path PASSED [ 44%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_edge_case_long_name FAILED [ 48%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_tag_happy_path PASSED [ 52%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_happy_path FAILED [ 56%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_edge_case_invalid_status FAILED [ 60%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_reviews_happy_path FAILED [ 64%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_authors_happy_path PASSED [ 68%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_author_happy_path PASSED [ 72%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_author_happy_path PASSED [ 76%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_categories_happy_path PASSED [ 80%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_category_happy_path PASSED [ 84%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_category_happy_path PASSED [ 88%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_happy_path PASSED [ 92%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_category_happy_path PASSED [ 96%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_no_stock FAILED [100%]
+
+================================== FAILURES ===================================
+_______________ test_update_author_edge_case_invalid_born_year ________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:96: in test_update_author_edge_case_invalid_born_year
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+__________________ test_create_category_edge_case_long_name ___________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:107: in test_create_category_edge_case_long_name
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+_________________________ test_create_book_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:115: in test_create_book_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data
+E   AssertionError: assert 'id' in {'detail': [{'input': {'author_id': 3, 'category_id': 2, 'isbn': 'isbn_4d94b4f4', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+___________________ test_create_book_edge_case_invalid_isbn ___________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:128: in test_create_book_edge_case_invalid_isbn
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+________________________ test_create_review_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:136: in test_create_review_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data
+E   AssertionError: assert 'id' in {'detail': [{'input': {'author_id': 5, 'category_id': 4, 'isbn': 'isbn_8fd68678', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_________________ test_create_review_edge_case_invalid_rating _________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:143: in test_create_review_edge_case_invalid_rating
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data
+E   AssertionError: assert 'id' in {'detail': [{'input': {'author_id': 6, 'category_id': 5, 'isbn': 'isbn_14f33774', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_______________________ test_apply_discount_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:156: in test_apply_discount_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data
+E   AssertionError: assert 'id' in {'detail': [{'input': {'author_id': 7, 'category_id': 6, 'isbn': 'isbn_9c7984c3', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+______________ test_apply_discount_edge_case_invalid_percentage _______________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:163: in test_apply_discount_edge_case_invalid_percentage
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data
+E   AssertionError: assert 'id' in {'detail': [{'input': {'author_id': 8, 'category_id': 7, 'isbn': 'isbn_aaed6e06', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_____________________ test_create_tag_edge_case_long_name _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:176: in test_create_tag_edge_case_long_name
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+_____________________ test_update_order_status_happy_path _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:189: in test_update_order_status_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data
+E   AssertionError: assert 'id' in {'detail': [{'input': {'author_id': 9, 'category_id': 8, 'isbn': 'isbn_64168d3f', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+______________ test_update_order_status_edge_case_invalid_status ______________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:197: in test_update_order_status_edge_case_invalid_status
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data
+E   AssertionError: assert 'id' in {'detail': [{'input': {'author_id': 10, 'category_id': 9, 'isbn': 'isbn_632e7136', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+________________________ test_list_reviews_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:208: in test_list_reviews_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data
+E   AssertionError: assert 'id' in {'detail': [{'input': {'author_id': 11, 'category_id': 10, 'isbn': 'isbn_d5b7f98f', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_____________________ test_create_book_edge_case_no_stock _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:276: in test_create_book_edge_case_no_stock
+    book_id = create_book(unique("book"), author_id, category_id, "978-3-16-148410-0", 29.99, 0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data
+E   AssertionError: assert 'id' in {'detail': [{'ctx': {'max_length': 13}, 'input': '978-3-16-148410-0', 'loc': ['body', 'isbn'], 'msg': 'String should have at most 13 characters', ...}, {'input': {'author_id': 15, 'category_id': 14, 'isbn': '978-3-16-148410-0', 'price': 29.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_edge_case_invalid_born_year
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_edge_case_long_name
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_invalid_isbn
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_edge_case_invalid_rating
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_edge_case_invalid_percentage
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_edge_case_long_name
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_edge_case_invalid_status
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_reviews_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_no_stock
+======================== 13 failed, 12 passed in 1.26s ========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 2 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 25 items
+
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_author_happy_path PASSED [  4%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_edge_case_invalid_born_year FAILED [  8%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_happy_path PASSED [ 12%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_edge_case_long_name FAILED [ 16%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_happy_path FAILED [ 20%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_invalid_isbn FAILED [ 24%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_happy_path FAILED [ 28%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_edge_case_invalid_rating FAILED [ 32%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_happy_path FAILED [ 36%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_edge_case_invalid_percentage FAILED [ 40%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_happy_path PASSED [ 44%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_edge_case_long_name FAILED [ 48%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_tag_happy_path PASSED [ 52%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_happy_path FAILED [ 56%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_edge_case_invalid_status FAILED [ 60%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_reviews_happy_path FAILED [ 64%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_authors_happy_path FAILED [ 68%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_author_happy_path FAILED [ 72%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_author_happy_path FAILED [ 76%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_categories_happy_path FAILED [ 80%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_category_happy_path FAILED [ 84%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_category_happy_path FAILED [ 88%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_happy_path FAILED [ 92%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_category_happy_path FAILED [ 96%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_no_stock FAILED [100%]
+
+================================== FAILURES ===================================
+_______________ test_update_author_edge_case_invalid_born_year ________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:96: in test_update_author_edge_case_invalid_born_year
+    response = requests.put(f"{base_url}/authors/{author_id}", json={"name": name, "born_year": 3000}, timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+__________________ test_create_category_edge_case_long_name ___________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:107: in test_create_category_edge_case_long_name
+    response = requests.post(f"{base_url}/categories", json={"name": long_name}, timeout=timeout)
+                                ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_________________________ test_create_book_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:116: in test_create_book_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_52aa7204_4b73ab78', 'author_id': 3, 'category_id': 2, 'isbn': 'isbn_f93b8046', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 3, 'category_id': 2, 'isbn': 'isbn_f93b8046', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+___________________ test_create_book_edge_case_invalid_isbn ___________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:121: in test_create_book_edge_case_invalid_isbn
+    response = requests.post(f"{base_url}/books", json={
+                                ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_create_review_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:137: in test_create_review_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_37487918_4c2e0b7c', 'author_id': 5, 'category_id': 4, 'isbn': 'isbn_794b5193', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 5, 'category_id': 4, 'isbn': 'isbn_794b5193', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_________________ test_create_review_edge_case_invalid_rating _________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:144: in test_create_review_edge_case_invalid_rating
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_c3910fd2_c725becb', 'author_id': 6, 'category_id': 5, 'isbn': 'isbn_dcea1577', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 6, 'category_id': 5, 'isbn': 'isbn_dcea1577', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_______________________ test_apply_discount_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:157: in test_apply_discount_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_66fb788e_c9b7d9f4', 'author_id': 7, 'category_id': 6, 'isbn': 'isbn_4d603174', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 7, 'category_id': 6, 'isbn': 'isbn_4d603174', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+______________ test_apply_discount_edge_case_invalid_percentage _______________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:164: in test_apply_discount_edge_case_invalid_percentage
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_ff69f44d_649efe4d', 'author_id': 8, 'category_id': 7, 'isbn': 'isbn_9994abe0', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 8, 'category_id': 7, 'isbn': 'isbn_9994abe0', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_____________________ test_create_tag_edge_case_long_name _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:176: in test_create_tag_edge_case_long_name
+    response = requests.post(f"{base_url}/tags", json={"name": long_name}, timeout=timeout)
+                                ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_____________________ test_update_order_status_happy_path _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:190: in test_update_order_status_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_060f8a2b_29f5a6a3', 'author_id': 9, 'category_id': 8, 'isbn': 'isbn_92f5e814', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 9, 'category_id': 8, 'isbn': 'isbn_92f5e814', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+______________ test_update_order_status_edge_case_invalid_status ______________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:198: in test_update_order_status_edge_case_invalid_status
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_0f2f7574_8ddcd883', 'author_id': 10, 'category_id': 9, 'isbn': 'isbn_f4807ac6', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 10, 'category_id': 9, 'isbn': 'isbn_f4807ac6', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+________________________ test_list_reviews_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:209: in test_list_reviews_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_0c0a990e_8c019931', 'author_id': 11, 'category_id': 10, 'isbn': 'isbn_0f294386', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 11, 'category_id': 10, 'isbn': 'isbn_0f294386', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+________________________ test_list_authors_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:218: in test_list_authors_happy_path
+    response = requests.get(f"{base_url}/authors", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_________________________ test_get_author_happy_path __________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:226: in test_get_author_happy_path
+    response = requests.get(f"{base_url}/authors/{author_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_delete_author_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:233: in test_delete_author_happy_path
+    response = requests.delete(f"{base_url}/authors/{author_id}", timeout=timeout)
+                                  ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_list_categories_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:238: in test_list_categories_happy_path
+    response = requests.get(f"{base_url}/categories", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_get_category_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:246: in test_get_category_happy_path
+    response = requests.get(f"{base_url}/categories/{category_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_delete_category_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:253: in test_delete_category_happy_path
+    response = requests.delete(f"{base_url}/categories/{category_id}", timeout=timeout)
+                                  ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_update_author_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:260: in test_update_author_happy_path
+    response = requests.get(f"{base_url}/authors/{author_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_update_category_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:269: in test_update_category_happy_path
+    response = requests.get(f"{base_url}/categories/{category_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_____________________ test_create_book_edge_case_no_stock _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:277: in test_create_book_edge_case_no_stock
+    book_id = create_book(unique("book"), author_id, category_id, "978-3-16-148410-0", 29.99, 0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'string_too_long', 'loc': ['body', 'isbn'], 'msg': 'String should have at most 13 characters', 'input': '978-3-16-148410-0', 'ctx': {'max_length': 13}}, {'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_3a425187_359e20f6', 'author_id': 16, 'category_id': 15, 'isbn': '978-3-16-148410-0', 'price': 29.99, 'stock': 0}}]}
+E   assert 'id' in {'detail': [{'ctx': {'max_length': 13}, 'input': '978-3-16-148410-0', 'loc': ['body', 'isbn'], 'msg': 'String should have at most 13 characters', ...}, {'input': {'author_id': 16, 'category_id': 15, 'isbn': '978-3-16-148410-0', 'price': 29.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_edge_case_invalid_born_year
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_edge_case_long_name
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_invalid_isbn
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_edge_case_invalid_rating
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_edge_case_invalid_percentage
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_edge_case_long_name
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_edge_case_invalid_status
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_reviews_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_authors_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_categories_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_no_stock
+======================== 21 failed, 4 passed in 0.98s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 3 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 25 items
+
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_author_happy_path PASSED [  4%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_edge_case_invalid_born_year FAILED [  8%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_happy_path PASSED [ 12%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_edge_case_long_name FAILED [ 16%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_happy_path FAILED [ 20%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_invalid_isbn FAILED [ 24%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_happy_path FAILED [ 28%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_edge_case_invalid_rating FAILED [ 32%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_happy_path FAILED [ 36%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_edge_case_invalid_percentage FAILED [ 40%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_happy_path PASSED [ 44%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_edge_case_long_name FAILED [ 48%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_tag_happy_path PASSED [ 52%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_happy_path FAILED [ 56%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_edge_case_invalid_status FAILED [ 60%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_reviews_happy_path FAILED [ 64%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_authors_happy_path FAILED [ 68%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_author_happy_path FAILED [ 72%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_author_happy_path FAILED [ 76%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_categories_happy_path FAILED [ 80%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_category_happy_path FAILED [ 84%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_category_happy_path FAILED [ 88%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_happy_path FAILED [ 92%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_category_happy_path FAILED [ 96%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_no_stock FAILED [100%]
+
+================================== FAILURES ===================================
+_______________ test_update_author_edge_case_invalid_born_year ________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:97: in test_update_author_edge_case_invalid_born_year
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+__________________ test_create_category_edge_case_long_name ___________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:108: in test_create_category_edge_case_long_name
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+_________________________ test_create_book_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:116: in test_create_book_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_ed0c7ee2_7a8e7279', 'author_id': 3, 'category_id': 2, 'isbn': 'isbn_ddcdbd5b', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 3, 'category_id': 2, 'isbn': 'isbn_ddcdbd5b', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+___________________ test_create_book_edge_case_invalid_isbn ___________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:133: in test_create_book_edge_case_invalid_isbn
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+________________________ test_create_review_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:141: in test_create_review_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_94962f16_3854441c', 'author_id': 5, 'category_id': 4, 'isbn': 'isbn_fef2c9cd', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 5, 'category_id': 4, 'isbn': 'isbn_fef2c9cd', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_________________ test_create_review_edge_case_invalid_rating _________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:151: in test_create_review_edge_case_invalid_rating
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_b67734b2_73593569', 'author_id': 6, 'category_id': 5, 'isbn': 'isbn_b2cec692', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 6, 'category_id': 5, 'isbn': 'isbn_b2cec692', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_______________________ test_apply_discount_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:164: in test_apply_discount_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_05aa173d_f2ad967f', 'author_id': 7, 'category_id': 6, 'isbn': 'isbn_bdeb6f5e', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 7, 'category_id': 6, 'isbn': 'isbn_bdeb6f5e', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+______________ test_apply_discount_edge_case_invalid_percentage _______________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:172: in test_apply_discount_edge_case_invalid_percentage
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_f08100ef_3f15a8af', 'author_id': 8, 'category_id': 7, 'isbn': 'isbn_1891c3de', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 8, 'category_id': 7, 'isbn': 'isbn_1891c3de', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_____________________ test_create_tag_edge_case_long_name _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:185: in test_create_tag_edge_case_long_name
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+_____________________ test_update_order_status_happy_path _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:198: in test_update_order_status_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_b2b22c26_2877f4a9', 'author_id': 9, 'category_id': 8, 'isbn': 'isbn_a1284f06', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 9, 'category_id': 8, 'isbn': 'isbn_a1284f06', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+______________ test_update_order_status_edge_case_invalid_status ______________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:207: in test_update_order_status_edge_case_invalid_status
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_b6c5c1ca_1c9675fb', 'author_id': 10, 'category_id': 9, 'isbn': 'isbn_444d5d83', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 10, 'category_id': 9, 'isbn': 'isbn_444d5d83', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+________________________ test_list_reviews_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:218: in test_list_reviews_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_c8976482_d82e4abe', 'author_id': 11, 'category_id': 10, 'isbn': 'isbn_76a75bec', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 11, 'category_id': 10, 'isbn': 'isbn_76a75bec', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+________________________ test_list_authors_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:227: in test_list_authors_happy_path
+    response = requests.get(f"{base_url}/authors", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_________________________ test_get_author_happy_path __________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:235: in test_get_author_happy_path
+    response = requests.get(f"{base_url}/authors/{author_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_delete_author_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:242: in test_delete_author_happy_path
+    response = requests.delete(f"{base_url}/authors/{author_id}", timeout=timeout)
+                                  ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_list_categories_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:247: in test_list_categories_happy_path
+    response = requests.get(f"{base_url}/categories", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_get_category_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:255: in test_get_category_happy_path
+    response = requests.get(f"{base_url}/categories/{category_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_delete_category_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:262: in test_delete_category_happy_path
+    response = requests.delete(f"{base_url}/categories/{category_id}", timeout=timeout)
+                                  ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_update_author_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:269: in test_update_author_happy_path
+    response = requests.get(f"{base_url}/authors/{author_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_update_category_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:278: in test_update_category_happy_path
+    response = requests.get(f"{base_url}/categories/{category_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_____________________ test_create_book_edge_case_no_stock _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:286: in test_create_book_edge_case_no_stock
+    book_id = create_book(unique("book"), author_id, category_id, "978-3-16-148410-0", 29.99, 0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'string_too_long', 'loc': ['body', 'isbn'], 'msg': 'String should have at most 13 characters', 'input': '978-3-16-148410-0', 'ctx': {'max_length': 13}}, {'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_e334ebe1_dc98f2ff', 'author_id': 16, 'category_id': 15, 'isbn': '978-3-16-148410-0', 'price': 29.99, 'stock': 0}}]}
+E   assert 'id' in {'detail': [{'ctx': {'max_length': 13}, 'input': '978-3-16-148410-0', 'loc': ['body', 'isbn'], 'msg': 'String should have at most 13 characters', ...}, {'input': {'author_id': 16, 'category_id': 15, 'isbn': '978-3-16-148410-0', 'price': 29.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_edge_case_invalid_born_year
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_edge_case_long_name
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_invalid_isbn
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_edge_case_invalid_rating
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_edge_case_invalid_percentage
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_edge_case_long_name
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_edge_case_invalid_status
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_reviews_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_authors_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_categories_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_no_stock
+======================== 21 failed, 4 passed in 1.17s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 4 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 25 items
+
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_author_happy_path PASSED [  4%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_edge_case_invalid_born_year FAILED [  8%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_happy_path PASSED [ 12%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_edge_case_long_name FAILED [ 16%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_happy_path FAILED [ 20%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_invalid_isbn FAILED [ 24%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_happy_path FAILED [ 28%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_edge_case_invalid_rating FAILED [ 32%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_happy_path FAILED [ 36%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_edge_case_invalid_percentage FAILED [ 40%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_happy_path PASSED [ 44%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_edge_case_long_name FAILED [ 48%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_tag_happy_path PASSED [ 52%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_happy_path FAILED [ 56%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_edge_case_invalid_status FAILED [ 60%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_reviews_happy_path FAILED [ 64%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_authors_happy_path FAILED [ 68%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_author_happy_path FAILED [ 72%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_author_happy_path FAILED [ 76%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_categories_happy_path FAILED [ 80%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_category_happy_path FAILED [ 84%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_category_happy_path FAILED [ 88%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_happy_path FAILED [ 92%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_category_happy_path FAILED [ 96%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_no_stock FAILED [100%]
+
+================================== FAILURES ===================================
+_______________ test_update_author_edge_case_invalid_born_year ________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:97: in test_update_author_edge_case_invalid_born_year
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+__________________ test_create_category_edge_case_long_name ___________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:108: in test_create_category_edge_case_long_name
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+_________________________ test_create_book_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:116: in test_create_book_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_8039b30f', 'author_id': 3, 'category_id': 2, 'isbn': 'isbn_6e7da9d2', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 3, 'category_id': 2, 'isbn': 'isbn_6e7da9d2', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+___________________ test_create_book_edge_case_invalid_isbn ___________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:133: in test_create_book_edge_case_invalid_isbn
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+________________________ test_create_review_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:141: in test_create_review_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_d9986451', 'author_id': 5, 'category_id': 4, 'isbn': 'isbn_1fa58517', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 5, 'category_id': 4, 'isbn': 'isbn_1fa58517', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_________________ test_create_review_edge_case_invalid_rating _________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:151: in test_create_review_edge_case_invalid_rating
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_818caf5f', 'author_id': 6, 'category_id': 5, 'isbn': 'isbn_663e0405', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 6, 'category_id': 5, 'isbn': 'isbn_663e0405', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_______________________ test_apply_discount_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:164: in test_apply_discount_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_28262099', 'author_id': 7, 'category_id': 6, 'isbn': 'isbn_a113fa2a', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 7, 'category_id': 6, 'isbn': 'isbn_a113fa2a', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+______________ test_apply_discount_edge_case_invalid_percentage _______________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:172: in test_apply_discount_edge_case_invalid_percentage
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_ced484ef', 'author_id': 8, 'category_id': 7, 'isbn': 'isbn_dcfe9772', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 8, 'category_id': 7, 'isbn': 'isbn_dcfe9772', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_____________________ test_create_tag_edge_case_long_name _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:185: in test_create_tag_edge_case_long_name
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+_____________________ test_update_order_status_happy_path _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:198: in test_update_order_status_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_22bfc4cf', 'author_id': 9, 'category_id': 8, 'isbn': 'isbn_bbe80757', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 9, 'category_id': 8, 'isbn': 'isbn_bbe80757', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+______________ test_update_order_status_edge_case_invalid_status ______________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:207: in test_update_order_status_edge_case_invalid_status
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_813eb42d', 'author_id': 10, 'category_id': 9, 'isbn': 'isbn_19dd46e1', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 10, 'category_id': 9, 'isbn': 'isbn_19dd46e1', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+________________________ test_list_reviews_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:218: in test_list_reviews_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_0113735b', 'author_id': 11, 'category_id': 10, 'isbn': 'isbn_0de3a5c4', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 11, 'category_id': 10, 'isbn': 'isbn_0de3a5c4', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+________________________ test_list_authors_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:227: in test_list_authors_happy_path
+    response = requests.get(f"{base_url}/authors", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_________________________ test_get_author_happy_path __________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:235: in test_get_author_happy_path
+    response = requests.get(f"{base_url}/authors/{author_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_delete_author_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:242: in test_delete_author_happy_path
+    response = requests.delete(f"{base_url}/authors/{author_id}", timeout=timeout)
+                                  ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_list_categories_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:247: in test_list_categories_happy_path
+    response = requests.get(f"{base_url}/categories", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_get_category_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:255: in test_get_category_happy_path
+    response = requests.get(f"{base_url}/categories/{category_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_delete_category_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:262: in test_delete_category_happy_path
+    response = requests.delete(f"{base_url}/categories/{category_id}", timeout=timeout)
+                                  ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_update_author_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:269: in test_update_author_happy_path
+    response = requests.get(f"{base_url}/authors/{author_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_update_category_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:278: in test_update_category_happy_path
+    response = requests.get(f"{base_url}/categories/{category_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_____________________ test_create_book_edge_case_no_stock _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:286: in test_create_book_edge_case_no_stock
+    book_id = create_book(unique("book"), author_id, category_id, "978-3-16-148410-0", 29.99, 0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'string_too_long', 'loc': ['body', 'isbn'], 'msg': 'String should have at most 13 characters', 'input': '978-3-16-148410-0', 'ctx': {'max_length': 13}}, {'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_05a399e7', 'author_id': 16, 'category_id': 15, 'isbn': '978-3-16-148410-0', 'price': 29.99, 'stock': 0}}]}
+E   assert 'id' in {'detail': [{'ctx': {'max_length': 13}, 'input': '978-3-16-148410-0', 'loc': ['body', 'isbn'], 'msg': 'String should have at most 13 characters', ...}, {'input': {'author_id': 16, 'category_id': 15, 'isbn': '978-3-16-148410-0', 'price': 29.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_edge_case_invalid_born_year
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_edge_case_long_name
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_invalid_isbn
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_edge_case_invalid_rating
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_edge_case_invalid_percentage
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_edge_case_long_name
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_edge_case_invalid_status
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_reviews_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_authors_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_categories_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_no_stock
+======================== 21 failed, 4 passed in 1.21s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 5 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 25 items
+
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_author_happy_path PASSED [  4%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_edge_case_invalid_born_year FAILED [  8%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_happy_path PASSED [ 12%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_edge_case_long_name FAILED [ 16%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_happy_path FAILED [ 20%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_invalid_isbn FAILED [ 24%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_happy_path FAILED [ 28%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_edge_case_invalid_rating FAILED [ 32%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_happy_path FAILED [ 36%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_edge_case_invalid_percentage FAILED [ 40%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_happy_path PASSED [ 44%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_edge_case_long_name FAILED [ 48%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_tag_happy_path PASSED [ 52%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_happy_path FAILED [ 56%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_edge_case_invalid_status FAILED [ 60%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_reviews_happy_path FAILED [ 64%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_authors_happy_path FAILED [ 68%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_author_happy_path FAILED [ 72%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_author_happy_path FAILED [ 76%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_categories_happy_path FAILED [ 80%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_category_happy_path FAILED [ 84%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_category_happy_path FAILED [ 88%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_happy_path FAILED [ 92%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_category_happy_path FAILED [ 96%]
+outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_no_stock FAILED [100%]
+
+================================== FAILURES ===================================
+_______________ test_update_author_edge_case_invalid_born_year ________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:97: in test_update_author_edge_case_invalid_born_year
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+__________________ test_create_category_edge_case_long_name ___________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:108: in test_create_category_edge_case_long_name
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+_________________________ test_create_book_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:116: in test_create_book_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_782877b4', 'author_id': 3, 'category_id': 2, 'isbn': 'isbn_da617c61', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 3, 'category_id': 2, 'isbn': 'isbn_da617c61', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+___________________ test_create_book_edge_case_invalid_isbn ___________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:134: in test_create_book_edge_case_invalid_isbn
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+________________________ test_create_review_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:142: in test_create_review_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_fcc837d7', 'author_id': 5, 'category_id': 4, 'isbn': 'isbn_b9178789', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 5, 'category_id': 4, 'isbn': 'isbn_b9178789', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_________________ test_create_review_edge_case_invalid_rating _________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:153: in test_create_review_edge_case_invalid_rating
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_7a01de64', 'author_id': 6, 'category_id': 5, 'isbn': 'isbn_f09a8dfd', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 6, 'category_id': 5, 'isbn': 'isbn_f09a8dfd', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_______________________ test_apply_discount_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:166: in test_apply_discount_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_db5a390b', 'author_id': 7, 'category_id': 6, 'isbn': 'isbn_78089a68', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 7, 'category_id': 6, 'isbn': 'isbn_78089a68', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+______________ test_apply_discount_edge_case_invalid_percentage _______________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:176: in test_apply_discount_edge_case_invalid_percentage
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_86e0c7c0', 'author_id': 8, 'category_id': 7, 'isbn': 'isbn_c95e44f3', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 8, 'category_id': 7, 'isbn': 'isbn_c95e44f3', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+_____________________ test_create_tag_edge_case_long_name _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:189: in test_create_tag_edge_case_long_name
+    assert response.status_code == 400
+E   assert 422 == 400
+E    +  where 422 = <Response [422]>.status_code
+_____________________ test_update_order_status_happy_path _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:202: in test_update_order_status_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_ecf04231', 'author_id': 9, 'category_id': 8, 'isbn': 'isbn_3342b8ab', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 9, 'category_id': 8, 'isbn': 'isbn_3342b8ab', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+______________ test_update_order_status_edge_case_invalid_status ______________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:211: in test_update_order_status_edge_case_invalid_status
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_bab62c09', 'author_id': 10, 'category_id': 9, 'isbn': 'isbn_28efb9f9', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 10, 'category_id': 9, 'isbn': 'isbn_28efb9f9', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+________________________ test_list_reviews_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:222: in test_list_reviews_happy_path
+    book_id = create_book(unique("book"), author_id, category_id, isbn, 19.99, 10)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_c88915ad', 'author_id': 11, 'category_id': 10, 'isbn': 'isbn_8565175b', 'price': 19.99, 'stock': 10}}]}
+E   assert 'id' in {'detail': [{'input': {'author_id': 11, 'category_id': 10, 'isbn': 'isbn_8565175b', 'price': 19.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+________________________ test_list_authors_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:231: in test_list_authors_happy_path
+    response = requests.get(f"{base_url}/authors", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_________________________ test_get_author_happy_path __________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:239: in test_get_author_happy_path
+    response = requests.get(f"{base_url}/authors/{author_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_delete_author_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:246: in test_delete_author_happy_path
+    response = requests.delete(f"{base_url}/authors/{author_id}", timeout=timeout)
+                                  ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_list_categories_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:251: in test_list_categories_happy_path
+    response = requests.get(f"{base_url}/categories", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_get_category_happy_path _________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:259: in test_get_category_happy_path
+    response = requests.get(f"{base_url}/categories/{category_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_delete_category_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:266: in test_delete_category_happy_path
+    response = requests.delete(f"{base_url}/categories/{category_id}", timeout=timeout)
+                                  ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+________________________ test_update_author_happy_path ________________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:273: in test_update_author_happy_path
+    response = requests.get(f"{base_url}/authors/{author_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_______________________ test_update_category_happy_path _______________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:282: in test_update_category_happy_path
+    response = requests.get(f"{base_url}/categories/{category_id}", timeout=timeout)
+                               ^^^^^^^^
+E   NameError: name 'base_url' is not defined
+_____________________ test_create_book_edge_case_no_stock _____________________
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:290: in test_create_book_edge_case_no_stock
+    book_id = create_book(unique("book"), author_id, category_id, "978-3-16-148410-0", 29.99, 0)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py:42: in create_book
+    assert "id" in data, f"Response does not contain 'id': {data}"
+E   AssertionError: Response does not contain 'id': {'detail': [{'type': 'string_too_long', 'loc': ['body', 'isbn'], 'msg': 'String should have at most 13 characters', 'input': '978-3-16-148410-0', 'ctx': {'max_length': 13}}, {'type': 'missing', 'loc': ['body', 'published_year'], 'msg': 'Field required', 'input': {'title': 'book_6130a12b', 'author_id': 16, 'category_id': 15, 'isbn': '978-3-16-148410-0', 'price': 29.99, 'stock': 0}}]}
+E   assert 'id' in {'detail': [{'ctx': {'max_length': 13}, 'input': '978-3-16-148410-0', 'loc': ['body', 'isbn'], 'msg': 'String should have at most 13 characters', ...}, {'input': {'author_id': 16, 'category_id': 15, 'isbn': '978-3-16-148410-0', 'price': 29.99, ...}, 'loc': ['body', 'published_year'], 'msg': 'Field required', 'type': 'missing'}]}
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_edge_case_invalid_born_year
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_category_edge_case_long_name
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_invalid_isbn
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_review_edge_case_invalid_rating
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_apply_discount_edge_case_invalid_percentage
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_tag_edge_case_long_name
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_order_status_edge_case_invalid_status
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_reviews_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_authors_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_list_categories_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_get_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_delete_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_author_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_update_category_happy_path
+FAILED outputs/test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py::test_create_book_edge_case_no_stock
+======================== 21 failed, 4 passed in 1.19s =========================
+
+

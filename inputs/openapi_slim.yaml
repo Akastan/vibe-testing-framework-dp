@@ -1,0 +1,273 @@
+openapi: 3.1.0
+info:
+  title: Bookstore API
+  version: 2.0.0
+  description: REST API pro správu knihkupectví – knihy, autoři, kategorie, recenze, tagy a objednávky.
+note: Compressed spec. All endpoints preserve exact paths, methods, params, and status codes. Schema details are summarized
+  inline.
+validation_note: All endpoints may return 422 for invalid input data (Pydantic validation).
+paths:
+  /health:
+    get:
+      summary: Health Check
+      responses:
+        '200': Successful Response
+  /authors:
+    post:
+      summary: Create Author
+      request_body: 'AuthorCreate: name(str,1-100,required), bio(str?), born_year(int?,0-2026)'
+      responses:
+        '201': Successful Response → AuthorResponse
+    get:
+      summary: List Authors
+      params:
+      - skip(query):integer,default=0,optional
+      - limit(query):integer,default=100,optional
+      responses:
+        '200': Successful Response
+  /authors/{author_id}:
+    get:
+      summary: Get Author
+      params:
+      - author_id(path):integer
+      responses:
+        '200': Successful Response → AuthorResponse
+    put:
+      summary: Update Author
+      params:
+      - author_id(path):integer
+      request_body: 'AuthorUpdate: name(str?,1-100), bio(str?), born_year(int?,0-2026)'
+      responses:
+        '200': Successful Response → AuthorResponse
+    delete:
+      summary: Delete Author
+      params:
+      - author_id(path):integer
+      responses:
+        '204': Successful Response
+  /categories:
+    get:
+      summary: List Categories
+      responses:
+        '200': Successful Response
+    post:
+      summary: Create Category
+      request_body: 'CategoryCreate: name(str,1-50,required), description(str?)'
+      responses:
+        '201': Successful Response → CategoryResponse
+  /categories/{category_id}:
+    get:
+      summary: Get Category
+      params:
+      - category_id(path):integer
+      responses:
+        '200': Successful Response → CategoryResponse
+    put:
+      summary: Update Category
+      params:
+      - category_id(path):integer
+      request_body: 'CategoryUpdate: name(str?,1-50), description(str?)'
+      responses:
+        '200': Successful Response → CategoryResponse
+    delete:
+      summary: Delete Category
+      params:
+      - category_id(path):integer
+      responses:
+        '204': Successful Response
+  /books:
+    post:
+      summary: Create Book
+      request_body: 'BookCreate: title(str,1-200,req), isbn(str,10-13,req), price(float,>=0,req), published_year(int,1000-2026,req),
+        stock(int,>=0,default=0), author_id(int,req), category_id(int,req)'
+      responses:
+        '201': Successful Response → BookResponse
+    get:
+      summary: List Books
+      params:
+      - page(query):integer,>=1,default=1,optional
+      - page_size(query):integer,>=1,<=100,default=10,optional
+      - search(query)
+      - author_id(query)
+      - category_id(query)
+      - min_price(query)
+      - max_price(query)
+      responses:
+        '200': Successful Response → PaginatedBooks
+  /books/{book_id}:
+    get:
+      summary: Get Book
+      params:
+      - book_id(path):integer
+      responses:
+        '200': Successful Response → BookResponse
+    put:
+      summary: Update Book
+      params:
+      - book_id(path):integer
+      request_body: 'BookUpdate: title?, isbn?, price?, published_year?, stock?, author_id?, category_id?'
+      responses:
+        '200': Successful Response → BookResponse
+    delete:
+      summary: Delete Book
+      params:
+      - book_id(path):integer
+      responses:
+        '204': Successful Response
+  /books/{book_id}/reviews:
+    post:
+      summary: Create Review
+      params:
+      - book_id(path):integer
+      request_body: 'ReviewCreate: rating(int,1-5,req), comment(str?), reviewer_name(str,1-100,req)'
+      responses:
+        '201': Successful Response → ReviewResponse
+    get:
+      summary: List Reviews
+      params:
+      - book_id(path):integer
+      responses:
+        '200': Successful Response
+  /books/{book_id}/rating:
+    get:
+      summary: Get Book Rating
+      params:
+      - book_id(path):integer
+      responses:
+        '200': Successful Response
+  /books/{book_id}/discount:
+    post:
+      summary: Apply Discount
+      params:
+      - book_id(path):integer
+      request_body: 'DiscountRequest: discount_percent(float,gt=0,le=50,req)'
+      responses:
+        '200': Successful Response → DiscountResponse
+  /books/{book_id}/stock:
+    patch:
+      summary: Update Stock
+      params:
+      - book_id(path):integer
+      - quantity(query):integer
+      responses:
+        '200': Successful Response → BookResponse
+  /tags:
+    get:
+      summary: List Tags
+      responses:
+        '200': Successful Response
+    post:
+      summary: Create Tag
+      request_body: 'TagCreate: name(str,1-30,req)'
+      responses:
+        '201': Successful Response → TagResponse
+  /tags/{tag_id}:
+    get:
+      summary: Get Tag
+      params:
+      - tag_id(path):integer
+      responses:
+        '200': Successful Response → TagResponse
+    put:
+      summary: Update Tag
+      params:
+      - tag_id(path):integer
+      request_body: 'TagUpdate: name(str?,1-30)'
+      responses:
+        '200': Successful Response → TagResponse
+    delete:
+      summary: Delete Tag
+      params:
+      - tag_id(path):integer
+      responses:
+        '204': Successful Response
+  /books/{book_id}/tags:
+    post:
+      summary: Add Tags To Book
+      description: Přidá tagy ke knize. Již existující vazby se ignorují.
+      params:
+      - book_id(path):integer
+      request_body: 'BookTagAction: tag_ids(list[int],min=1,req)'
+      responses:
+        '200': Successful Response → BookResponse
+    delete:
+      summary: Remove Tags From Book
+      description: Odebere tagy z knihy.
+      params:
+      - book_id(path):integer
+      request_body: 'BookTagAction: tag_ids(list[int],min=1,req)'
+      responses:
+        '200': Successful Response → BookResponse
+  /orders:
+    post:
+      summary: Create Order
+      description: Vytvoří objednávku, odečte sklad a zachytí aktuální ceny.
+      request_body: 'OrderCreate: customer_name(str,1-100,req), customer_email(str,1-200,req), items(list[OrderItem],min=1,req)'
+      responses:
+        '201': Successful Response → OrderResponse
+    get:
+      summary: List Orders
+      params:
+      - page(query):integer,>=1,default=1,optional
+      - page_size(query):integer,>=1,<=100,default=10,optional
+      - status(query)
+      - customer_name(query)
+      responses:
+        '200': Successful Response → PaginatedOrders
+  /orders/{order_id}:
+    get:
+      summary: Get Order
+      params:
+      - order_id(path):integer
+      responses:
+        '200': Successful Response → OrderResponse
+    delete:
+      summary: Delete Order
+      description: Smaže objednávku. Lze smazat pouze pending nebo cancelled objednávky.
+      params:
+      - order_id(path):integer
+      responses:
+        '204': Successful Response
+  /orders/{order_id}/status:
+    patch:
+      summary: Update Order Status
+      description: Změní stav objednávky dle povolených přechodů. Při zrušení vrátí sklad.
+      params:
+      - order_id(path):integer
+      request_body: 'OrderStatusUpdate: status(str, one of: confirmed|shipped|delivered|cancelled)'
+      responses:
+        '200': Successful Response → OrderResponse
+  /reset:
+    post:
+      summary: Reset Database
+      description: Smaže všechna data z databáze. Pouze pro testovací účely.
+      responses:
+        '200': Successful Response
+schemas_summary:
+  AuthorCreate: name(str,1-100,required), bio(str?), born_year(int?,0-2026)
+  AuthorUpdate: name(str?,1-100), bio(str?), born_year(int?,0-2026)
+  AuthorResponse: id, name, bio, born_year, created_at
+  CategoryCreate: name(str,1-50,required), description(str?)
+  CategoryUpdate: name(str?,1-50), description(str?)
+  CategoryResponse: id, name, description
+  BookCreate: title(str,1-200,req), isbn(str,10-13,req), price(float,>=0,req), published_year(int,1000-2026,req), stock(int,>=0,default=0),
+    author_id(int,req), category_id(int,req)
+  BookUpdate: title?, isbn?, price?, published_year?, stock?, author_id?, category_id?
+  BookResponse: id, title, isbn, price, published_year, stock, author_id, category_id, created_at, author{}, category{}, tags[]
+  BookListResponse: id, title, isbn, price, published_year, stock, author_id, category_id
+  ReviewCreate: rating(int,1-5,req), comment(str?), reviewer_name(str,1-100,req)
+  ReviewResponse: id, book_id, rating, comment, reviewer_name, created_at
+  DiscountRequest: discount_percent(float,gt=0,le=50,req)
+  DiscountResponse: book_id, title, original_price, discount_percent, discounted_price
+  TagCreate: name(str,1-30,req)
+  TagUpdate: name(str?,1-30)
+  TagResponse: id, name, created_at
+  BookTagAction: tag_ids(list[int],min=1,req)
+  OrderCreate: customer_name(str,1-100,req), customer_email(str,1-200,req), items(list[OrderItem],min=1,req)
+  OrderItemCreate: book_id(int,req), quantity(int,>=1,req)
+  OrderItemResponse: id, book_id, quantity, unit_price
+  OrderResponse: id, customer_name, customer_email, status, created_at, updated_at, items[], total_price
+  OrderListResponse: id, customer_name, customer_email, status, total_price, created_at
+  OrderStatusUpdate: 'status(str, one of: confirmed|shipped|delivered|cancelled)'
+  PaginatedBooks: items[], total, page, page_size, total_pages
+  PaginatedOrders: items[], total, page, page_size, total_pages

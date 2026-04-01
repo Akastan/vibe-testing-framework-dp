@@ -1,0 +1,449 @@
+[
+  {
+    "timestamp": "2026-04-01T14:08:58.815811",
+    "llm": "qwen25-coder-32b",
+    "api": "bookstore",
+    "level": "L0",
+    "run_id": 1,
+    "temperature": 0.4,
+    "use_slim_context": true,
+    "iterations_used": 5,
+    "all_tests_passed": false,
+    "elapsed_seconds": 534.76,
+    "plan_test_count": 25,
+    "output_filename": "test_generated_qwen25-coder-32b__bookstore__L0__run1__t0_4.py",
+    "plan_filename": "test_plan_qwen25-coder-32b__bookstore__L0__run1__t0_4.json",
+    "metrics": {
+      "test_validity": {
+        "tests_passed": 4,
+        "tests_failed": 21,
+        "tests_errors": 0,
+        "total_executed": 25,
+        "validity_rate_pct": 16.0
+      },
+      "endpoint_coverage": {
+        "total_api_endpoints": 34,
+        "covered_endpoints": 16,
+        "uncovered_endpoints": [
+          "DELETE /authors/{author_id}",
+          "DELETE /books/{book_id}",
+          "DELETE /books/{book_id}/tags",
+          "DELETE /categories/{category_id}",
+          "DELETE /orders/{order_id}",
+          "DELETE /tags/{tag_id}",
+          "GET /authors/{author_id}",
+          "GET /books/{book_id}",
+          "GET /books/{book_id}/rating",
+          "GET /categories/{category_id}",
+          "GET /orders",
+          "GET /orders/{order_id}",
+          "GET /tags/{tag_id}",
+          "PATCH /books/{book_id}/stock",
+          "POST /books/{book_id}/discount",
+          "POST /books/{book_id}/tags",
+          "POST /orders",
+          "POST /reset"
+        ],
+        "endpoint_coverage_pct": 47.06
+      },
+      "assertion_depth": {
+        "total_test_functions": 25,
+        "total_assertions": 41,
+        "assertion_depth": 1.64
+      },
+      "response_validation": {
+        "tests_with_body_check": 14,
+        "total_test_functions": 25,
+        "response_validation_pct": 56.0
+      },
+      "test_type_distribution": {
+        "total_planned": 25,
+        "distribution": {
+          "happy_path": {
+            "count": 17,
+            "pct": 68.0
+          },
+          "edge_case": {
+            "count": 8,
+            "pct": 32.0
+          }
+        }
+      },
+      "status_code_diversity": {
+        "unique_status_codes": [
+          200,
+          204,
+          400
+        ],
+        "diversity_count": 3,
+        "code_distribution": {
+          "200": 9,
+          "204": 2,
+          "400": 7
+        }
+      },
+      "empty_tests": {
+        "empty_tests": [
+          "test_create_author_happy_path",
+          "test_create_category_happy_path",
+          "test_create_tag_happy_path",
+          "test_update_tag_happy_path"
+        ],
+        "empty_count": 4
+      },
+      "avg_test_length": {
+        "avg_lines": 7.24,
+        "total_test_functions": 25
+      },
+      "plan_adherence": {
+        "planned": 25,
+        "found_in_code": 20,
+        "extra_in_code": 5,
+        "adherence_pct": 80.0
+      },
+      "stale_tests": {
+        "stale_count": 10,
+        "stale_names": [
+          "test_apply_discount_edge_case_invalid_percentage",
+          "test_apply_discount_happy_path",
+          "test_create_book_edge_case_invalid_isbn",
+          "test_create_book_happy_path",
+          "test_create_category_edge_case_long_name",
+          "test_create_review_edge_case_invalid_rating",
+          "test_create_review_happy_path",
+          "test_create_tag_edge_case_long_name",
+          "test_update_author_edge_case_invalid_born_year",
+          "test_update_order_status_happy_path"
+        ]
+      }
+    },
+    "diagnostics": {
+      "context_size": {
+        "total_chars": 12322,
+        "total_lines": 388,
+        "total_est_tokens": 4107,
+        "section_count": 1,
+        "sections": {
+          "OPENAPI SPECIFIKACE": {
+            "chars": 12294,
+            "lines": 387,
+            "est_tokens": 4098
+          }
+        }
+      },
+      "plan_analysis": {
+        "total_planned_tests": 25,
+        "unique_endpoints_in_plan": 17,
+        "total_api_endpoints": 34,
+        "top3_concentration_pct": 24.0,
+        "error_focused_endpoints": 8,
+        "skipped_endpoints": [
+          "DELETE /authors/{author_id}",
+          "DELETE /books/{book_id}",
+          "DELETE /books/{book_id}/tags",
+          "DELETE /categories/{category_id}",
+          "DELETE /orders/{order_id}",
+          "DELETE /tags/{tag_id}",
+          "GET /authors/{author_id}",
+          "GET /books/{book_id}",
+          "GET /books/{book_id}/rating",
+          "GET /categories/{category_id}",
+          "GET /orders",
+          "GET /orders/{order_id}",
+          "GET /tags/{tag_id}",
+          "PATCH /books/{book_id}/stock",
+          "POST /books/{book_id}/discount",
+          "POST /books/{book_id}/tags",
+          "POST /orders",
+          "POST /reset"
+        ],
+        "domain_distribution": {
+          "authors": 5,
+          "categories": 4,
+          "books": 9,
+          "tags": 4,
+          "orders": 2,
+          "other": 1
+        }
+      },
+      "helper_snapshot": {
+        "helpers": {
+          "unique": {
+            "signature": "unique(prefix='test')",
+            "lines": 2,
+            "has_stock_field": false,
+            "has_assertion": false,
+            "default_published_year": null
+          },
+          "create_author": {
+            "signature": "create_author(name)",
+            "lines": 5,
+            "has_stock_field": false,
+            "has_assertion": true,
+            "default_published_year": null
+          },
+          "update_author": {
+            "signature": "update_author(author_id, name)",
+            "lines": 4,
+            "has_stock_field": false,
+            "has_assertion": true,
+            "default_published_year": null
+          },
+          "create_category": {
+            "signature": "create_category(name)",
+            "lines": 5,
+            "has_stock_field": false,
+            "has_assertion": true,
+            "default_published_year": null
+          },
+          "update_category": {
+            "signature": "update_category(category_id, name)",
+            "lines": 4,
+            "has_stock_field": false,
+            "has_assertion": true,
+            "default_published_year": null
+          },
+          "create_book": {
+            "signature": "create_book(title, author_id, category_id, isbn, price, stock)",
+            "lines": 12,
+            "has_stock_field": true,
+            "has_assertion": true,
+            "default_published_year": null
+          },
+          "update_book": {
+            "signature": "update_book(book_id, title)",
+            "lines": 4,
+            "has_stock_field": false,
+            "has_assertion": true,
+            "default_published_year": null
+          },
+          "create_review": {
+            "signature": "create_review(book_id, rating, comment)",
+            "lines": 7,
+            "has_stock_field": false,
+            "has_assertion": true,
+            "default_published_year": null
+          },
+          "apply_discount": {
+            "signature": "apply_discount(book_id, percentage)",
+            "lines": 4,
+            "has_stock_field": false,
+            "has_assertion": true,
+            "default_published_year": null
+          },
+          "create_tag": {
+            "signature": "create_tag(name)",
+            "lines": 5,
+            "has_stock_field": false,
+            "has_assertion": true,
+            "default_published_year": null
+          },
+          "update_tag": {
+            "signature": "update_tag(tag_id, name)",
+            "lines": 4,
+            "has_stock_field": false,
+            "has_assertion": true,
+            "default_published_year": null
+          },
+          "create_order": {
+            "signature": "create_order(book_id, quantity)",
+            "lines": 8,
+            "has_stock_field": false,
+            "has_assertion": true,
+            "default_published_year": null
+          },
+          "update_order_status": {
+            "signature": "update_order_status(order_id, status)",
+            "lines": 4,
+            "has_stock_field": false,
+            "has_assertion": true,
+            "default_published_year": null
+          }
+        },
+        "helper_count": 13
+      },
+      "prompt_budget": {
+        "context_tokens_est": 4107,
+        "plan_tokens_est": 2336,
+        "total_prompt_tokens_est": 7243,
+        "remaining_for_output_est": 120757,
+        "prompt_budget_pct": 5.7
+      },
+      "instruction_compliance": {
+        "total_http_calls": 31,
+        "missing_timeout": 30,
+        "uses_unique_helper": true,
+        "calls_reset_endpoint": false,
+        "uses_fixtures": false,
+        "compliance_score": 80
+      },
+      "failure_taxonomy": {
+        "total_failures": 13,
+        "categories": {
+          "wrong_status_code": 4,
+          "other": 9
+        },
+        "category_pct": {
+          "wrong_status_code": 30.8,
+          "other": 69.2
+        },
+        "per_test": {
+          "test_update_author_edge_case_invalid_born_year": {
+            "category": "wrong_status_code",
+            "error_summary": "assert response.status_code == 400"
+          },
+          "test_create_category_edge_case_long_name": {
+            "category": "wrong_status_code",
+            "error_summary": "assert response.status_code == 400"
+          },
+          "test_create_book_happy_path": {
+            "category": "other",
+            "error_summary": "book_id = create_book(unique(\"book\"), author_id, category_id, isbn, 19.99, 10)"
+          },
+          "test_create_book_edge_case_invalid_isbn": {
+            "category": "wrong_status_code",
+            "error_summary": "assert response.status_code == 400"
+          },
+          "test_create_review_happy_path": {
+            "category": "other",
+            "error_summary": "book_id = create_book(unique(\"book\"), author_id, category_id, isbn, 19.99, 10)"
+          },
+          "test_create_review_edge_case_invalid_rating": {
+            "category": "other",
+            "error_summary": "book_id = create_book(unique(\"book\"), author_id, category_id, isbn, 19.99, 10)"
+          },
+          "test_apply_discount_happy_path": {
+            "category": "other",
+            "error_summary": "book_id = create_book(unique(\"book\"), author_id, category_id, isbn, 19.99, 10)"
+          },
+          "test_apply_discount_edge_case_invalid_percentage": {
+            "category": "other",
+            "error_summary": "book_id = create_book(unique(\"book\"), author_id, category_id, isbn, 19.99, 10)"
+          },
+          "test_create_tag_edge_case_long_name": {
+            "category": "wrong_status_code",
+            "error_summary": "assert response.status_code == 400"
+          },
+          "test_update_order_status_happy_path": {
+            "category": "other",
+            "error_summary": "book_id = create_book(unique(\"book\"), author_id, category_id, isbn, 19.99, 10)"
+          },
+          "test_update_order_status_edge_case_invalid_status": {
+            "category": "other",
+            "error_summary": "book_id = create_book(unique(\"book\"), author_id, category_id, isbn, 19.99, 10)"
+          },
+          "test_list_reviews_happy_path": {
+            "category": "other",
+            "error_summary": "book_id = create_book(unique(\"book\"), author_id, category_id, isbn, 19.99, 10)"
+          },
+          "test_create_book_edge_case_no_stock": {
+            "category": "other",
+            "error_summary": "book_id = create_book(unique(\"book\"), author_id, category_id, \"978-3-16-148410-0\", 29.99, 0)"
+          }
+        }
+      },
+      "code_patterns": {
+        "total_tests": 25,
+        "avg_http_calls": 0.76,
+        "avg_helper_calls": 2.24,
+        "pct_side_effect_checks": 0.0,
+        "pct_chaining": 0.0
+      },
+      "plan_code_drift": {
+        "planned_count": 25,
+        "actual_count": 25,
+        "matched": 20,
+        "only_in_plan_count": 5,
+        "only_in_code_count": 5,
+        "status_code_drift_count": 9
+      },
+      "context_utilization": {
+        "context_endpoints_found": 18,
+        "plan_endpoints_used": 12,
+        "status_codes_from_context": [
+          "200",
+          "204"
+        ],
+        "status_codes_hallucinated": [
+          "400"
+        ]
+      },
+      "repair_trajectory": {
+        "iterations": [
+          {
+            "iteration": 1,
+            "passed": 12,
+            "failed": 13,
+            "repair_type": "helper_fallback",
+            "repaired_count": 13,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 2,
+            "passed": 4,
+            "failed": 21,
+            "repair_type": "isolated",
+            "repaired_count": 10,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 3,
+            "passed": 4,
+            "failed": 21,
+            "repair_type": "helper_fallback",
+            "repaired_count": 21,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 4,
+            "passed": 4,
+            "failed": 21,
+            "repair_type": "isolated",
+            "repaired_count": 10,
+            "stale_skipped": 0
+          },
+          {
+            "iteration": 5,
+            "passed": 4,
+            "failed": 21,
+            "repair_type": null,
+            "repaired_count": 0,
+            "stale_skipped": 0
+          }
+        ],
+        "convergence_iteration": 3,
+        "never_fixed_tests": [
+          "test_apply_discount_edge_case_invalid_percentage",
+          "test_apply_discount_happy_path",
+          "test_create_book_edge_case_invalid_isbn",
+          "test_create_book_edge_case_no_stock",
+          "test_create_book_happy_path",
+          "test_create_category_edge_case_long_name",
+          "test_create_review_edge_case_invalid_rating",
+          "test_create_review_happy_path",
+          "test_create_tag_edge_case_long_name",
+          "test_list_reviews_happy_path",
+          "test_update_author_edge_case_invalid_born_year",
+          "test_update_order_status_edge_case_invalid_status",
+          "test_update_order_status_happy_path"
+        ],
+        "fixed_tests": [],
+        "failure_categories": {
+          "test_update_author_edge_case_invalid_born_year": "wrong_status_code",
+          "test_create_category_edge_case_long_name": "wrong_status_code",
+          "test_create_book_happy_path": "other",
+          "test_create_book_edge_case_invalid_isbn": "wrong_status_code",
+          "test_create_review_happy_path": "other",
+          "test_create_review_edge_case_invalid_rating": "other",
+          "test_apply_discount_happy_path": "other",
+          "test_apply_discount_edge_case_invalid_percentage": "other",
+          "test_create_tag_edge_case_long_name": "wrong_status_code",
+          "test_update_order_status_happy_path": "other",
+          "test_update_order_status_edge_case_invalid_status": "other",
+          "test_list_reviews_happy_path": "other",
+          "test_create_book_edge_case_no_stock": "other"
+        }
+      }
+    }
+  }
+]

@@ -1,0 +1,256 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří, že API je v pořádku a reaguje s kódem 200."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_happy_path",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Ověří vytvoření autora s platnými údaji."
+        },
+        {
+          "name": "create_author_edge_case_short_name",
+          "type": "edge_case",
+          "expected_status": 400,
+          "description": "Ověří chybu při pokusu vytvořit autora s názvem delší než 100 znaků."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří získání seznamu autorů."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří aktualizaci existujícího autora."
+        },
+        {
+          "name": "update_author_edge_case_invalid_born_year",
+          "type": "edge_case",
+          "expected_status": 400,
+          "description": "Ověří chybu při pokusu o aktualizaci roku narození mimo povolený rozsah."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_happy_path",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Ověří vytvoření kategorie s platnými údaji."
+        },
+        {
+          "name": "create_category_edge_case_long_name",
+          "type": "edge_case",
+          "expected_status": 400,
+          "description": "Ověří chybu při pokusu vytvořit kategorii s názvem delší než 50 znaků."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_categories_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří získání seznamu kategorií."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories/{category_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_category_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří aktualizaci existující kategorie."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_happy_path",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Ověří vytvoření knihy s platnými údaji."
+        },
+        {
+          "name": "create_book_edge_case_invalid_isbn",
+          "type": "edge_case",
+          "expected_status": 400,
+          "description": "Ověří chybu při pokusu vytvořit knihu s neplatným ISBN."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří získání seznamu knih."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_book_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří aktualizaci existující knihy."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_happy_path",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Ověří vytvoření recenze k knize."
+        },
+        {
+          "name": "create_review_edge_case_invalid_rating",
+          "type": "edge_case",
+          "expected_status": 400,
+          "description": "Ověří chybu při pokusu vytvořit recenzi s neplatnou hodnocením."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "apply_discount_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří aplikaci slevy na knihu."
+        },
+        {
+          "name": "apply_discount_edge_case_invalid_percentage",
+          "type": "edge_case",
+          "expected_status": 400,
+          "description": "Ověří chybu při pokusu o aplikaci neplatného procentuálního slevy."
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_happy_path",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Ověří vytvoření nového tagu."
+        },
+        {
+          "name": "create_tag_edge_case_long_name",
+          "type": "edge_case",
+          "expected_status": 400,
+          "description": "Ověří chybu při pokusu vytvořit tag s názvem delší než 30 znaků."
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_tags_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří získání seznamu tagů."
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags/{tag_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_tag_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří aktualizaci existujícího tagu."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří aktualizaci stavu objednávky."
+        },
+        {
+          "name": "update_order_status_edge_case_invalid_status",
+          "type": "edge_case",
+          "expected_status": 400,
+          "description": "Ověří chybu při pokusu o aktualizaci stavu objednávky na neplatnou hodnotu."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_reviews_happy_path",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří získání seznamu recenzí pro konkrétní knihu."
+        }
+      ]
+    }
+  ]
+}
