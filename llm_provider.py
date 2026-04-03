@@ -4,14 +4,26 @@ Podporuje: Gemini, OpenAI, Claude, DeepSeek, OllamaCompat (lokální modely).
 
 Model se vždy nastavuje přes experiment.yaml → create_llm().
 Temperature se předává z experiment.yaml; None = default provideru.
+
+v2.2: generate_text() vrací tuple (text, usage_dict | None).
+      TrackingLLMWrapper v main.py to rozbalí transparentně.
+      usage_dict formát: {"prompt_tokens": int, "completion_tokens": int,
+                          "total_tokens": int, "cached_tokens": int}
 """
+import re
 import time
 from abc import ABC, abstractmethod
+
+from token_tracker import (
+    extract_usage_gemini,
+    extract_usage_openai,
+    extract_usage_claude,
+)
 
 
 class LLMProvider(ABC):
     @abstractmethod
-    def generate_text(self, prompt: str) -> str:
+    def generate_text(self, prompt: str) -> tuple[str, dict | None]:
         pass
 
 
@@ -19,9 +31,12 @@ class RetryMixin:
     """Sdílená retry logika pro všechny providery."""
     max_retries: int = 5
     base_delay: float = 10.0
-    time.sleep(15) # Pro free Gemini API - max 15 RPM (requests per minute)
+    time.sleep(15)  # Pro free Gemini API - max 15 RPM
 
-    def _retry_call(self, func, retryable_codes=("503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED", "high demand", "rate_limit")):
+    def _retry_call(self, func, retryable_codes=(
+        "503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED",
+        "high demand", "rate_limit",
+    )):
         for attempt in range(1, self.max_retries + 1):
             try:
                 return func()
@@ -42,20 +57,26 @@ class GeminiProvider(LLMProvider, RetryMixin):
                  max_retries: int = 5, base_delay: float = 10.0):
         from google import genai
         self.client = genai.Client(api_key=api_key)
+        self.model = model_name       # pro TokenTracker pricing lookup
         self.model_name = model_name
-        self.temperature = temperature  # None → Google default
+        self.temperature = temperature
         self.max_retries = max_retries
         self.base_delay = base_delay
 
-    def generate_text(self, prompt: str) -> str:
+    def generate_text(self, prompt: str) -> tuple[str, dict | None]:
         from google.genai import types
         temp = self.temperature if self.temperature is not None else 1
+
         def _call():
-            return self.client.models.generate_content(
+            response = self.client.models.generate_content(
                 model=self.model_name,
                 contents=prompt,
                 config=types.GenerateContentConfig(temperature=temp),
-            ).text
+            )
+            text = response.text or ""
+            usage = extract_usage_gemini(response)
+            return text, usage
+
         return self._retry_call(_call)
 
 
@@ -65,19 +86,23 @@ class OpenAIProvider(LLMProvider, RetryMixin):
                  max_retries: int = 5, base_delay: float = 10.0):
         from openai import OpenAI
         self.client = OpenAI(api_key=api_key)
+        self.model = model_name
         self.model_name = model_name
         self.temperature = temperature if temperature is not None else 0.7
         self.max_retries = max_retries
         self.base_delay = base_delay
 
-    def generate_text(self, prompt: str) -> str:
+    def generate_text(self, prompt: str) -> tuple[str, dict | None]:
         def _call():
             response = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=self.temperature,
             )
-            return response.choices[0].message.content
+            text = response.choices[0].message.content or ""
+            usage = extract_usage_openai(response)
+            return text, usage
+
         return self._retry_call(_call)
 
 
@@ -87,12 +112,13 @@ class ClaudeProvider(LLMProvider, RetryMixin):
                  max_retries: int = 5, base_delay: float = 10.0):
         from anthropic import Anthropic
         self.client = Anthropic(api_key=api_key)
+        self.model = model_name
         self.model_name = model_name
-        self.temperature = temperature  # None → Anthropic default
+        self.temperature = temperature
         self.max_retries = max_retries
         self.base_delay = base_delay
 
-    def generate_text(self, prompt: str) -> str:
+    def generate_text(self, prompt: str) -> tuple[str, dict | None]:
         def _call():
             kwargs = dict(
                 model=self.model_name,
@@ -102,7 +128,10 @@ class ClaudeProvider(LLMProvider, RetryMixin):
             if self.temperature is not None:
                 kwargs["temperature"] = self.temperature
             response = self.client.messages.create(**kwargs)
-            return response.content[0].text
+            text = response.content[0].text
+            usage = extract_usage_claude(response)
+            return text, usage
+
         return self._retry_call(_call)
 
 
@@ -113,19 +142,23 @@ class DeepSeekProvider(LLMProvider, RetryMixin):
                  max_retries: int = 5, base_delay: float = 10.0):
         from openai import OpenAI
         self.client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+        self.model = model_name
         self.model_name = model_name
         self.temperature = temperature if temperature is not None else 0.7
         self.max_retries = max_retries
         self.base_delay = base_delay
 
-    def generate_text(self, prompt: str) -> str:
+    def generate_text(self, prompt: str) -> tuple[str, dict | None]:
         def _call():
             response = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=self.temperature,
             )
-            return response.choices[0].message.content
+            text = response.choices[0].message.content or ""
+            usage = extract_usage_openai(response)  # OpenAI-kompatibilní formát
+            return text, usage
+
         return self._retry_call(_call)
 
 
@@ -144,6 +177,7 @@ class OllamaCompatProvider(LLMProvider, RetryMixin):
             base_url=base_url,
             http_client=httpx.Client(verify=verify_ssl),
         )
+        self.model = model_name
         self.model_name = model_name
         self.temperature = temperature if temperature is not None else 0.4
         self.max_tokens = max_tokens
@@ -151,7 +185,7 @@ class OllamaCompatProvider(LLMProvider, RetryMixin):
         self.max_retries = max_retries
         self.base_delay = base_delay
 
-    def generate_text(self, prompt: str) -> str:
+    def generate_text(self, prompt: str) -> tuple[str, dict | None]:
         def _call():
             response = self.client.chat.completions.create(
                 model=self.model_name,
@@ -161,9 +195,9 @@ class OllamaCompatProvider(LLMProvider, RetryMixin):
                 extra_body={"options": {"num_ctx": self.num_ctx}},
             )
             raw = response.choices[0].message.content or ""
-            import re
             text = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL).strip()
-            return text
+            usage = extract_usage_openai(response)  # OpenAI-kompatibilní SDK
+            return text, usage
 
         return self._retry_call(_call)
 
@@ -178,6 +212,7 @@ PROVIDERS = {
     "ollama_compat": OllamaCompatProvider,
 }
 
+
 def create_llm(provider: str, api_key: str, model: str,
                temperature: float | None = None,
                **kwargs) -> LLMProvider:
@@ -186,12 +221,13 @@ def create_llm(provider: str, api_key: str, model: str,
     Extra kwargs (base_url, max_tokens, num_ctx, verify_ssl) se předají jen providerům,
     které je podporují.
     """
+    import inspect
+
     cls = PROVIDERS.get(provider)
     if not cls:
         raise ValueError(f"Neznámý provider: {provider}. Dostupné: {list(PROVIDERS.keys())}")
 
     # Předej jen kwargs které konstruktor přijímá
-    import inspect
     valid_params = inspect.signature(cls.__init__).parameters
     filtered = {k: v for k, v in kwargs.items() if k in valid_params}
 

@@ -1,14 +1,13 @@
 """
-Vibe Testing Framework – Experiment Runner (v2 — unified prompt framework).
+Vibe Testing Framework – Experiment Runner (v2.2 — token tracking).
 
-Změny oproti v1:
-- PromptBuilder se vytváří z api_cfg a předává do všech fází
-- StaleTracker žije per run (resetuje se mezi runy)
-- phase2 dostává prompt_builder místo raw promptu
+Změny oproti v2.1:
+- TokenTracker per run — přesné měření tokenů z API response
+- TrackingLLMWrapper — transparentní proxy, phase moduly beze změny
+- token_usage + token_usage_slim ve výstupním JSON
 
-v2.1:
-- Temperature jako další rozměr experimentu (RQ4)
-- create_llm() se volá per-temperature (ne per-LLM)
+Prerekvizita: llm_provider.py musí vracet (text, usage_dict) z generate_text().
+Viz token_tracker.py pro extract_usage_* funkce per provider.
 """
 import os
 import json
@@ -18,6 +17,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 from llm_provider import create_llm
+from token_tracker import TokenTracker
 from prompts.prompt_templates import PromptBuilder
 from prompts.phase1_context import analyze_context
 from prompts.phase2_planning import generate_test_plan
@@ -41,6 +41,52 @@ CONTEXT_LEVELS = {
     "L3": "L2 + DB schéma",
     "L4": "L3 + existující testy",
 }
+
+
+# ─── Tracking wrapper ────────────────────────────────────
+# Obalí LLM provider, zachytí (text, usage) a předá jen text.
+# Phase moduly volají wrapper.generate_text(prompt) → str (beze změny).
+# Wrapper interně zaznamenává tokeny do TokenTracker.
+#
+# PREREKVIZITA: LLM provider musí vracet tuple (text, usage_dict | None).
+# Pokud vrací jen str (stará verze), wrapper funguje v degraded režimu
+# (nezaznamenává tokeny, jen loguje warning).
+
+class TrackingLLMWrapper:
+    """Transparentní proxy nad LLM providerem s automatickým token trackingem."""
+
+    def __init__(self, llm, tracker: TokenTracker):
+        self._llm = llm
+        self._tracker = tracker
+        self._phase = "unknown"
+        self._detail = ""
+        self._warned = False
+
+    def set_phase(self, phase: str, detail: str = ""):
+        """Nastav aktuální fázi — volej před každým blokem LLM callů."""
+        self._phase = phase
+        self._detail = detail
+
+    def generate_text(self, prompt: str) -> str:
+        """Volá underlying LLM, zaznamenává usage, vrací jen text."""
+        result = self._llm.generate_text(prompt)
+
+        # Nový provider: vrací (text, usage_dict)
+        if isinstance(result, tuple):
+            text, usage = result
+            self._tracker.record(self._phase, usage, detail=self._detail)
+            return text
+
+        # Starý provider: vrací jen str — degraded režim
+        if not self._warned:
+            print("  ⚠️ LLM provider nevrací usage data — token tracking nedostupný.")
+            print("     Uprav generate_text() v llm_provider.py aby vracel (text, usage).")
+            self._warned = True
+        return result
+
+    # Proxy: předej všechno ostatní na underlying LLM
+    def __getattr__(self, name):
+        return getattr(self._llm, name)
 
 
 def load_experiment_config(path: str = "experiment.yaml") -> dict:
@@ -73,6 +119,14 @@ def run_pipeline(
 
     inputs = api_cfg["inputs"]
 
+    # ── Token tracker per run ───────────────────────────
+    # model name pro pricing lookup
+    model_name = getattr(llm, "model", llm_name)
+    if isinstance(llm, TrackingLLMWrapper):
+        model_name = getattr(llm._llm, "model", llm_name)
+    tracker = TokenTracker(model=model_name)
+    tracked_llm = TrackingLLMWrapper(llm, tracker)
+
     # ── Unified prompt builder (z api_cfg + level) ──────
     prompt_builder = PromptBuilder(api_cfg, level=level)
 
@@ -95,8 +149,9 @@ def run_pipeline(
 
     # ── FÁZE 2: Plánování ────────────────────────────────
     print(f"  [Fáze 2] Generování plánu ({test_count} testů)...")
+    tracked_llm.set_phase("planning")
     test_plan = generate_test_plan(
-        context, llm, prompt_builder=prompt_builder,
+        context, tracked_llm, prompt_builder=prompt_builder,
         test_count=test_count,
     )
 
@@ -112,16 +167,18 @@ def run_pipeline(
 
     # ── FÁZE 3 + 4: Generování + Feedback loop ──────────
     print(f"  [Fáze 3+4] Generování kódu (max {max_iterations} iterací)...")
+    tracked_llm.set_phase("generation")
     test_code = generate_test_code(
-        test_plan, context, llm,
+        test_plan, context, tracked_llm,
         prompt_builder=prompt_builder,
         base_url=api_cfg["base_url"],
     )
 
     actual_count = count_test_functions(test_code)
     if plan_test_count > 0:
+        tracked_llm.set_phase("generation_fill")
         test_code = validate_test_count(
-            test_code, plan_test_count, llm=llm,
+            test_code, plan_test_count, llm=tracked_llm,
             prompt_builder=prompt_builder,
             base_url=api_cfg["base_url"], context=context,
         )
@@ -155,8 +212,9 @@ def run_pipeline(
         elif iteration < max_iterations:
             print("  ❌ Testy selhaly. Opravuji...")
             diag_repair_tracker.record_iteration(iteration, output_log)
+            tracked_llm.set_phase("repair", detail=f"iter{iteration}")
             test_code, repair_info = repair_failing_tests(
-                test_code, output_log, context, llm,
+                test_code, output_log, context, tracked_llm,
                 prompt_builder=prompt_builder,
                 base_url=api_cfg["base_url"],
                 stale_tracker=stale_tracker,
@@ -195,6 +253,10 @@ def run_pipeline(
     et = metrics["empty_tests"]
     st = metrics["stale_tests"]
 
+    # ── Token usage summary ──────────────────────────────
+    token_summary = tracker.summary()
+    token_slim = tracker.summary_slim()
+
     print(f"\n  {'─' * 50}")
     print(f"  Validity:   {tv['validity_rate_pct']}% ({tv['tests_passed']}/{tv['total_executed']})")
     print(f"  Endpoint:   {ec['endpoint_coverage_pct']}% ({ec['covered_endpoints']}/{ec['total_api_endpoints']})")
@@ -204,6 +266,15 @@ def run_pipeline(
     print(f"  Empty tests: {et['empty_count']}")
     print(f"  Stale tests: {st['stale_count']}")
     print(f"  Čas:        {elapsed}s | Iterací: {iteration}")
+    # Token info
+    print(f"  Tokeny:     {token_slim['total_tokens']:,} total "
+          f"({token_slim['prompt_tokens']:,} in / "
+          f"{token_slim['completion_tokens']:,} out) "
+          f"| {token_slim['total_calls']} calls")
+    if token_slim["pricing_found"]:
+        print(f"  Cena:       ${token_slim['cost_usd']:.4f}")
+    else:
+        print(f"  Cena:       N/A (model '{tracker.model}' není v pricing tabulce)")
 
     # ── FÁZE 6: Diagnostika ──────────────────────────
     plan_json_str = json.dumps(test_plan, indent=2, ensure_ascii=False)
@@ -232,6 +303,8 @@ def run_pipeline(
         "plan_filename": plan_filename,
         "metrics": metrics,
         "diagnostics": diagnostics,
+        "token_usage": token_summary,          # ← plný breakdown per phase
+        "token_usage_slim": token_slim,         # ← pro rychlý přehled / agregace
     }
 
 
@@ -257,6 +330,10 @@ def main():
 
     all_results = []
     done = 0
+
+    # ── Agregované token stats přes celý experiment ──────
+    total_tokens_all = 0
+    total_cost_all = 0.0
 
     for llm_cfg in cfg["llms"]:
         api_key = os.environ.get(llm_cfg["api_key_env"])
@@ -301,6 +378,12 @@ def main():
                                 temperature=temp,
                             )
                             all_results.append(result)
+
+                            # Agreguj token stats
+                            slim = result.get("token_usage_slim", {})
+                            total_tokens_all += slim.get("total_tokens", 0)
+                            total_cost_all += slim.get("cost_usd", 0)
+
                         except Exception as e:
                             print(f"  ❌ CHYBA: {e}")
                             all_results.append({
@@ -328,6 +411,7 @@ def main():
     ok = sum(1 for r in all_results if r.get("all_tests_passed"))
     err = sum(1 for r in all_results if "error" in r)
     print(f"  ✅ Passed: {ok} | ❌ Failed: {len(all_results) - ok - err} | 💥 Error: {err}")
+    print(f"  📊 Tokeny celkem: {total_tokens_all:,} | Cena celkem: ${total_cost_all:.4f}")
 
 
 if __name__ == "__main__":
