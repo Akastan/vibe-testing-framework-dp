@@ -960,6 +960,195 @@ paths:
           content:
             application/json:
               schema: {}
+  /authors/{author_id}/books:
+    get:
+      tags:
+      - Authors
+      summary: List Author Books
+      description: Seznam knih daného autora s stránkováním.
+      operationId: list_author_books_authors__author_id__books_get
+      parameters:
+      - name: author_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Author Id
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 10
+          title: Page Size
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBooks'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/bulk:
+    post:
+      tags:
+      - Books
+      summary: Bulk Create Books
+      description: 'Hromadné vytvoření knih. Každá kniha se validuje samostatně.
+
+        Vrací 201 pokud všechny uspěly, 207 pokud některé selhaly,
+
+        422 pokud všechny selhaly.'
+      operationId: bulk_create_books_books_bulk_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkBookCreate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/{book_id}/clone:
+    post:
+      tags:
+      - Books
+      summary: Clone Book
+      description: Vytvoří kopii knihy s novým ISBN. Stock se nekopíruje.
+      operationId: clone_book_books__book_id__clone_post
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookCloneRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /orders/{order_id}/invoice:
+    get:
+      tags:
+      - Orders
+      summary: Get Invoice
+      description: 'Vygeneruje fakturu pro objednávku.
+
+        Dostupné pouze pro objednávky ve stavu confirmed, shipped nebo delivered.
+
+        Pending a cancelled → 403.'
+      operationId: get_invoice_orders__order_id__invoice_get
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /orders/{order_id}/items:
+    post:
+      tags:
+      - Orders
+      summary: Add Item To Order
+      description: 'Přidá položku do existující objednávky.
+
+        Pouze pending objednávky lze modifikovat (jinak 403).
+
+        Duplicitní book_id v objednávce → 409.'
+      operationId: add_item_to_order_orders__order_id__items_post
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderAddItem'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /statistics/summary:
+    get:
+      tags:
+      - Statistics
+      summary: Get Statistics
+      description: Souhrnné statistiky knihkupectví. Obrat se počítá jen z delivered
+        objednávek.
+      operationId: get_statistics_statistics_summary_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsSummary'
 components:
   schemas:
     AuthorCreate:
@@ -1038,6 +1227,27 @@ components:
           title: Born Year
       type: object
       title: AuthorUpdate
+    BookCloneRequest:
+      properties:
+        new_isbn:
+          type: string
+          maxLength: 13
+          minLength: 10
+          title: New Isbn
+        new_title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: New Title
+        stock:
+          type: integer
+          minimum: 0.0
+          title: Stock
+          default: 0
+      type: object
+      required:
+      - new_isbn
+      title: BookCloneRequest
     BookCreate:
       properties:
         title:
@@ -1228,6 +1438,60 @@ components:
           title: Category Id
       type: object
       title: BookUpdate
+    BulkBookCreate:
+      properties:
+        books:
+          items:
+            $ref: '#/components/schemas/BulkBookItem'
+          type: array
+          maxItems: 20
+          minItems: 1
+          title: Books
+      type: object
+      required:
+      - books
+      title: BulkBookCreate
+    BulkBookItem:
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Title
+        isbn:
+          type: string
+          maxLength: 13
+          minLength: 10
+          title: Isbn
+        price:
+          type: number
+          minimum: 0.0
+          title: Price
+        published_year:
+          type: integer
+          maximum: 2026.0
+          minimum: 1000.0
+          title: Published Year
+        stock:
+          type: integer
+          minimum: 0.0
+          title: Stock
+          default: 0
+        author_id:
+          type: integer
+          title: Author Id
+        category_id:
+          type: integer
+          title: Category Id
+      type: object
+      required:
+      - title
+      - isbn
+      - price
+      - published_year
+      - author_id
+      - category_id
+      title: BulkBookItem
     CategoryCreate:
       properties:
         name:
@@ -1324,6 +1588,88 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    InvoiceItem:
+      properties:
+        book_title:
+          type: string
+          title: Book Title
+        isbn:
+          type: string
+          title: Isbn
+        quantity:
+          type: integer
+          title: Quantity
+        unit_price:
+          type: number
+          title: Unit Price
+        line_total:
+          type: number
+          title: Line Total
+      type: object
+      required:
+      - book_title
+      - isbn
+      - quantity
+      - unit_price
+      - line_total
+      title: InvoiceItem
+    InvoiceResponse:
+      properties:
+        invoice_number:
+          type: string
+          title: Invoice Number
+        order_id:
+          type: integer
+          title: Order Id
+        customer_name:
+          type: string
+          title: Customer Name
+        customer_email:
+          type: string
+          title: Customer Email
+        status:
+          type: string
+          title: Status
+        issued_at:
+          type: string
+          title: Issued At
+        items:
+          items:
+            $ref: '#/components/schemas/InvoiceItem'
+          type: array
+          title: Items
+        subtotal:
+          type: number
+          title: Subtotal
+        item_count:
+          type: integer
+          title: Item Count
+      type: object
+      required:
+      - invoice_number
+      - order_id
+      - customer_name
+      - customer_email
+      - status
+      - issued_at
+      - items
+      - subtotal
+      - item_count
+      title: InvoiceResponse
+    OrderAddItem:
+      properties:
+        book_id:
+          type: integer
+          title: Book Id
+        quantity:
+          type: integer
+          minimum: 1.0
+          title: Quantity
+      type: object
+      required:
+      - book_id
+      - quantity
+      title: OrderAddItem
     OrderCreate:
       properties:
         customer_name:
@@ -1572,6 +1918,63 @@ components:
       - reviewer_name
       - created_at
       title: ReviewResponse
+    StatisticsSummary:
+      properties:
+        total_authors:
+          type: integer
+          title: Total Authors
+        total_categories:
+          type: integer
+          title: Total Categories
+        total_books:
+          type: integer
+          title: Total Books
+        total_tags:
+          type: integer
+          title: Total Tags
+        total_orders:
+          type: integer
+          title: Total Orders
+        total_reviews:
+          type: integer
+          title: Total Reviews
+        books_in_stock:
+          type: integer
+          title: Books In Stock
+        books_out_of_stock:
+          type: integer
+          title: Books Out Of Stock
+        total_revenue:
+          type: number
+          title: Total Revenue
+        average_book_price:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Average Book Price
+        average_rating:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Average Rating
+        orders_by_status:
+          type: object
+          title: Orders By Status
+      type: object
+      required:
+      - total_authors
+      - total_categories
+      - total_books
+      - total_tags
+      - total_orders
+      - total_reviews
+      - books_in_stock
+      - books_out_of_stock
+      - total_revenue
+      - average_book_price
+      - average_rating
+      - orders_by_status
+      title: StatisticsSummary
     TagCreate:
       properties:
         name:
