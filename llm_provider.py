@@ -29,25 +29,45 @@ class LLMProvider(ABC):
 
 class RetryMixin:
     """Sdílená retry logika pro všechny providery."""
-    max_retries: int = 5
-    base_delay: float = 10.0
-    time.sleep(15)  # Pro free Gemini API - max 15 RPM
+
+    # Zvýšeno pro bezpečnější zotavení (limity se resetují po minutě)
+    max_retries: int = 8
+
+    # Agresivnější základní zpoždění při chybě (30s -> 60s -> 120s)
+    base_delay: float = 30.0
+
+    # Preventivní pauza PŘED KAŽDÝM voláním API (ochrana proti RPM)
+    # 5 vteřin = max 12 requestů za minutu (bohatě splňuje 50 RPM)
+    call_delay: float = 5.0
 
     def _retry_call(self, func, retryable_codes=(
-        "503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED",
-        "high demand", "rate_limit",
+            "503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED",
+            "high demand", "rate_limit", "Too Many Requests", "rate_limit_error"
     )):
+        # 1. Zpomalení před samotným requestem
+        if self.call_delay > 0:
+            time.sleep(self.call_delay)
+
+        # 2. Samotný request s exponenciálním backoffem
         for attempt in range(1, self.max_retries + 1):
             try:
                 return func()
             except Exception as e:
                 err = str(e)
-                if any(code in err for code in retryable_codes) and attempt < self.max_retries:
+
+                # Pokud narazíme na rate limit (např. jsme vyčerpali 30k ITPM)
+                if any(code.lower() in err.lower() for code in retryable_codes) and attempt < self.max_retries:
+                    # Výpočet pauzy: 30s -> 60s -> 120s...
                     delay = self.base_delay * (2 ** (attempt - 1))
-                    print(f"    ⚠️ API chyba (pokus {attempt}/{self.max_retries}): {err[:120]}")
-                    print(f"    ⏳ Čekám {delay:.0f}s...")
+
+                    # Capneme maximální čekání na 4 minuty, ať to nevisí věčně
+                    delay = min(delay, 240.0)
+
+                    print(f"    ⚠️ Rate Limit / API chyba (pokus {attempt}/{self.max_retries}): {err[:120]}")
+                    print(f"    ⏳ Čekám {delay:.0f}s na obnovení kapacity tokenů...")
                     time.sleep(delay)
                 else:
+                    # Pokud je to jiná chyba (např. špatný API klíč), crashneme hned
                     raise
 
 
