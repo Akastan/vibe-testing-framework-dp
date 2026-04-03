@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 
 from llm_provider import create_llm
 from token_tracker import TokenTracker
+from context_compressor import compress_context, print_compression_report
 from prompts.prompt_templates import PromptBuilder
 from prompts.phase1_context import analyze_context
 from prompts.phase2_planning import generate_test_plan
@@ -138,7 +139,7 @@ def run_pipeline(
     start_time = time.time()
 
     # ── FÁZE 1: Kontext ──────────────────────────────────
-    context = analyze_context(
+    context_raw = analyze_context(
         openapi_path=inputs["openapi"],
         doc_path=inputs.get("documentation"),
         level=level,
@@ -146,6 +147,10 @@ def run_pipeline(
         db_schema_path=inputs.get("db_schema"),
         existing_tests_path=inputs.get("existing_tests"),
     )
+
+    # ── Komprese kontextu (token savings) ────────────────
+    context, compression_stats = compress_context(context_raw, level=level)
+    print_compression_report(compression_stats)
 
     # ── FÁZE 2: Plánování ────────────────────────────────
     print(f"  [Fáze 2] Generování plánu ({test_count} testů)...")
@@ -305,6 +310,7 @@ def run_pipeline(
         "diagnostics": diagnostics,
         "token_usage": token_summary,          # ← plný breakdown per phase
         "token_usage_slim": token_slim,         # ← pro rychlý přehled / agregace
+        "compression": compression_stats.summary(),  # ← kolik tokenů ušetřeno
     }
 
 
