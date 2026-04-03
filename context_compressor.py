@@ -113,7 +113,7 @@ def compress_openapi(spec_text: str) -> str:
     #    (ty jsme už odstranili celé 422 response bloky)
 
     # 4. Kompaktní JSON (indent=1 místo 2)
-    result = json.dumps(spec, indent=1, ensure_ascii=False)
+    result = yaml.dump(spec, allow_unicode=True, sort_keys=False)
 
     # 5. Přidej poznámku o 422
     note = (
