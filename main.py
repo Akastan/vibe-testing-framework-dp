@@ -191,7 +191,7 @@ def run_pipeline(
     print(f"  Testů v kódu: {actual_count} (plán: {plan_test_count})")
 
     # Stale tracker per run
-    stale_tracker = StaleTracker(threshold=2)
+    stale_tracker = StaleTracker()
     # Diagnostický repair tracker
     diag_repair_tracker = DiagRepairTracker()
 
@@ -231,6 +231,13 @@ def run_pipeline(
                 repaired_count=repair_info["repaired_count"],
                 stale_skipped=repair_info["stale_skipped"],
             )
+
+            # ── Early stop: všechny failing jsou stale ───
+            if repair_info["repair_type"] == "all_stale_early_stop":
+                print(f"  ⛔ Early stop — všechny failing testy jsou stale.")
+                print(f"     Ušetřeno {max_iterations - iteration} iterací "
+                      f"(~{(max_iterations - iteration) * 10} LLM callů).")
+                break
         else:
             print(f"  ⚠️ Max iterací dosaženo.")
             diag_repair_tracker.record_iteration(iteration, output_log)
@@ -302,6 +309,7 @@ def run_pipeline(
         "temperature": temperature,
         "iterations_used": iteration,
         "all_tests_passed": success,
+        "early_stopped": last_repair_type == "all_stale_early_stop",
         "elapsed_seconds": elapsed,
         "plan_test_count": plan_test_count,
         "output_filename": output_filename,

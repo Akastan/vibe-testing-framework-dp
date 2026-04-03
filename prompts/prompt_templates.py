@@ -1,19 +1,9 @@
 """
-Unified Prompt Framework – v5 (fair experimental design).
+Unified Prompt Framework – v6 (batch repair).
 
-Klíčový princip oddělení:
-  - framework_rules: JAK psát testy (pytest/requests technikálie).
-    Injektují se do VŠECH levelů. Neobsahují znalost o API.
-  - api_knowledge: CO API dělá (chování, pravidla, defaulty).
-    Injektují se POUZE do L1+ (kde tato znalost přirozeně existuje v kontextu).
-
-Tím je zajištěno že jediná proměnná mezi levely je KONTEXT.
-
-Použití:
-    builder = PromptBuilder(api_cfg, level="L0")
-    prompt = builder.planning_prompt(context, test_count)
-    prompt = builder.generation_prompt(plan_json, context, base_url)
-    ...
+Změny oproti v5:
+  - repair_batch_prompt: hromadná oprava failing testů v 1 promptu
+  - repair_single_prompt zachován jako fallback (nepoužívá se v hlavním flow)
 """
 from __future__ import annotations
 
@@ -21,18 +11,14 @@ from __future__ import annotations
 class PromptBuilder:
     """Sestavuje prompty z experiment.yaml konfigurace pro dané API + level."""
 
-    # L1+ dostane api_knowledge, L0 ne
     _KNOWLEDGE_LEVELS = ("L1", "L2", "L3", "L4")
 
     def __init__(self, api_cfg: dict, level: str):
         self.api_name = api_cfg["name"]
         self.level = level
         self.base_url = api_cfg["base_url"]
-
-        # Framework rules — platí vždy
         self.framework_rules: list[str] = api_cfg.get("framework_rules", [])
 
-        # API knowledge — jen pro L1+
         if level in self._KNOWLEDGE_LEVELS:
             self.api_knowledge: list[str] = api_cfg.get("api_knowledge", [])
         else:
@@ -49,7 +35,6 @@ class PromptBuilder:
         return f"\nTECHNICKÉ POŽADAVKY FRAMEWORKU:\n{lines}\n"
 
     def _knowledge_block(self) -> str:
-        """Vrací blok s API knowledge. Prázdný pro L0."""
         if not self.api_knowledge:
             return ""
         lines = "\n".join(f"- {r}" for r in self.api_knowledge)
@@ -73,7 +58,6 @@ class PromptBuilder:
     # ══════════════════════════════════════════════════
 
     def planning_prompt(self, context: str, test_count: int) -> str:
-        # ZMĚNA: Kontext je nahoře. Znalosti uprostřed. Tvrdá pravidla a JSON vynucení úplně dole.
         return f"""Analyzuj toto API a připrav se na vytvoření testovacího plánu.
 
 API KONTEXT:
@@ -164,11 +148,53 @@ NO MARKDOWN BLOCKS (do not use ```python), NO PROSE, NO EXPLANATIONS.
     #  FÁZE 3: Opravy
     # ══════════════════════════════════════════════════
 
+    def repair_batch_prompt(
+        self,
+        test_entries: list[tuple[str, str, str]],
+        helpers: str,
+        base_url: str,
+        stale_tests: list[str] | None = None,
+    ) -> str:
+        """Hromadná oprava více failing testů v jednom promptu.
+
+        Args:
+            test_entries: [(test_name, test_code, error_msg), ...]
+            helpers: kód helper funkcí
+            base_url: base URL API
+            stale_tests: seznam stale testů (pro info)
+        """
+        tests_block = ""
+        for i, (name, code, error) in enumerate(test_entries, 1):
+            tests_block += f"\n── TEST {i}: {name} ──\n"
+            tests_block += f"CODE:\n{code}\n"
+            tests_block += f"ERROR:\n{error}\n"
+
+        return f"""Oprav tyto selhávající testovací funkce. Každý test má svůj kód a chybu.
+BASE_URL = "{base_url}"
+
+DOSTUPNÉ HELPERY:
+{helpers}
+
+SELHÁVAJÍCÍ TESTY ({len(test_entries)}):
+{tests_block}
+{self._knowledge_block()}{self._stale_block(stale_tests)}{self._framework_block()}
+=========================================
+CRITICAL CODING INSTRUCTIONS:
+- Oprav KAŽDOU funkci výše. Zachovej přesné názvy funkcí.
+- Používej existující helper funkce, nevymýšlej nové.
+- Pokud test ověřuje jen status kód, přidej i kontrolu response body.
+- Vrať POUZE opravené funkce (def test_...), žádné helpery ani importy.
+
+YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (all {len(test_entries)} fixed functions).
+NO MARKDOWN BLOCKS, NO PROSE, NO IMPORTS, NO HELPERS, NO EXPLANATIONS.
+"""
+
     def repair_single_prompt(
         self, test_name: str, test_code: str, error_msg: str,
         helpers: str, base_url: str,
         stale_tests: list[str] | None = None,
     ) -> str:
+        """Fallback — oprava jednoho testu (nepoužívá se v hlavním flow)."""
         return f"""Oprav tuto jednu selhávající testovací funkci.
 BASE_URL = "{base_url}"
 

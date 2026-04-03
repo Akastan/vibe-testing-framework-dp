@@ -1,17 +1,19 @@
 """
-Fáze 3: Generování a oprava pytest testů (v2 — unified prompt framework).
+Fáze 3: Generování a oprava pytest testů (v3 — nový repair loop).
 
-Změny oproti v1:
-- Všechny prompty přes PromptBuilder (žádné hardcoded API pravidla)
-- Stale detection: testy se stejnou chybou ≥2× po sobě se přeskakují
-- PromptBuilder se předává jako parametr (vytvořen v main.py z api_cfg)
+Změny oproti v2:
+- Repair strategie: VŽDY nejdřív izolované opravy, pak helpery
+- Stale = test potřebuje min. 1× izolovanou + 1× helper opravu se stejnou chybou
+- Helpery se počítají do stale (ne jako dřív kde byly "free pass")
+- Early stop: pokud všechny failing testy jsou stale → break z iterací
+- Alternace: isolated → helper → isolated → helper → ...
 
-Klíčové principy (beze změny):
-- Počáteční generování: LLM vygeneruje celý soubor z plánu
-- Validace počtu: AST kontrola + ořezání přebytečných testů
-- Izolovaná oprava: mikro-prompty pro jednotlivé failing testy
-- Helper detekce: společná root cause → oprava helperů
-- Počet testů se nikdy nemění
+Flow:
+  Iterace 1: isolated repair (per-test prompty)
+  Iterace 2: helper repair (pokud root cause, jinak isolated znovu)
+  Iterace 3: isolated (pro ne-stale testy)
+  Iterace 4: helper
+  ...dokud nejsou všechny stale nebo max_iterations
 """
 import ast
 import json
@@ -145,7 +147,7 @@ def _extract_error_for_test(pytest_log: str, test_name: str) -> str:
 
 
 def _detect_helper_root_cause(pytest_log: str, failing_names: list[str]) -> bool:
-    if len(failing_names) < 4:
+    if len(failing_names) < 3:
         return False
 
     first_errors = []
@@ -162,105 +164,121 @@ def _detect_helper_root_cause(pytest_log: str, failing_names: list[str]) -> bool
     if len(first_errors) < 3:
         return False
 
-    def normalize(line):
-        line = re.sub(r'\d+', 'N', line)
-        line = re.sub(r'["\'].*?["\']', 'STR', line)
-        return line.strip()
-
-    normalized = [normalize(e) for e in first_errors]
+    normalized = [_normalize_error(e) for e in first_errors]
     most_common = max(set(normalized), key=normalized.count)
     ratio = normalized.count(most_common) / len(normalized)
     return ratio >= 0.7
 
 
+def _normalize_error(error: str) -> str:
+    error = re.sub(r'\d+', 'N', error)
+    error = re.sub(r'["\'].*?["\']', 'STR', error)
+    error = re.sub(r'0x[0-9a-fA-F]+', 'ADDR', error)
+    return error.strip()[:500]
+
+
 # ═══════════════════════════════════════════════════════════
-#  Stale Detection
+#  Stale Detection (v3 — isolated + helper = stale)
 # ═══════════════════════════════════════════════════════════
+
+class _StaleEntry:
+    """Stav jednoho testu v stale trackeru."""
+    __slots__ = ("isolated_errors", "helper_errors")
+
+    def __init__(self):
+        self.isolated_errors: list[str] = []   # normalizované chyby z izolovaných oprav
+        self.helper_errors: list[str] = []     # normalizované chyby z helper oprav
+
 
 class StaleTracker:
     """Sleduje opakující se chyby testů napříč iteracemi.
 
-    Test je "stale" pokud má stejnou normalizovanou chybu ≥ threshold
-    po sobě jdoucích iterací KDE BYL POKUS O OPRAVU.
-    Testy přeskočené kvůli capu nenabírají stale historii.
+    Test je "stale" pokud:
+      1. Má alespoň 1 pokus o izolovanou opravu
+      2. Má alespoň 1 pokus o helper opravu
+      3. Poslední chyba z obou typů je stejná (normalizovaná)
+
+    Tím je zajištěno, že každý test dostane šanci na oba typy oprav
+    než je vyřazen. Helper opravy se počítají do stale (ne free pass).
     """
 
-    def __init__(self, threshold: int = 2):
-        self.threshold = threshold
-        # {test_name: [normalized_error_iter1, normalized_error_iter2, ...]}
-        self._history: dict[str, list[str]] = {}
+    def __init__(self):
+        self._entries: dict[str, _StaleEntry] = {}
         self._stale: set[str] = set()
 
-    def update(self, pytest_log: str, failing_names: list[str],
-               attempted_names: list[str] | None = None):
-        """Aktualizuj historii po každé iteraci.
+    def update(self, repair_type: str, pytest_log: str,
+               failing_names: list[str],
+               attempted_names: list[str]):
+        """Aktualizuj po repair iteraci.
 
         Args:
-            pytest_log: výstup z pytestu
+            repair_type: "isolated" | "helper_root_cause" | "helper_fallback"
+            pytest_log: log z PŘEDCHOZÍHO pytest runu (před opravou)
             failing_names: všechny failing testy
-            attempted_names: testy které byly skutečně pokuseny o opravu.
-                Pokud None, všechny failing se považují za attempted.
-                Testy v failing ale NE v attempted nenabírají stale historii.
+            attempted_names: testy pro které se pokusila oprava
         """
-        if attempted_names is None:
-            attempted_names = failing_names
-
         attempted_set = set(attempted_names)
+        is_helper = repair_type in ("helper_root_cause", "helper_fallback")
 
-        current_errors: dict[str, str] = {}
+        # Zaznamenej chyby pro attempted testy
         for name in failing_names:
+            if name not in attempted_set:
+                continue
+
             error = _extract_error_for_test(pytest_log, name)
-            current_errors[name] = self._normalize(error)
+            norm = _normalize_error(error)
 
-        # Aktualizuj historii JEN pro attempted testy
-        for name, norm_err in current_errors.items():
-            if name in attempted_set:
-                # Test dostal šanci → nabírá historii
-                if name not in self._history:
-                    self._history[name] = []
-                self._history[name].append(norm_err)
-            # Testy které nedostaly šanci: neinkrement (historii neměníme)
+            entry = self._entries.setdefault(name, _StaleEntry())
+            if is_helper:
+                entry.helper_errors.append(norm)
+            else:
+                entry.isolated_errors.append(norm)
 
-        # Vyčisti testy co prošly (už nejsou failing)
-        passed = set(self._history.keys()) - set(failing_names)
+        # Vyčisti testy co prošly
+        passed = set(self._entries.keys()) - set(failing_names)
         for name in passed:
-            self._history.pop(name, None)
+            self._entries.pop(name, None)
             self._stale.discard(name)
 
-        # Detekuj stale
-        for name, history in self._history.items():
-            if len(history) >= self.threshold:
-                last_n = history[-self.threshold:]
-                if len(set(last_n)) == 1:  # Všechny stejné
-                    if name not in self._stale:
-                        print(f"      🔒 {name} je stale (stejná chyba {self.threshold}×)")
-                    self._stale.add(name)
+        # Detekuj stale: potřebuje obojí + stejná chyba
+        for name, entry in self._entries.items():
+            if not entry.isolated_errors or not entry.helper_errors:
+                continue  # nemá ještě oba typy → nemůže být stale
+
+            last_isolated = entry.isolated_errors[-1]
+            last_helper = entry.helper_errors[-1]
+
+            if last_isolated == last_helper:
+                if name not in self._stale:
+                    print(f"      🔒 {name} je stale "
+                          f"(isolated {len(entry.isolated_errors)}× + "
+                          f"helper {len(entry.helper_errors)}×, stejná chyba)")
+                self._stale.add(name)
 
     def get_stale(self) -> list[str]:
-        """Vrátí seznam stale testů."""
         return sorted(self._stale)
 
     def filter_repairable(self, failing_names: list[str]) -> list[str]:
-        """Vrátí jen testy které NEJSOU stale (opravitelné)."""
         return [n for n in failing_names if n not in self._stale]
 
-    @staticmethod
-    def _normalize(error: str) -> str:
-        """Normalizuje chybovou hlášku pro porovnání."""
-        error = re.sub(r'\d+', 'N', error)
-        error = re.sub(r'["\'].*?["\']', 'STR', error)
-        error = re.sub(r'0x[0-9a-fA-F]+', 'ADDR', error)
-        return error.strip()[:500]
+    def has_had_isolated(self, test_name: str) -> bool:
+        """Měl test alespoň 1 pokus o izolovanou opravu?"""
+        entry = self._entries.get(test_name)
+        return bool(entry and entry.isolated_errors)
+
+    def has_had_helper(self, test_name: str) -> bool:
+        """Měl test alespoň 1 pokus o helper opravu?"""
+        entry = self._entries.get(test_name)
+        return bool(entry and entry.helper_errors)
 
 
 # ═══════════════════════════════════════════════════════════
-#  Počáteční generování
+#  Počáteční generování (beze změny)
 # ═══════════════════════════════════════════════════════════
 
 def generate_test_code(test_plan: dict, context_data: str, llm,
                        prompt_builder: PromptBuilder,
                        base_url: str = "http://localhost:8000") -> str:
-    """Vygeneruje kompletní testovací soubor z plánu."""
     plan_str = json.dumps(test_plan, indent=2, ensure_ascii=False)
     prompt = prompt_builder.generation_prompt(plan_str, context_data, base_url)
 
@@ -278,14 +296,13 @@ def generate_test_code(test_plan: dict, context_data: str, llm,
 
 
 # ═══════════════════════════════════════════════════════════
-#  Validace počtu testů
+#  Validace počtu testů (beze změny)
 # ═══════════════════════════════════════════════════════════
 
 def validate_test_count(code: str, expected: int, llm=None,
                         prompt_builder: PromptBuilder = None,
                         base_url: str = "http://localhost:8000",
                         context: str = "") -> str:
-    """Zajistí přesně expected testů: ořízne přebytečné, doplní chybějící."""
     actual = count_test_functions(code)
     if actual == expected:
         return code
@@ -346,13 +363,12 @@ def validate_test_count(code: str, expected: int, llm=None,
 
 
 # ═══════════════════════════════════════════════════════════
-#  Oprava failing testů (s PromptBuilder + stale detection)
+#  Repair — interní funkce
 # ═══════════════════════════════════════════════════════════
 
 def _repair_single_test(test_name, test_code, error_msg, helpers, llm,
                          prompt_builder: PromptBuilder, base_url: str,
                          stale_tests: list[str] | None = None):
-    """Mikro-prompt: opraví jeden konkrétní selhávající test."""
     prompt = prompt_builder.repair_single_prompt(
         test_name, test_code, error_msg, helpers, base_url, stale_tests
     )
@@ -390,7 +406,6 @@ def _repair_single_test(test_name, test_code, error_msg, helpers, llm,
 
 def _repair_helpers(master_code, pytest_log, helpers, failing_names, llm,
                      prompt_builder: PromptBuilder, base_url: str):
-    """Opraví helper funkce při detekci společné root cause."""
     sample_errors = []
     for name in failing_names[:3]:
         err = _extract_error_for_test(pytest_log, name)
@@ -436,6 +451,143 @@ def _repair_helpers(master_code, pytest_log, helpers, failing_names, llm,
     return result
 
 
+def _do_isolated_repairs(master_code, pytest_log, repairable, helpers, llm,
+                          prompt_builder, base_url, stale_tests):
+    """Hromadná izolovaná oprava — 1 prompt pro všechny failing testy."""
+    to_repair = repairable[:MAX_INDIVIDUAL_REPAIRS]
+    skipped_excess = len(repairable) - len(to_repair)
+
+    if skipped_excess > 0:
+        print(f"    [Repair:Isolated] Opravuji {len(to_repair)}/{len(repairable)} testů"
+              f" v 1 promptu ({skipped_excess} odloženo)...")
+    else:
+        print(f"    [Repair:Isolated] Opravuji {len(to_repair)} testů v 1 promptu...")
+
+    # Sestav data pro hromadný prompt
+    test_entries = []
+    for name in to_repair:
+        code = _extract_function_code(master_code, name)
+        if not code:
+            print(f"      ⚠️ {name} nenalezen v kódu")
+            continue
+        error = _extract_error_for_test(pytest_log, name)
+        test_entries.append((name, code, error))
+
+    if not test_entries:
+        return master_code, 0, to_repair
+
+    # 1 LLM call pro všechny testy
+    prompt = prompt_builder.repair_batch_prompt(
+        test_entries, helpers, base_url, stale_tests
+    )
+
+    try:
+        raw = llm.generate_text(prompt)
+    except Exception as e:
+        print(f"    [Repair:Isolated] ⚠️ LLM chyba: {str(e)[:120]}")
+        return master_code, 0, to_repair
+
+    # Parsuj odpověď — extrahuj jednotlivé funkce
+    fixed_functions = _parse_batch_repair_response(raw)
+    print(f"    [Repair:Isolated] LLM vrátil {len(fixed_functions)} opravených funkcí")
+
+    repaired = 0
+    for name, fixed_code in fixed_functions.items():
+        if name not in {e[0] for e in test_entries}:
+            continue  # LLM vrátil funkci kterou jsme nežádali
+
+        new_code = _replace_function_code(master_code, name, fixed_code)
+        try:
+            ast.parse(new_code)
+            master_code = new_code
+            repaired += 1
+        except SyntaxError:
+            print(f"      ⚠️ {name} oprava způsobila syntax error, přeskakuji")
+
+    print(f"    [Repair:Isolated] ✅ Opraveno {repaired}/{len(test_entries)}")
+    return master_code, repaired, to_repair
+
+
+def _parse_batch_repair_response(raw: str) -> dict[str, str]:
+    """Parsuj LLM odpověď s více opravenými funkcemi.
+
+    Vrací: {func_name: func_code}
+    """
+    clean = raw.strip()
+    if clean.startswith("```python"):
+        clean = clean[9:]
+    elif clean.startswith("```"):
+        clean = clean[3:]
+    if clean.endswith("```"):
+        clean = clean[:-3]
+    clean = clean.strip()
+
+    if not clean:
+        return {}
+
+    # Zkus parsovat celý blok jako validní Python
+    try:
+        tree = ast.parse(clean)
+    except SyntaxError:
+        # Fallback: zkus najít jednotlivé funkce regexem
+        return _extract_functions_regex(clean)
+
+    # Extrahuj všechny test_ funkce z AST
+    functions = {}
+    lines = clean.split('\n')
+    for node in ast.iter_child_nodes(tree):
+        if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
+            start = node.lineno - 1
+            if node.decorator_list:
+                start = node.decorator_list[0].lineno - 1
+            end = node.end_lineno - 1
+            func_code = '\n'.join(lines[start:end + 1])
+            functions[node.name] = func_code
+
+    return functions
+
+
+def _extract_functions_regex(raw: str) -> dict[str, str]:
+    """Fallback extrakce funkcí když AST parse selže."""
+    functions = {}
+    # Najdi všechny def test_... bloky
+    pattern = r'(def (test_\w+)\(.*?\):.*?)(?=\ndef |\Z)'
+    for match in re.finditer(pattern, raw, re.DOTALL):
+        func_code = match.group(1).rstrip()
+        func_name = match.group(2)
+        # Ověř že to je alespoň syntakticky platné
+        try:
+            ast.parse(func_code)
+            functions[func_name] = func_code
+        except SyntaxError:
+            continue
+    return functions
+
+
+def _do_helper_repair(master_code, pytest_log, repairable, helpers, llm,
+                       prompt_builder, base_url):
+    """Helper repair — oprava sdílených helper funkcí."""
+    is_root_cause = _detect_helper_root_cause(pytest_log, repairable)
+
+    if is_root_cause:
+        print(f"    [Repair:Helper] Root cause detekována ({len(repairable)} testů). "
+              f"Opravuji helpery...")
+        repair_type = "helper_root_cause"
+    else:
+        print(f"    [Repair:Helper] {len(repairable)} testů stále selhává po izolované opravě. "
+              f"Zkouším helpery...")
+        repair_type = "helper_fallback"
+
+    new_code = _repair_helpers(
+        master_code, pytest_log, helpers, repairable, llm, prompt_builder, base_url
+    )
+    return new_code, repair_type
+
+
+# ═══════════════════════════════════════════════════════════
+#  Hlavní repair funkce (v3)
+# ═══════════════════════════════════════════════════════════
+
 def repair_failing_tests(master_code: str, pytest_log: str,
                          context: str, llm,
                          prompt_builder: PromptBuilder,
@@ -444,14 +596,24 @@ def repair_failing_tests(master_code: str, pytest_log: str,
                          previous_repair_type: str | None = None,
                          ) -> tuple[str, dict]:
     """
-    Izolovaně opraví selhávající testy s podporou stale detection.
+    Opraví selhávající testy. Alternuje: isolated → helper → isolated → ...
 
-    Vrací: (opravený_kód, repair_info)
-    repair_info = {"repair_type": str|None, "repaired_count": int, "stale_skipped": int}
+    Strategie:
+      1. Parsuj failing testy, odfiltruj stale
+      2. Pokud všechny stale → vrať "all_stale_early_stop" (main.py breakne smyčku)
+      3. Pokud předchozí = None nebo helper → IZOLOVANÁ oprava
+      4. Pokud předchozí = isolated → HELPER oprava
+      5. Aktualizuj stale tracker (isolated i helper se počítají)
 
-    previous_repair_type: typ opravy z předchozí iterace.
-      Pokud byl "helper_root_cause" nebo "helper_fallback" a nepomohl,
-      přeskočíme helper strategie a jdeme rovnou na izolovaný repair.
+    Stale logika:
+      Test je stale po: ≥1 izolované + ≥1 helper opravě se stejnou chybou.
+      Dokud test nemá oba typy → dostává další šance.
+
+    Returns:
+        (opravený_kód, repair_info)
+        repair_info["repair_type"]:
+          "isolated" | "helper_root_cause" | "helper_fallback" |
+          "all_stale_early_stop" | "skipped_all_stale"
     """
     repair_info = {"repair_type": None, "repaired_count": 0, "stale_skipped": 0}
 
@@ -459,9 +621,10 @@ def repair_failing_tests(master_code: str, pytest_log: str,
     if not failing:
         return master_code, repair_info
 
-    # Stale detection
+    # ── Stale filtrování ─────────────────────────────────
     stale_tests = []
     repairable = failing
+
     if stale_tracker:
         stale_tests = stale_tracker.get_stale()
         repairable = stale_tracker.filter_repairable(failing)
@@ -469,102 +632,57 @@ def repair_failing_tests(master_code: str, pytest_log: str,
 
         if stale_tests:
             print(f"    [Repair] {len(stale_tests)} stale testů přeskočeno: "
-                  f"{', '.join(stale_tests[:3])}{'...' if len(stale_tests) > 3 else ''}")
+                  f"{', '.join(stale_tests[:5])}{'...' if len(stale_tests) > 5 else ''}")
 
         if not repairable:
-            print(f"    [Repair] Všechny failing testy jsou stale, přeskakuji opravu.")
-            repair_info["repair_type"] = "skipped_all_stale"
+            # Všechny failing jsou stale → signál pro early stop
+            print(f"    [Repair] ⛔ Všechny failing testy ({len(failing)}) jsou stale. "
+                  f"Další iterace nemají smysl.")
+            repair_info["repair_type"] = "all_stale_early_stop"
             return master_code, repair_info
 
     helpers = _extract_helpers_code(master_code)
     backup = master_code
 
-    # Rozhodnutí: smíme použít helper repair?
-    # Pokud předchozí iterace už zkoušela helper repair a nepomohlo,
-    # přeskočíme a jdeme rovnou na izolovaný repair.
-    helper_already_tried = previous_repair_type in ("helper_root_cause", "helper_fallback")
+    # ── Rozhodnutí: isolated nebo helper? ────────────────
+    # Pravidlo: isolated → helper → isolated → helper → ...
+    # První iterace (previous=None) vždy začíná isolated.
 
-    if helper_already_tried:
-        print(f"    [Repair] Předchozí helper repair nepomohl → přepínám na izolovaný repair.")
+    use_helper = (previous_repair_type == "isolated")
 
-    # Společná root cause → oprava helperů (jen pokud helper ještě nebyl zkoušen)
-    if not helper_already_tried and _detect_helper_root_cause(pytest_log, failing):
-        print(f"    [Repair] Společná root cause ({len(failing)} testů). Opravuji helpery...")
-        repair_info["repair_type"] = "helper_root_cause"
-        master_code = _repair_helpers(
-            master_code, pytest_log, helpers, failing, llm, prompt_builder, base_url
+    if use_helper:
+        # ── HELPER REPAIR ────────────────────────────────
+        master_code, repair_type = _do_helper_repair(
+            master_code, pytest_log, repairable, helpers,
+            llm, prompt_builder, base_url,
         )
-        repair_info["repaired_count"] = len(failing)
-        return master_code, repair_info
-
-    # Příliš mnoho repairable → fallback na opravu helperů (jen pokud helper ještě nebyl zkoušen)
-    if not helper_already_tried and len(repairable) > MAX_INDIVIDUAL_REPAIRS:
-        print(f"    [Repair] {len(repairable)} repairable testů (limit {MAX_INDIVIDUAL_REPAIRS}). "
-              f"Opravuji helpery...")
-        repair_info["repair_type"] = "helper_fallback"
-        master_code = _repair_helpers(
-            master_code, pytest_log, helpers, repairable, llm, prompt_builder, base_url
-        )
+        repair_info["repair_type"] = repair_type
         repair_info["repaired_count"] = len(repairable)
-        return master_code, repair_info
 
-    # Izolovaná oprava jednotlivých testů (capped na MAX_INDIVIDUAL_REPAIRS)
-    to_repair = repairable[:MAX_INDIVIDUAL_REPAIRS]
-    skipped_excess = len(repairable) - len(to_repair)
+        # Aktualizuj stale: helper pokus pro všechny repairable
+        if stale_tracker:
+            stale_tracker.update(
+                repair_type, pytest_log, failing,
+                attempted_names=repairable,
+            )
 
-    if skipped_excess > 0:
-        print(f"    [Repair] Izolovaná oprava {len(to_repair)}/{len(repairable)} testů"
-              f" (+ {len(stale_tests)} stale, {skipped_excess} odloženo na další iteraci)...")
     else:
-        print(f"    [Repair] Izolovaná oprava {len(to_repair)} testů"
-              f" (+ {len(stale_tests)} stale přeskočeno)...")
-
-    repair_info["repair_type"] = "isolated"
-    repaired = 0
-
-    for i, test_name in enumerate(to_repair, 1):
-        if i > 1:
-            time.sleep(5)
-
-        test_code = _extract_function_code(master_code, test_name)
-        if not test_code:
-            print(f"      ⚠️ {test_name} nenalezen v kódu")
-            continue
-
-        error_msg = _extract_error_for_test(pytest_log, test_name)
-        print(f"      ({i}/{len(to_repair)}) {test_name}...")
-
-        fixed = _repair_single_test(
-            test_name, test_code, error_msg, helpers, llm,
-            prompt_builder, base_url, stale_tests
+        # ── ISOLATED REPAIR ──────────────────────────────
+        master_code, repaired, attempted = _do_isolated_repairs(
+            master_code, pytest_log, repairable, helpers,
+            llm, prompt_builder, base_url, stale_tests,
         )
+        repair_info["repair_type"] = "isolated"
+        repair_info["repaired_count"] = repaired
 
-        if fixed:
-            new_code = _replace_function_code(master_code, test_name, fixed)
-            try:
-                ast.parse(new_code)
-                master_code = new_code
-                repaired += 1
-            except SyntaxError:
-                print(f"      ⚠️ {test_name} oprava způsobila syntax error, přeskakuji")
-        else:
-            print(f"      ⚠️ {test_name} oprava selhala")
+        # Aktualizuj stale: isolated pokus pro attempted testy
+        if stale_tracker:
+            stale_tracker.update(
+                "isolated", pytest_log, failing,
+                attempted_names=attempted,
+            )
 
-    repair_info["repaired_count"] = repaired
-    print(f"    [Repair] ✅ Opraveno {repaired}/{len(to_repair)}")
-
-    if stale_tracker:
-        if repair_info["repair_type"] in ("helper_root_cause", "helper_fallback"):
-            # Helper repair = pokus o opravu VŠECH failing
-            stale_tracker.update(pytest_log, failing, attempted_names=failing)
-        elif repair_info["repair_type"] == "isolated":
-            # Izolovaný = jen to_repair (capped seznam)
-            stale_tracker.update(pytest_log, failing, attempted_names=to_repair)
-        elif repair_info["repair_type"] == "skipped_all_stale":
-            # Nikdo nebyl attempted, ale stale testy stále failují
-            stale_tracker.update(pytest_log, failing, attempted_names=[])
-
-    # Bezpečnostní kontrola: počet testů se nesmí změnit
+    # ── Bezpečnostní kontrola: počet testů se nesmí změnit ──
     before = count_test_functions(backup)
     after = count_test_functions(master_code)
     if before != after:

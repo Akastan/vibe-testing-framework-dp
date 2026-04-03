@@ -20,6 +20,7 @@ from token_tracker import (
 )
 
 
+
 class LLMProvider(ABC):
     @abstractmethod
     def generate_text(self, prompt: str) -> tuple[str, dict | None]:
