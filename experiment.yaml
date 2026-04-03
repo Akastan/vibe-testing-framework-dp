@@ -1,53 +1,46 @@
 # ══════════════════════════════════════════════════════════
-# Experiment konfigurace – jeden soubor řídí celý běh
+# Experiment konfigurace v11 — čistý design
+#
+# api_knowledge ODSTRANĚNO — hinty jsou v documentation.md
+# (sekce "Poznámky pro integraci a testování").
+# Jediná nezávislá proměnná mezi levely = KONTEXT.
 # ══════════════════════════════════════════════════════════
 
 experiment:
-  name: "diplomka_v10"
-  #levels: ["L0", "L1", "L2", "L3", "L4"]
-  levels: ["L4"]
-  max_iterations: 5        # Feedback loop iterací
-  runs_per_combination: 5 #3  # Opakování pro statistickou validitu
-  test_count: 30           # Kolik testů LLM vygeneruje
-
-  # ── Temperature experiment (RQ3) ─────────────────────
-  # Pokud je temperatures list přítomen a má víc než 1 hodnotu,
-  # pipeline iteruje přes všechny teploty jako další rozměr.
-  # Pokud chybí nebo je [null], použije se default teplota provideru.
-  #temperatures: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+  name: "diplomka_v11"
+  levels: ["L0", "L1", "L2", "L3", "L4"]
+  max_iterations: 5
+  runs_per_combination: 5
+  test_count: 30
   temperatures: [0.4]
 
 # ── LLM modely ───────────────────────────────────────────
-# Každý model musí mít provider a api_key_env (název env proměnné)
 llms:
   - name: "gemini-3.1-flash-lite-preview"
     provider: "gemini"
     model: "gemini-3.1-flash-lite-preview"
     api_key_env: "GEMINI_API_KEY"
 
-  # - name: "deepseek-r1-32b"
-  #   provider: "ollama_compat"
-  #   model: "deepseek-r1:32b-fast"
-  #   api_key_env: "LOCAL_LLM_KEY"
-  #   base_url_env: "LOCAL_LLM_URL"
-  #   max_tokens: 8192
-  #   num_ctx: 32768
-  #   verify_ssl: false
+  - name: "mistral-large-2411"
+    provider: "mistral"
+    model: "mistral-large-2411"
+    api_key_env: "MISTRAL_API_KEY"
+
+  # - name: "deepseek-chat"
+  #   provider: "deepseek"
+  #   model: "deepseek-chat"
+  #   api_key_env: "DEEPSEEK_API_KEY"
 
   # - name: "qwen25-coder-32b"
   #   provider: "ollama_compat"
   #   model: "qwen2.5-coder:32b-fast"
   #   api_key_env: "LOCAL_LLM_KEY"
   #   base_url_env: "LOCAL_LLM_URL"
-  #   max_tokens: 8192
+  #   max_tokens: 16384
   #   num_ctx: 32768
   #   verify_ssl: false
 
-
 # ── Testovaná API ────────────────────────────────────────
-# api_rules: instrukce pro LLM jak volat endpointy (bez těchto testy padnou)
-# helper_hints: jak správně nastavit helper funkce (default hodnoty, povinná pole)
-
 apis:
   - name: "bookstore"
     docker: true
@@ -68,35 +61,22 @@ apis:
     # ────────────────────────────────────────────────────
     framework_rules:
       - "Timeout=30 na každém HTTP volání."
-      - "Unikátní stringy přes uuid4: unique(prefix) → f'{prefix}_{uuid.uuid4().hex[:8]}'"
+      - >-
+        Unikátní stringy přes uuid4:
+        unique(prefix) → f'{prefix}_{uuid.uuid4().hex[:8]}'
       - "Nepoužívej fixtures, conftest, setup_module."
       - "Nevolej /reset endpoint — framework resetuje DB automaticky."
       - "Každý test musí být self-contained (vytvoří si data přes helpery)."
       - "Na DELETE s 204 nevolej .json() — tělo je prázdné."
+      - >-
+        V helper funkcích (create_book, create_author...)
+        NEPOUŽÍVEJ raise_for_status().
+        Místo toho: assert response.status_code in (200, 201),
+        f"Helper failed {response.status_code}: {response.text[:200]}"
 
-    # ── API KNOWLEDGE ───────────────────────────────────
-    # CO API dělá. Injektuje se POUZE do L1+.
-    # Na L0 model toto NEDOSTANE — musí si to odvodit z OpenAPI spec.
+    # ── API KNOWLEDGE — PRÁZDNÉ ─────────────────────────
+    # Hinty přesunuty do documentation.md (sekce 4).
+    # L0 = čistě spec, L1+ = docs s testing notes.
+    # Žádná skrytá injekce mimo kontext.
     # ────────────────────────────────────────────────────
-    api_knowledge:
-      - "create_book helper MUSÍ nastavit 'stock': 10, jinak objednávky selžou na insufficient stock (API default je 0)."
-      - "Helper create_book má mít default published_year=2020. Pro test discountu na NOVOU knihu (mladší 1 roku) vytvoř knihu s published_year aktuálního roku PŘÍMO V TESTU."
-      - "DELETE /books/{id}/tags používá REQUEST BODY: json={\"tag_ids\": [...]}."
-      - "PATCH /books/{id}/stock používá QUERY parametr: params={\"quantity\": N}, ne JSON body."
-      - "Stock quantity je DELTA (přičte/odečte), ne absolutní hodnota. Stock=10, quantity=5 → výsledek 15."
-      - "Pro 'not found' endpointy API vrací 404, ne 422."
-      - "POST endpointy vracejí 201 při úspěchu, ne 200."
-
-  # - name: "todo-api"
-  #   source_dir: "../todo-api"
-  #   server_cmd: ["-m", "flask", "run", "--host", "127.0.0.1", "--port", "8001"]
-  #   base_url: "http://localhost:8001"
-  #   source_module: "app"
-  #   mutation_target: "app/routes.py"
-  #   startup_wait: 2.0
-  #   inputs:
-  #     openapi: "inputs/todo_openapi.yaml"
-  #     documentation: "inputs/todo_docs.md"
-  #     source_code: "inputs/todo_source.py"
-  #     db_schema: "inputs/todo_schema.sql"
-  #     existing_tests: "inputs/todo_tests.py"
+    api_knowledge: []
