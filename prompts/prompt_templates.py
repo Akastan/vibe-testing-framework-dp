@@ -189,33 +189,6 @@ YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (all {len(test_entries)} fixed func
 NO MARKDOWN BLOCKS, NO PROSE, NO IMPORTS, NO HELPERS, NO EXPLANATIONS.
 """
 
-    def repair_single_prompt(
-        self, test_name: str, test_code: str, error_msg: str,
-        helpers: str, base_url: str,
-        stale_tests: list[str] | None = None,
-    ) -> str:
-        """Fallback — oprava jednoho testu (nepoužívá se v hlavním flow)."""
-        return f"""Oprav tuto jednu selhávající testovací funkci.
-BASE_URL = "{base_url}"
-
-DOSTUPNÉ HELPERY:
-{helpers}
-
-SELHÁVAJÍCÍ TEST:
-{test_code}
-
-CHYBA PŘI BĚHU:
-{error_msg}
-{self._knowledge_block()}{self._stale_block(stale_tests)}{self._framework_block()}
-=========================================
-CRITICAL CODING INSTRUCTIONS:
-- Oprav funkci, neměň její název.
-- Používej existující helper funkce, nevymýšlej nové.
-- Pokud test ověřuje jen status kód, přidej i kontrolu response body.
-
-YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (the fixed function only).
-NO MARKDOWN BLOCKS, NO PROSE, NO IMPORTS, NO EXPLANATIONS.
-"""
 
     def repair_helpers_prompt(
         self, helpers: str, sample_errors: list[str],
