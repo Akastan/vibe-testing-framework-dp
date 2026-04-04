@@ -366,43 +366,6 @@ def validate_test_count(code: str, expected: int, llm=None,
 #  Repair — interní funkce
 # ═══════════════════════════════════════════════════════════
 
-def _repair_single_test(test_name, test_code, error_msg, helpers, llm,
-                         prompt_builder: PromptBuilder, base_url: str,
-                         stale_tests: list[str] | None = None):
-    prompt = prompt_builder.repair_single_prompt(
-        test_name, test_code, error_msg, helpers, base_url, stale_tests
-    )
-
-    try:
-        raw = llm.generate_text(prompt)
-    except Exception as e:
-        print(f"      ⚠️ LLM chyba: {str(e)[:100]}")
-        return None
-
-    clean = raw.strip()
-    if clean.startswith("```python"):
-        clean = clean[9:]
-    elif clean.startswith("```"):
-        clean = clean[3:]
-    if clean.endswith("```"):
-        clean = clean[:-3]
-    clean = textwrap.dedent(clean).strip()
-
-    try:
-        tree = ast.parse(clean)
-        for node in ast.iter_child_nodes(tree):
-            if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
-                lines = clean.split('\n')
-                start = node.lineno - 1
-                end = node.end_lineno - 1
-                return '\n'.join(lines[start:end + 1])
-    except SyntaxError:
-        pass
-
-    if f"def {test_name}" in clean or "def test_" in clean:
-        return clean
-    return None
-
 
 def _repair_helpers(master_code, pytest_log, helpers, failing_names, llm,
                      prompt_builder: PromptBuilder, base_url: str):
