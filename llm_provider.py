@@ -8,14 +8,11 @@ Temperature se předává z experiment.yaml; None = default provideru.
 v2.3: + MistralProvider (Mistral AI SDK)
       generate_text() vrací tuple (text, usage_dict | None).
 """
-import re
 import time
 from abc import ABC, abstractmethod
 
 from token_tracker import (
     extract_usage_gemini,
-    extract_usage_openai,
-    extract_usage_claude,
     extract_usage_mistral,
 )
 
@@ -84,61 +81,6 @@ class GeminiProvider(LLMProvider, RetryMixin):
         return self._retry_call(_call)
 
 
-class OpenAIProvider(LLMProvider, RetryMixin):
-    def __init__(self, api_key: str, model_name: str,
-                 temperature: float | None = None,
-                 max_retries: int = 8, base_delay: float = 30.0):
-        from openai import OpenAI
-        self.client = OpenAI(api_key=api_key)
-        self.model = model_name
-        self.model_name = model_name
-        self.temperature = temperature if temperature is not None else 0.7
-        self.max_retries = max_retries
-        self.base_delay = base_delay
-
-    def generate_text(self, prompt: str) -> tuple[str, dict | None]:
-        def _call():
-            response = self.client.chat.completions.create(
-                model=self.model_name,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=self.temperature,
-            )
-            text = response.choices[0].message.content or ""
-            usage = extract_usage_openai(response)
-            return text, usage
-
-        return self._retry_call(_call)
-
-
-class ClaudeProvider(LLMProvider, RetryMixin):
-    def __init__(self, api_key: str, model_name: str,
-                 temperature: float | None = None,
-                 max_retries: int = 8, base_delay: float = 30.0):
-        from anthropic import Anthropic
-        self.client = Anthropic(api_key=api_key)
-        self.model = model_name
-        self.model_name = model_name
-        self.temperature = temperature
-        self.max_retries = max_retries
-        self.base_delay = base_delay
-
-    def generate_text(self, prompt: str) -> tuple[str, dict | None]:
-        def _call():
-            kwargs = dict(
-                model=self.model_name,
-                max_tokens=8192,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            if self.temperature is not None:
-                kwargs["temperature"] = self.temperature
-            response = self.client.messages.create(**kwargs)
-            text = response.content[0].text
-            usage = extract_usage_claude(response)
-            return text, usage
-
-        return self._retry_call(_call)
-
-
 class DeepSeekProvider(LLMProvider, RetryMixin):
     """DeepSeek — OpenAI-kompatibilní API."""
     def __init__(self, api_key: str, model_name: str,
@@ -196,55 +138,12 @@ class MistralProvider(LLMProvider, RetryMixin):
         return self._retry_call(_call)
 
 
-class OllamaCompatProvider(LLMProvider, RetryMixin):
-    def __init__(self, api_key: str, model_name: str,
-                 temperature: float | None = None,
-                 max_retries: int = 8, base_delay: float = 30.0,
-                 base_url: str = "",
-                 max_tokens: int = 8192,
-                 num_ctx: int = 32768,
-                 verify_ssl: bool = False):
-        import httpx
-        from openai import OpenAI
-        self.client = OpenAI(
-            api_key=api_key,
-            base_url=base_url,
-            http_client=httpx.Client(verify=verify_ssl),
-        )
-        self.model = model_name
-        self.model_name = model_name
-        self.temperature = temperature if temperature is not None else 0.4
-        self.max_tokens = max_tokens
-        self.num_ctx = num_ctx
-        self.max_retries = max_retries
-        self.base_delay = base_delay
-
-    def generate_text(self, prompt: str) -> tuple[str, dict | None]:
-        def _call():
-            response = self.client.chat.completions.create(
-                model=self.model_name,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-                extra_body={"options": {"num_ctx": self.num_ctx}},
-            )
-            raw = response.choices[0].message.content or ""
-            text = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL).strip()
-            usage = extract_usage_openai(response)
-            return text, usage
-
-        return self._retry_call(_call)
-
-
 # ── Factory ──────────────────────────────────────────────
 
 PROVIDERS = {
     "gemini": GeminiProvider,
-    "openai": OpenAIProvider,
-    "claude": ClaudeProvider,
     "deepseek": DeepSeekProvider,
     "mistral": MistralProvider,
-    "ollama_compat": OllamaCompatProvider,
 }
 
 
