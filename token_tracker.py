@@ -19,8 +19,7 @@ Usage dict format (jednotný pro všechny providery):
 """
 
 from dataclasses import dataclass, field
-from typing import Optional
-import time, json
+import time
 
 
 # ─── Pricing (USD per 1M tokenů, duben 2026) ────────────
@@ -31,39 +30,17 @@ DEFAULT_PRICING: dict[str, dict[str, float | None]] = {
     # ═══ Gemini (USD per 1M tokenů, duben 2026) ═══
     # Zdroj: ai.google.dev/gemini-api/docs/pricing (2026-04-02)
     # ≤200K context. Pro modely: >200K = 2× cena.
-    "gemini-3.1-pro-preview": {
-        "input": 2.00,  "output": 12.00, "cached_input": 0.50,
-    },
     "gemini-3.1-flash-lite-preview": {
         "input": 0.25,  "output": 1.50,  "cached_input": 0.0625,
     },
-    "gemini-3-flash-preview": {
-        "input": 0.50,  "output": 3.00,  "cached_input": 0.125,
-    },
     "gemini-2.5-pro": {
         "input": 1.25,  "output": 10.00, "cached_input": 0.3125,
-    },
-    "gemini-2.5-flash": {
-        "input": 0.30,  "output": 2.50,  "cached_input": 0.075,
-    },
-    "gemini-2.5-flash-lite": {
-        "input": 0.10,  "output": 0.40,  "cached_input": 0.025,
-    },
-    # Deprecated, shutdown 2026-06-01:
-    "gemini-2.0-flash": {
-        "input": 0.10,  "output": 0.40,  "cached_input": 0.025,
-    },
-    "gemini-2.0-flash-lite": {
-        "input": 0.075, "output": 0.30,  "cached_input": 0.01875,
     },
     # ═══ DeepSeek (USD per 1M tokenů) ═══
     # Zdroj: api-docs.deepseek.com/quick_start/pricing
     # deepseek-chat i deepseek-reasoner = V3.2 (128K context)
     # Cache hit = 90% sleva (automatický prefix caching)
     "deepseek-chat": {                          # V3.2 / V4
-        "input": 0.28,  "output": 0.42,  "cached_input": 0.028,
-    },
-    "deepseek-reasoner": {                      # V3.2 reasoning mode
         "input": 0.28,  "output": 0.42,  "cached_input": 0.028,
     },
     "deepseek-v4": {                            # V4 (březen 2026)
@@ -73,45 +50,6 @@ DEFAULT_PRICING: dict[str, dict[str, float | None]] = {
     # Zdroj: docs.mistral.ai/deployment/ai-studio/pricing
     "mistral-large-latest": {                   # Large 3
         "input": 2.00,  "output": 6.00,  "cached_input": None,
-    },
-    "mistral-medium-latest": {                  # Medium 3
-        "input": 0.40,  "output": 2.00,  "cached_input": None,
-    },
-    "mistral-small-latest": {                   # Small 3.1
-        "input": 0.20,  "output": 0.60,  "cached_input": None,
-    },
-    "codestral-latest": {
-        "input": 0.30,  "output": 0.90,  "cached_input": None,
-    },
-    "open-mistral-nemo": {
-        "input": 0.15,  "output": 0.15,  "cached_input": None,
-    },
-    "ministral-8b-latest": {
-        "input": 0.10,  "output": 0.10,  "cached_input": None,
-    },
-    # ═══ OpenAI ═══
-    "gpt-4o": {
-        "input": 2.50,  "output": 10.00, "cached_input": 1.25,
-    },
-    "gpt-4o-mini": {
-        "input": 0.15,  "output": 0.60,  "cached_input": 0.075,
-    },
-    "o3-mini": {
-        "input": 1.10,  "output": 4.40,  "cached_input": 0.55,
-    },
-    # ═══ Claude ═══
-    "claude-sonnet-4-20250514": {
-        "input": 3.00,  "output": 15.00, "cached_input": 0.30,
-    },
-    "claude-haiku-4-5-20251001": {
-        "input": 0.80,  "output": 4.00,  "cached_input": 0.08,
-    },
-    # ═══ Lokální (OllamaCompat) — zdarma, jen elektřina ═══
-    "qwen2.5-coder:32b-fast": {
-        "input": 0.0, "output": 0.0, "cached_input": None,
-    },
-    "deepseek-r1:32b": {
-        "input": 0.0, "output": 0.0, "cached_input": None,
     },
 }
 
@@ -300,65 +238,6 @@ def extract_usage_gemini(response) -> dict | None:
         "cached_tokens": getattr(meta, "cached_content_token_count", 0) or 0,
     }
 
-
-def extract_usage_openai(response) -> dict | None:
-    """
-    OpenAI / DeepSeek / OllamaCompat (OpenAI-compatible) response.usage:
-      prompt_tokens, completion_tokens, total_tokens
-      Některé mají prompt_tokens_details.cached_tokens
-    """
-    usage = getattr(response, "usage", None)
-    if not usage:
-        return None
-
-    cached = 0
-    details = getattr(usage, "prompt_tokens_details", None)
-    if details:
-        cached = getattr(details, "cached_tokens", 0) or 0
-
-    return {
-        "prompt_tokens": getattr(usage, "prompt_tokens", 0) or 0,
-        "completion_tokens": getattr(usage, "completion_tokens", 0) or 0,
-        "total_tokens": getattr(usage, "total_tokens", 0) or 0,
-        "cached_tokens": cached,
-    }
-
-
-def extract_usage_openai_raw(response_dict: dict) -> dict | None:
-    """
-    Pro OllamaCompat (httpx raw JSON response) — ne SDK objekt.
-    Response JSON: {"usage": {"prompt_tokens": N, ...}}
-    """
-    usage = response_dict.get("usage")
-    if not usage:
-        return None
-    return {
-        "prompt_tokens": usage.get("prompt_tokens", 0) or 0,
-        "completion_tokens": usage.get("completion_tokens", 0) or 0,
-        "total_tokens": usage.get("total_tokens", 0) or 0,
-        "cached_tokens": (usage.get("prompt_tokens_details", {}) or {})
-                          .get("cached_tokens", 0) or 0,
-    }
-
-
-def extract_usage_claude(response) -> dict | None:
-    """
-    Anthropic response.usage:
-      input_tokens, output_tokens
-      cache_creation_input_tokens, cache_read_input_tokens (volitelné)
-    """
-    usage = getattr(response, "usage", None)
-    if not usage:
-        return None
-    input_tok = getattr(usage, "input_tokens", 0) or 0
-    output_tok = getattr(usage, "output_tokens", 0) or 0
-    cached = (getattr(usage, "cache_read_input_tokens", 0) or 0)
-    return {
-        "prompt_tokens": input_tok,
-        "completion_tokens": output_tok,
-        "total_tokens": input_tok + output_tok,
-        "cached_tokens": cached,
-    }
 
 
 def extract_usage_mistral(response) -> dict | None:
