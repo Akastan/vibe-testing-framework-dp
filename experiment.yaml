@@ -14,7 +14,7 @@ experiment:
   levels: ["L0", "L1", "L2", "L3", "L4"]
   #levels: ["L4"]
   max_iterations: 5
-  runs_per_combination: 3
+  runs_per_combination: 5
   test_count: 30
   temperatures: [0.4]
 
@@ -65,42 +65,5 @@ apis:
         NEPOUŽÍVEJ raise_for_status().
         Místo toho: assert response.status_code in (200, 201),
         f"Helper failed {response.status_code}: {response.text[:200]}"
-
-    api_knowledge: []
-
-  # ── API 2: AstroOps ───────────────────────────────────
-  # Stejný port 8000 — framework zastaví bookstore kontejner
-  # než spustí astroops (viz main.py: stop_managed_server).
-  - name: "astroops"
-    docker: true
-    source_dir: "../astroops-api"
-    base_url: "http://localhost:8000"
-    startup_wait: 20.0
-    inputs:
-      openapi: "inputs/api2_astroops/openapi.yaml"
-      documentation: "inputs/api2_astroops/documentation.md"
-      source_code: "inputs/api2_astroops/source_code.py"
-      db_schema: "inputs/api2_astroops/db_schema.sql"
-      existing_tests: "inputs/api2_astroops/existing_tests.py"
-
-    framework_rules:
-      - "Timeout=30 na každém HTTP volání."
-      - >-
-        Unikátní stringy přes uuid4:
-        unique(prefix) → f'{prefix}_{uuid.uuid4().hex[:8]}'
-      - "Nepoužívej fixtures, conftest, setup_module."
-      - "Nevolej /reset endpoint — framework resetuje DB automaticky."
-      - "Každý test musí být self-contained (vytvoří si data přes helpery)."
-      - "Na DELETE s 204 a 202 nevolej .json() pokud tělo neočekáváš."
-      - >-
-        V helper funkcích (create_satellite, create_payload...)
-        NEPOUŽÍVEJ raise_for_status().
-        Místo toho: assert response.status_code in (200, 201),
-        f"Helper failed {response.status_code}: {response.text[:200]}"
-      - >-
-        Všechny endpointy kromě /health a /reset vyžadují
-        header Authorization: Bearer <token>.
-        Používej konstantu AUTH = {"Authorization": "Bearer test-token"}
-        a přidávej ji ke KAŽDÉMU requestu v helperech i testech.
 
     api_knowledge: []

@@ -14,7 +14,7 @@ import glob
 import sqlite3
 
 SERVER_URL = "http://localhost:8000"
-FRAMEWORK_INPUTS = os.path.join("inputs", "bookstore")
+FRAMEWORK_INPUTS = os.path.join("inputs", "api1-bookstore")
 
 FILES_TO_EXPORT = {
     "l1_docs": "docs/documentation.md",
