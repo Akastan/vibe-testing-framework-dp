@@ -11,6 +11,8 @@ Opravy:
   - Automatický /reset před každým pytest spuštěním
   - Retry při infrastrukturních chybách (DB locked, connection error)
   - Detekce opakující se chyby → nepředávat LLM jako feedback
+  - API identity tracking: při přepnutí na jiné API na stejném portu
+    se předchozí automaticky zastaví
 """
 import os
 import sys
@@ -25,7 +27,12 @@ OUTPUTS_DIR = "outputs"
 _managed_servers: dict[str, subprocess.Popen] = {}
 
 # Pro Docker režim: sledujeme, které API běží přes Docker
+# key = base_url, value = api_cfg
 _docker_servers: dict[str, dict] = {}
+
+# Tracking: které API (podle jména) běží na kterém portu
+# key = base_url, value = api_name
+_active_api: dict[str, str] = {}
 
 # Kolikrát opakovat pytest při infra chybě (DB locked, connection refused)
 INFRA_RETRY_MAX = 2
@@ -33,7 +40,7 @@ INFRA_RETRY_DELAY = 5  # sekund
 
 
 # ═══════════════════════════════════════════════════════════
-#  Pomocné funkce – lokální režim (beze změny)
+#  Pomocné funkce – lokální režim
 # ═══════════════════════════════════════════════════════════
 
 def _resolve_python(api_cfg: dict) -> str:
@@ -58,7 +65,6 @@ def _is_server_running(base_url: str) -> bool:
 
 
 def _start_server_local(api_cfg: dict) -> subprocess.Popen | None:
-    """Spustí server lokálně přes Python subprocess."""
     python_exe = _resolve_python(api_cfg)
     abs_api = os.path.abspath(api_cfg["source_dir"])
     cmd = api_cfg["server_cmd"]
@@ -87,7 +93,6 @@ def _start_server_local(api_cfg: dict) -> subprocess.Popen | None:
 
 
 def _stop_server_local(proc):
-    """Zastaví lokální subprocess."""
     if proc and proc.poll() is None:
         if os.name == "nt":
             proc.kill()
@@ -106,18 +111,15 @@ def _stop_server_local(proc):
 # ═══════════════════════════════════════════════════════════
 
 def _docker_compose_cmd(api_cfg: dict) -> list[str]:
-    """Sestaví base příkaz pro docker compose."""
     compose_file = api_cfg.get("docker_compose_file", "docker-compose.yml")
     return ["docker", "compose", "-f", compose_file]
 
 
 def _start_server_docker(api_cfg: dict) -> bool:
-    """Spustí server přes docker compose up. Vrací True pokud se podařilo."""
     abs_api = os.path.abspath(api_cfg["source_dir"])
     base_cmd = _docker_compose_cmd(api_cfg)
     wait = api_cfg.get("startup_wait", 15.0)
 
-    # Build + start (detached)
     print(f"    [Docker] Spouštím: docker compose up --build -d")
     result = subprocess.run(
         base_cmd + ["up", "--build", "-d"],
@@ -131,7 +133,6 @@ def _start_server_docker(api_cfg: dict) -> bool:
         print(f"    {result.stderr[:300]}")
         return False
 
-    # Čekej na health check
     print(f"    [Docker] Čekám na server (max {wait}s)...")
     for _ in range(int(wait * 2)):
         if _is_server_running(api_cfg["base_url"]):
@@ -140,7 +141,6 @@ def _start_server_docker(api_cfg: dict) -> bool:
         time.sleep(0.5)
 
     print(f"    [Docker] ❌ Timeout – server neodpovídá.")
-    # Zobraz logy pro debug
     logs = subprocess.run(
         base_cmd + ["logs", "--tail", "30"],
         cwd=abs_api, capture_output=True, text=True,
@@ -151,11 +151,10 @@ def _start_server_docker(api_cfg: dict) -> bool:
 
 
 def _stop_server_docker(api_cfg: dict):
-    """Zastaví Docker kontejner(y)."""
     abs_api = os.path.abspath(api_cfg["source_dir"])
     base_cmd = _docker_compose_cmd(api_cfg)
 
-    print(f"    [Docker] Zastavuji kontejner...")
+    print(f"    [Docker] Zastavuji kontejner ({api_cfg['name']})...")
     subprocess.run(
         base_cmd + ["down", "--volumes", "--remove-orphans"],
         cwd=abs_api,
@@ -166,10 +165,8 @@ def _stop_server_docker(api_cfg: dict):
 
 
 def _restart_server_docker(api_cfg: dict) -> bool:
-    """Restartuje Docker kontejner (čistý stav – nová DB)."""
     abs_api = os.path.abspath(api_cfg["source_dir"])
     base_cmd = _docker_compose_cmd(api_cfg)
-    wait = api_cfg.get("startup_wait", 15.0)
 
     print(f"    [Docker] Restartuji kontejner...")
     subprocess.run(
@@ -182,27 +179,73 @@ def _restart_server_docker(api_cfg: dict) -> bool:
 
 
 def _is_docker_mode(api_cfg: dict) -> bool:
-    """Zjistí, zda API používá Docker režim."""
     return api_cfg.get("docker", False)
 
 
 # ═══════════════════════════════════════════════════════════
-#  Společné funkce (obě režimy)
+#  API Identity — zajistí že na portu běží SPRÁVNÉ API
 # ═══════════════════════════════════════════════════════════
 
-def _start_server(api_cfg: dict) -> subprocess.Popen | None:
-    """Spustí server ve správném režimu. Pro Docker vrací dummy Popen-like objekt."""
-    if _is_docker_mode(api_cfg):
-        success = _start_server_docker(api_cfg)
-        if success:
-            # Uložíme si info že Docker běží
-            _docker_servers[api_cfg["base_url"]] = api_cfg
-            # Vrátíme None – Docker se neřídí přes Popen
-            # ale musíme signalizovat úspěch jinak
-            return "DOCKER_RUNNING"  # sentinel hodnota
-        return None
+def _ensure_correct_api(api_cfg: dict):
+    """Zkontroluje, zda na portu běží správné API. Pokud ne, zastaví staré a spustí nové.
+
+    Řeší situace:
+      1. Na portu běží jiné API z experimentu → zastaví ho
+      2. Na portu běží neznámý server (ruční spuštění) → zastaví Docker pro toto API
+      3. Na portu nic neběží → spustí
+    """
+    base_url = api_cfg["base_url"]
+    api_name = api_cfg["name"]
+    is_docker = _is_docker_mode(api_cfg)
+
+    current_api = _active_api.get(base_url)
+
+    # Správné API už běží
+    if current_api == api_name and _is_server_running(base_url):
+        return
+
+    # Na portu běží jiné API → zastavit
+    if current_api and current_api != api_name:
+        print(f"    [Server] ⚠️ Na {base_url} běží '{current_api}', potřebuji '{api_name}'. Přepínám...")
+        old_cfg = _docker_servers.get(base_url)
+        if old_cfg:
+            _stop_server_docker(old_cfg)
+            _docker_servers.pop(base_url, None)
+        old_proc = _managed_servers.pop(base_url, None)
+        if old_proc and old_proc != "DOCKER_RUNNING":
+            _stop_server_local(old_proc)
+        _active_api.pop(base_url, None)
+        time.sleep(2)
+
+    # Na portu něco běží ale nevíme co (ruční spuštění mimo framework)
+    if _is_server_running(base_url) and current_api != api_name:
+        print(f"    [Server] ⚠️ Na {base_url} už běží neznámý server. Zastavuji Docker pro {api_name}...")
+        if is_docker:
+            # Zkusíme docker compose down pro TOTO API — možná je to ono
+            _stop_server_docker(api_cfg)
+            time.sleep(2)
+
+        if _is_server_running(base_url):
+            print(f"    [Server] ⚠️ Server na {base_url} stále běží (asi ruční spuštění).")
+            print(f"    [Server] ⚠️ Zastav ho ručně, nebo budu pokračovat s tím co běží.")
+
+    # Spustit správné API
+    if not _is_server_running(base_url):
+        if is_docker:
+            if _start_server_docker(api_cfg):
+                _docker_servers[base_url] = api_cfg
+                _active_api[base_url] = api_name
+            else:
+                print(f"    [Server] ❌ Nepodařilo se spustit {api_name}")
+        else:
+            proc = _start_server_local(api_cfg)
+            if proc:
+                _managed_servers[base_url] = proc
+                _active_api[base_url] = api_name
+            else:
+                print(f"    [Server] ❌ Nepodařilo se spustit {api_name}")
     else:
-        return _start_server_local(api_cfg)
+        _active_api[base_url] = api_name
 
 
 def stop_managed_server(api_cfg: dict):
@@ -215,12 +258,13 @@ def stop_managed_server(api_cfg: dict):
             del _docker_servers[key]
     else:
         proc = _managed_servers.pop(key, None)
-        if proc:
+        if proc and proc != "DOCKER_RUNNING":
             _stop_server_local(proc)
+
+    _active_api.pop(key, None)
 
 
 def _reset_database(base_url: str) -> bool:
-    """Zavolá /reset endpoint a počká na potvrzení."""
     try:
         r = req.post(f"{base_url}/reset", timeout=10)
         if r.status_code == 200:
@@ -316,30 +360,22 @@ def run_tests_and_validate(
     key = base_url
     is_docker = _is_docker_mode(api_cfg)
 
-    # ── Zajistit běžící server ───────────────────────────
-    if not _is_server_running(base_url):
-        if is_docker:
-            # Docker: restart kontejneru
-            if key in _docker_servers:
-                print(f"    [Docker] ⚠️ Server přestal odpovídat, restartuji...")
-                if not _restart_server_docker(api_cfg):
-                    return False, "SERVER_ERROR: Docker restart selhal.\n"
-            else:
-                if not _start_server_docker(api_cfg):
-                    return False, "SERVER_ERROR: Nepodařilo se spustit Docker kontejner.\n"
-                _docker_servers[key] = api_cfg
-        else:
-            # Lokální: restart subprocess
-            old_proc = _managed_servers.pop(key, None)
-            if old_proc and old_proc != "DOCKER_RUNNING":
-                print(f"    [Server] ⚠️ Server přestal odpovídat, restartuji...")
-                _stop_server_local(old_proc)
-                time.sleep(2)
+    # ── Zajistit správné API na správném portu ────────────
+    _ensure_correct_api(api_cfg)
 
+    if not _is_server_running(base_url):
+        # Poslední pokus: spustit server
+        if is_docker:
+            if not _start_server_docker(api_cfg):
+                return False, "SERVER_ERROR: Nepodařilo se spustit Docker kontejner.\n"
+            _docker_servers[key] = api_cfg
+            _active_api[key] = api_cfg["name"]
+        else:
             proc = _start_server_local(api_cfg)
             if proc is None:
                 return False, "SERVER_ERROR: Nepodařilo se spustit API server.\n"
             _managed_servers[key] = proc
+            _active_api[key] = api_cfg["name"]
 
     # ── Reset databáze před každým spuštěním testů ───────
     print(f"    [Reset] Čistím databázi...")
@@ -350,25 +386,20 @@ def run_tests_and_validate(
     last_log = ""
     log_path = file_path.replace(".py", "_log.txt")
 
-    # Append mode – ale první volání v tomto runu vyčistí soubor
-    # (soubor se maže jen pokud ještě neexistuje iterace v tomto runu)
     if not hasattr(run_tests_and_validate, "_active_logs"):
         run_tests_and_validate._active_logs = set()
     if log_path not in run_tests_and_validate._active_logs:
-        # První iterace tohoto runu → vyčistit předchozí data
         with open(log_path, "w", encoding="utf-8") as lf:
             lf.write(f"# Log pro: {output_filename}\n")
             lf.write(f"# Čas spuštění: {__import__('datetime').datetime.now().isoformat()}\n\n")
         run_tests_and_validate._active_logs.add(log_path)
 
-    # ── Spuštění pytest s retry při infra chybách ────────
     last_log = ""
     for attempt in range(1, INFRA_RETRY_MAX + 1):
         try:
             returncode, full_log = _run_pytest(file_path)
             last_log = full_log
 
-            # Připojit log této iterace (append)
             with open(log_path, "a", encoding="utf-8") as lf:
                 lf.write(f"\n{'═' * 60}\n")
                 lf.write(f"══ ITERACE {iteration} | pytest returncode={returncode}\n")
@@ -376,7 +407,6 @@ def run_tests_and_validate(
                 lf.write(full_log)
                 lf.write("\n")
 
-            # Stručný výpis
             for line in full_log.strip().split("\n"):
                 if any(k in line for k in ["passed", "failed", "FAILED", "ERROR"]):
                     print(f"    {line.strip()}")
@@ -384,7 +414,6 @@ def run_tests_and_validate(
             if returncode == 0:
                 return True, full_log
 
-            # Kontrola: je to infra chyba?
             is_infra, pattern = _detect_infra_errors(full_log)
             if is_infra and attempt < INFRA_RETRY_MAX:
                 print(f"    ⚠️ Infra chyba detekována ({pattern})")
@@ -405,7 +434,6 @@ def run_tests_and_validate(
                 _reset_database(base_url)
                 continue
 
-            # Kontrola: mají všechny selhané testy stejnou root cause?
             is_single, root_msg = _detect_single_root_cause(full_log)
             if is_single:
                 print(f"    ⚠️ Všechny chyby mají stejnou příčinu: {root_msg[:120]}")

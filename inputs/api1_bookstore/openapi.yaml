@@ -1,26 +1,41 @@
 openapi: 3.1.0
 info:
-  title: AstroOps API
-  description: Satellite Mission Control
-  version: 1.0.0
+  title: Bookstore API
+  description: REST API pro správu knihkupectví – knihy, autoři, kategorie, recenze,
+    tagy a objednávky.
+  version: 3.0.2
 paths:
-  /satellites:
+  /health:
+    get:
+      tags:
+      - Health
+      summary: Health Check
+      operationId: health_check_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /authors:
     post:
-      summary: Create Satellite
-      operationId: create_satellite_satellites_post
+      tags:
+      - Authors
+      summary: Create Author
+      operationId: create_author_authors_post
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SatelliteCreate'
+              $ref: '#/components/schemas/AuthorCreate'
       responses:
         '201':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SatelliteResponse'
+                $ref: '#/components/schemas/AuthorResponse'
         '422':
           description: Validation Error
           content:
@@ -28,31 +43,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
     get:
-      summary: List Satellites
-      operationId: list_satellites_satellites_get
+      tags:
+      - Authors
+      summary: List Authors
+      operationId: list_authors_authors_get
       parameters:
-      - name: status
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Status
-      - name: orbit_type
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Orbit Type
       - name: skip
         in: query
         required: false
         schema:
           type: integer
-          minimum: 0
           default: 0
           title: Skip
       - name: limit
@@ -60,504 +60,6 @@ paths:
         required: false
         schema:
           type: integer
-          maximum: 100
-          minimum: 1
-          default: 20
-          title: Limit
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SatelliteListResponse'
-                title: Response List Satellites Satellites Get
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /satellites/{satellite_id}:
-    get:
-      summary: Get Satellite
-      operationId: get_satellite_satellites__satellite_id__get
-      parameters:
-      - name: satellite_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Satellite Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SatelliteResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    delete:
-      summary: Deorbit Satellite
-      operationId: deorbit_satellite_satellites__satellite_id__delete
-      parameters:
-      - name: satellite_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Satellite Id
-      responses:
-        '202':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /satellites/{satellite_id}/mode:
-    patch:
-      summary: Update Satellite Mode
-      operationId: update_satellite_mode_satellites__satellite_id__mode_patch
-      parameters:
-      - name: satellite_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Satellite Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SatelliteModeUpdate'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SatelliteResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /satellites/{satellite_id}/payloads:
-    get:
-      summary: List Payloads
-      operationId: list_payloads_satellites__satellite_id__payloads_get
-      parameters:
-      - name: satellite_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Satellite Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PayloadResponse'
-                title: Response List Payloads Satellites  Satellite Id  Payloads Get
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    post:
-      summary: Create Payload
-      operationId: create_payload_satellites__satellite_id__payloads_post
-      parameters:
-      - name: satellite_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Satellite Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PayloadCreate'
-      responses:
-        '201':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PayloadResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /payloads/{payload_id}/power:
-    patch:
-      summary: Update Payload Power
-      operationId: update_payload_power_payloads__payload_id__power_patch
-      parameters:
-      - name: payload_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Payload Id
-      - name: x-clearance
-        in: header
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: X-Clearance
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PayloadPowerUpdate'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PayloadPowerResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /payloads/{payload_id}/data:
-    get:
-      summary: Get Payload Data
-      operationId: get_payload_data_payloads__payload_id__data_get
-      parameters:
-      - name: payload_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Payload Id
-      - name: offset
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 0
-          default: 0
-          title: Offset
-      - name: chunk_size
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 1
-          default: 1000
-          title: Chunk Size
-      - name: x-clearance
-        in: header
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: X-Clearance
-      - name: accept
-        in: header
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Accept
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /satellites/{satellite_id}/maneuvers:
-    post:
-      summary: Create Maneuver
-      operationId: create_maneuver_satellites__satellite_id__maneuvers_post
-      parameters:
-      - name: satellite_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Satellite Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ManeuverCreate'
-      responses:
-        '201':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ManeuverResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    get:
-      summary: List Maneuvers
-      operationId: list_maneuvers_satellites__satellite_id__maneuvers_get
-      parameters:
-      - name: satellite_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Satellite Id
-      - name: status
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Status
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ManeuverResponse'
-                title: Response List Maneuvers Satellites  Satellite Id  Maneuvers
-                  Get
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /maneuvers/{maneuver_id}:
-    get:
-      summary: Get Maneuver
-      operationId: get_maneuver_maneuvers__maneuver_id__get
-      parameters:
-      - name: maneuver_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Maneuver Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ManeuverResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /maneuvers/{maneuver_id}/authorize:
-    post:
-      summary: Authorize Maneuver
-      operationId: authorize_maneuver_maneuvers__maneuver_id__authorize_post
-      parameters:
-      - name: maneuver_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Maneuver Id
-      - name: x-clearance
-        in: header
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: X-Clearance
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ManeuverAuthorize'
-              default:
-                force_execute: false
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ManeuverResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /maneuvers/{maneuver_id}/abort:
-    delete:
-      summary: Abort Maneuver
-      operationId: abort_maneuver_maneuvers__maneuver_id__abort_delete
-      parameters:
-      - name: maneuver_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Maneuver Id
-      responses:
-        '204':
-          description: Successful Response
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /maneuvers/{maneuver_id}/complete:
-    post:
-      summary: Complete Maneuver
-      operationId: complete_maneuver_maneuvers__maneuver_id__complete_post
-      parameters:
-      - name: maneuver_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Maneuver Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ManeuverResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /satellites/{satellite_id}/telemetry:
-    post:
-      summary: Ingest Telemetry
-      operationId: ingest_telemetry_satellites__satellite_id__telemetry_post
-      parameters:
-      - name: satellite_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Satellite Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TelemetryIngest'
-      responses:
-        '201':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TelemetryIngestResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    get:
-      summary: Query Telemetry
-      operationId: query_telemetry_satellites__satellite_id__telemetry_get
-      parameters:
-      - name: satellite_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Satellite Id
-      - name: from
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: From
-      - name: to
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: To
-      - name: metric
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Metric
-      - name: skip
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 0
-          default: 0
-          title: Skip
-      - name: limit
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 1000
-          minimum: 1
           default: 100
           title: Limit
       responses:
@@ -568,9 +70,65 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TelemetryResponse'
-                title: Response Query Telemetry Satellites  Satellite Id  Telemetry
-                  Get
+                  $ref: '#/components/schemas/AuthorResponse'
+                title: Response List Authors Authors Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /authors/{author_id}:
+    get:
+      tags:
+      - Authors
+      summary: Get Author
+      operationId: get_author_authors__author_id__get
+      parameters:
+      - name: author_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Author Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Authors
+      summary: Update Author
+      operationId: update_author_authors__author_id__put
+      parameters:
+      - name: author_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Author Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorResponse'
         '422':
           description: Validation Error
           content:
@@ -578,24 +136,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
     delete:
-      summary: Delete Telemetry
-      operationId: delete_telemetry_satellites__satellite_id__telemetry_delete
+      tags:
+      - Authors
+      summary: Delete Author
+      operationId: delete_author_authors__author_id__delete
       parameters:
-      - name: satellite_id
+      - name: author_id
         in: path
         required: true
         schema:
           type: integer
-          title: Satellite Id
-      - name: before
-        in: query
-        required: false
-        schema:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Before
+          title: Author Id
       responses:
         '204':
           description: Successful Response
@@ -605,55 +156,803 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /health:
+  /categories:
     get:
-      summary: Health Check
-      operationId: health_check_health_get
+      tags:
+      - Categories
+      summary: List Categories
+      operationId: list_categories_categories_get
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthResponse'
-  /windows:
-    get:
-      summary: Get Windows
-      operationId: get_windows_windows_get
-      parameters:
-      - name: satellite_id
-        in: query
+                items:
+                  $ref: '#/components/schemas/CategoryResponse'
+                type: array
+                title: Response List Categories Categories Get
+    post:
+      tags:
+      - Categories
+      summary: Create Category
+      operationId: create_category_categories_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
         required: true
-        schema:
-          type: integer
-          title: Satellite Id
       responses:
-        '200':
+        '201':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WindowsResponse'
+                $ref: '#/components/schemas/CategoryResponse'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /emergency/safemode:
-    post:
-      summary: Emergency Safemode
-      operationId: emergency_safemode_emergency_safemode_post
+  /categories/{category_id}:
+    get:
+      tags:
+      - Categories
+      summary: Get Category
+      operationId: get_category_categories__category_id__get
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Category Id
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmergencyResponse'
+                $ref: '#/components/schemas/CategoryResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Categories
+      summary: Update Category
+      operationId: update_category_categories__category_id__put
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Category Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Categories
+      summary: Delete Category
+      operationId: delete_category_categories__category_id__delete
+      parameters:
+      - name: category_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Category Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books:
+    post:
+      tags:
+      - Books
+      summary: Create Book
+      operationId: create_book_books_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Books
+      summary: List Books
+      operationId: list_books_books_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 10
+          title: Page Size
+      - name: search
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Search
+      - name: author_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Author Id
+      - name: category_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Category Id
+      - name: min_price
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: number
+            minimum: 0.0
+          - type: 'null'
+          title: Min Price
+      - name: max_price
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: number
+            minimum: 0.0
+          - type: 'null'
+          title: Max Price
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBooks'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/{book_id}:
+    get:
+      tags:
+      - Books
+      summary: Get Book
+      operationId: get_book_books__book_id__get
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Books
+      summary: Update Book
+      operationId: update_book_books__book_id__put
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Books
+      summary: Delete Book
+      operationId: delete_book_books__book_id__delete
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/{book_id}/reviews:
+    post:
+      tags:
+      - Reviews
+      summary: Create Review
+      operationId: create_review_books__book_id__reviews_post
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Reviews
+      summary: List Reviews
+      operationId: list_reviews_books__book_id__reviews_get
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewResponse'
+                title: Response List Reviews Books  Book Id  Reviews Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/{book_id}/rating:
+    get:
+      tags:
+      - Reviews
+      summary: Get Book Rating
+      operationId: get_book_rating_books__book_id__rating_get
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/{book_id}/discount:
+    post:
+      tags:
+      - Books
+      summary: Apply Discount
+      operationId: apply_discount_books__book_id__discount_post
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiscountRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscountResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/{book_id}/stock:
+    patch:
+      tags:
+      - Books
+      summary: Update Stock
+      operationId: update_stock_books__book_id__stock_patch
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      - name: quantity
+        in: query
+        required: true
+        schema:
+          type: integer
+          title: Quantity
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /tags:
+    get:
+      tags:
+      - Tags
+      summary: List Tags
+      operationId: list_tags_tags_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TagResponse'
+                type: array
+                title: Response List Tags Tags Get
+    post:
+      tags:
+      - Tags
+      summary: Create Tag
+      operationId: create_tag_tags_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /tags/{tag_id}:
+    get:
+      tags:
+      - Tags
+      summary: Get Tag
+      operationId: get_tag_tags__tag_id__get
+      parameters:
+      - name: tag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Tag Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Tags
+      summary: Update Tag
+      operationId: update_tag_tags__tag_id__put
+      parameters:
+      - name: tag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Tag Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Tags
+      summary: Delete Tag
+      operationId: delete_tag_tags__tag_id__delete
+      parameters:
+      - name: tag_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Tag Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/{book_id}/tags:
+    post:
+      tags:
+      - Tags
+      summary: Add Tags To Book
+      description: Přidá tagy ke knize. Již existující vazby se ignorují.
+      operationId: add_tags_to_book_books__book_id__tags_post
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookTagAction'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Tags
+      summary: Remove Tags From Book
+      description: Odebere tagy z knihy.
+      operationId: remove_tags_from_book_books__book_id__tags_delete
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookTagAction'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /orders:
+    post:
+      tags:
+      - Orders
+      summary: Create Order
+      description: Vytvoří objednávku, odečte sklad a zachytí aktuální ceny.
+      operationId: create_order_orders_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Orders
+      summary: List Orders
+      operationId: list_orders_orders_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 10
+          title: Page Size
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Status
+      - name: customer_name
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Customer Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrders'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /orders/{order_id}:
+    get:
+      tags:
+      - Orders
+      summary: Get Order
+      operationId: get_order_orders__order_id__get
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Orders
+      summary: Delete Order
+      description: Smaže objednávku. Lze smazat pouze pending nebo cancelled objednávky.
+      operationId: delete_order_orders__order_id__delete
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /orders/{order_id}/status:
+    patch:
+      tags:
+      - Orders
+      summary: Update Order Status
+      description: Změní stav objednávky dle povolených přechodů. Při zrušení vrátí
+        sklad.
+      operationId: update_order_status_orders__order_id__status_patch
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderStatusUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /reset:
     post:
+      tags:
+      - Testing
       summary: Reset Database
+      description: Smaže všechna data z databáze. Pouze pro testovací účely.
       operationId: reset_database_reset_post
       responses:
         '200':
@@ -661,25 +960,625 @@ paths:
           content:
             application/json:
               schema: {}
+  /authors/{author_id}/books:
+    get:
+      tags:
+      - Authors
+      summary: List Author Books
+      description: Seznam knih daného autora s stránkováním.
+      operationId: list_author_books_authors__author_id__books_get
+      parameters:
+      - name: author_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Author Id
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 10
+          title: Page Size
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBooks'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/bulk:
+    post:
+      tags:
+      - Books
+      summary: Bulk Create Books
+      description: 'Hromadné vytvoření knih. Každá kniha se validuje samostatně.
+
+        Vrací 201 pokud všechny uspěly, 207 pokud některé selhaly,
+
+        422 pokud všechny selhaly.'
+      operationId: bulk_create_books_books_bulk_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkBookCreate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/{book_id}/clone:
+    post:
+      tags:
+      - Books
+      summary: Clone Book
+      description: Vytvoří kopii knihy s novým ISBN. Stock se nekopíruje.
+      operationId: clone_book_books__book_id__clone_post
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookCloneRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /orders/{order_id}/invoice:
+    get:
+      tags:
+      - Orders
+      summary: Get Invoice
+      description: 'Vygeneruje fakturu pro objednávku.
+
+        Dostupné pouze pro objednávky ve stavu confirmed, shipped nebo delivered.
+
+        Pending a cancelled → 403.'
+      operationId: get_invoice_orders__order_id__invoice_get
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /orders/{order_id}/items:
+    post:
+      tags:
+      - Orders
+      summary: Add Item To Order
+      description: 'Přidá položku do existující objednávky.
+
+        Pouze pending objednávky lze modifikovat (jinak 403).
+
+        Duplicitní book_id v objednávce → 409.'
+      operationId: add_item_to_order_orders__order_id__items_post
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderAddItem'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /statistics/summary:
+    get:
+      tags:
+      - Statistics
+      summary: Get Statistics
+      description: Souhrnné statistiky knihkupectví. Obrat se počítá jen z delivered
+        objednávek.
+      operationId: get_statistics_statistics_summary_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsSummary'
 components:
   schemas:
-    EmergencyResponse:
+    AuthorCreate:
       properties:
-        satellites_affected:
-          type: integer
-          title: Satellites Affected
-        payloads_deactivated:
-          type: integer
-          title: Payloads Deactivated
-        maneuvers_aborted:
-          type: integer
-          title: Maneuvers Aborted
+        name:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Name
+        bio:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bio
+        born_year:
+          anyOf:
+          - type: integer
+            maximum: 2026.0
+            minimum: 0.0
+          - type: 'null'
+          title: Born Year
       type: object
       required:
-      - satellites_affected
-      - payloads_deactivated
-      - maneuvers_aborted
-      title: EmergencyResponse
+      - name
+      title: AuthorCreate
+    AuthorResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        bio:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bio
+        born_year:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Born Year
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - name
+      - bio
+      - born_year
+      - created_at
+      title: AuthorResponse
+    AuthorUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            maxLength: 100
+            minLength: 1
+          - type: 'null'
+          title: Name
+        bio:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bio
+        born_year:
+          anyOf:
+          - type: integer
+            maximum: 2026.0
+            minimum: 0.0
+          - type: 'null'
+          title: Born Year
+      type: object
+      title: AuthorUpdate
+    BookCloneRequest:
+      properties:
+        new_isbn:
+          type: string
+          maxLength: 13
+          minLength: 10
+          title: New Isbn
+        new_title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: New Title
+        stock:
+          type: integer
+          minimum: 0.0
+          title: Stock
+          default: 0
+      type: object
+      required:
+      - new_isbn
+      title: BookCloneRequest
+    BookCreate:
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Title
+        isbn:
+          type: string
+          maxLength: 13
+          minLength: 10
+          title: Isbn
+        price:
+          type: number
+          minimum: 0.0
+          title: Price
+        published_year:
+          type: integer
+          maximum: 2026.0
+          minimum: 1000.0
+          title: Published Year
+        stock:
+          type: integer
+          minimum: 0.0
+          title: Stock
+          default: 0
+        author_id:
+          type: integer
+          title: Author Id
+        category_id:
+          type: integer
+          title: Category Id
+      type: object
+      required:
+      - title
+      - isbn
+      - price
+      - published_year
+      - author_id
+      - category_id
+      title: BookCreate
+    BookListResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        title:
+          type: string
+          title: Title
+        isbn:
+          type: string
+          title: Isbn
+        price:
+          type: number
+          title: Price
+        published_year:
+          type: integer
+          title: Published Year
+        stock:
+          type: integer
+          title: Stock
+        author_id:
+          type: integer
+          title: Author Id
+        category_id:
+          type: integer
+          title: Category Id
+      type: object
+      required:
+      - id
+      - title
+      - isbn
+      - price
+      - published_year
+      - stock
+      - author_id
+      - category_id
+      title: BookListResponse
+    BookResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        title:
+          type: string
+          title: Title
+        isbn:
+          type: string
+          title: Isbn
+        price:
+          type: number
+          title: Price
+        published_year:
+          type: integer
+          title: Published Year
+        stock:
+          type: integer
+          title: Stock
+        author_id:
+          type: integer
+          title: Author Id
+        category_id:
+          type: integer
+          title: Category Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        author:
+          $ref: '#/components/schemas/AuthorResponse'
+        category:
+          $ref: '#/components/schemas/CategoryResponse'
+        tags:
+          items:
+            $ref: '#/components/schemas/TagResponse'
+          type: array
+          title: Tags
+      type: object
+      required:
+      - id
+      - title
+      - isbn
+      - price
+      - published_year
+      - stock
+      - author_id
+      - category_id
+      - created_at
+      - author
+      - category
+      title: BookResponse
+    BookTagAction:
+      properties:
+        tag_ids:
+          items:
+            type: integer
+          type: array
+          minItems: 1
+          title: Tag Ids
+      type: object
+      required:
+      - tag_ids
+      title: BookTagAction
+    BookUpdate:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Title
+        isbn:
+          anyOf:
+          - type: string
+            maxLength: 13
+            minLength: 10
+          - type: 'null'
+          title: Isbn
+        price:
+          anyOf:
+          - type: number
+            minimum: 0.0
+          - type: 'null'
+          title: Price
+        published_year:
+          anyOf:
+          - type: integer
+            maximum: 2026.0
+            minimum: 1000.0
+          - type: 'null'
+          title: Published Year
+        stock:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Stock
+        author_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Author Id
+        category_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Category Id
+      type: object
+      title: BookUpdate
+    BulkBookCreate:
+      properties:
+        books:
+          items:
+            $ref: '#/components/schemas/BulkBookItem'
+          type: array
+          maxItems: 20
+          minItems: 1
+          title: Books
+      type: object
+      required:
+      - books
+      title: BulkBookCreate
+    BulkBookItem:
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Title
+        isbn:
+          type: string
+          maxLength: 13
+          minLength: 10
+          title: Isbn
+        price:
+          type: number
+          minimum: 0.0
+          title: Price
+        published_year:
+          type: integer
+          maximum: 2026.0
+          minimum: 1000.0
+          title: Published Year
+        stock:
+          type: integer
+          minimum: 0.0
+          title: Stock
+          default: 0
+        author_id:
+          type: integer
+          title: Author Id
+        category_id:
+          type: integer
+          title: Category Id
+      type: object
+      required:
+      - title
+      - isbn
+      - price
+      - published_year
+      - author_id
+      - category_id
+      title: BulkBookItem
+    CategoryCreate:
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          minLength: 1
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+      type: object
+      required:
+      - name
+      title: CategoryCreate
+    CategoryResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+      type: object
+      required:
+      - id
+      - name
+      - description
+      title: CategoryResponse
+    CategoryUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            maxLength: 50
+            minLength: 1
+          - type: 'null'
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+      type: object
+      title: CategoryUpdate
+    DiscountRequest:
+      properties:
+        discount_percent:
+          type: number
+          maximum: 50.0
+          exclusiveMinimum: 0.0
+          title: Discount Percent
+      type: object
+      required:
+      - discount_percent
+      title: DiscountRequest
+    DiscountResponse:
+      properties:
+        book_id:
+          type: integer
+          title: Book Id
+        title:
+          type: string
+          title: Title
+        original_price:
+          type: number
+          title: Original Price
+        discount_percent:
+          type: number
+          title: Discount Percent
+        discounted_price:
+          type: number
+          title: Discounted Price
+      type: object
+      required:
+      - book_id
+      - title
+      - original_price
+      - discount_percent
+      - discounted_price
+      title: DiscountResponse
     HTTPValidationError:
       properties:
         detail:
@@ -689,414 +1588,433 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
-    HealthResponse:
+    InvoiceItem:
       properties:
+        book_title:
+          type: string
+          title: Book Title
+        isbn:
+          type: string
+          title: Isbn
+        quantity:
+          type: integer
+          title: Quantity
+        unit_price:
+          type: number
+          title: Unit Price
+        line_total:
+          type: number
+          title: Line Total
+      type: object
+      required:
+      - book_title
+      - isbn
+      - quantity
+      - unit_price
+      - line_total
+      title: InvoiceItem
+    InvoiceResponse:
+      properties:
+        invoice_number:
+          type: string
+          title: Invoice Number
+        order_id:
+          type: integer
+          title: Order Id
+        customer_name:
+          type: string
+          title: Customer Name
+        customer_email:
+          type: string
+          title: Customer Email
         status:
           type: string
           title: Status
-        database:
+        issued_at:
           type: string
-          title: Database
-      type: object
-      required:
-      - status
-      - database
-      title: HealthResponse
-    ManeuverAuthorize:
-      properties:
-        force_execute:
-          type: boolean
-          title: Force Execute
-          default: false
-      type: object
-      title: ManeuverAuthorize
-    ManeuverCreate:
-      properties:
-        delta_v:
-          type: number
-          exclusiveMinimum: 0.0
-          title: Delta V
-        direction:
-          type: string
-          title: Direction
-        scheduled_start:
-          type: string
-          format: date-time
-          title: Scheduled Start
-        scheduled_end:
-          type: string
-          format: date-time
-          title: Scheduled End
-      type: object
-      required:
-      - delta_v
-      - direction
-      - scheduled_start
-      - scheduled_end
-      title: ManeuverCreate
-    ManeuverResponse:
-      properties:
-        id:
-          type: integer
-          title: Id
-        satellite_id:
-          type: integer
-          title: Satellite Id
-        delta_v:
-          type: number
-          title: Delta V
-        direction:
-          type: string
-          title: Direction
-        scheduled_start:
-          type: string
-          format: date-time
-          title: Scheduled Start
-        scheduled_end:
-          type: string
-          format: date-time
-          title: Scheduled End
-        status:
-          type: string
-          title: Status
-        authorized_by:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Authorized By
-        created_at:
-          type: string
-          format: date-time
-          title: Created At
-      type: object
-      required:
-      - id
-      - satellite_id
-      - delta_v
-      - direction
-      - scheduled_start
-      - scheduled_end
-      - status
-      - authorized_by
-      - created_at
-      title: ManeuverResponse
-    PayloadCreate:
-      properties:
-        name:
-          type: string
-          maxLength: 100
-          minLength: 1
-          title: Name
-        type:
-          type: string
-          title: Type
-        power_draw:
-          type: number
-          exclusiveMinimum: 0.0
-          title: Power Draw
-        data_format:
-          type: string
-          title: Data Format
-          default: json
-        is_sensitive:
-          type: boolean
-          title: Is Sensitive
-          default: false
-      type: object
-      required:
-      - name
-      - type
-      - power_draw
-      title: PayloadCreate
-    PayloadPowerResponse:
-      properties:
-        id:
-          type: integer
-          title: Id
-        is_active:
-          type: boolean
-          title: Is Active
-        satellite_current_power:
-          type: number
-          title: Satellite Current Power
-      type: object
-      required:
-      - id
-      - is_active
-      - satellite_current_power
-      title: PayloadPowerResponse
-    PayloadPowerUpdate:
-      properties:
-        state:
-          type: string
-          title: State
-        target_coordinates:
-          anyOf:
-          - type: object
-          - type: 'null'
-          title: Target Coordinates
-      type: object
-      required:
-      - state
-      title: PayloadPowerUpdate
-    PayloadResponse:
-      properties:
-        id:
-          type: integer
-          title: Id
-        satellite_id:
-          type: integer
-          title: Satellite Id
-        name:
-          type: string
-          title: Name
-        type:
-          type: string
-          title: Type
-        power_draw:
-          type: number
-          title: Power Draw
-        is_active:
-          type: boolean
-          title: Is Active
-        data_format:
-          type: string
-          title: Data Format
-        is_sensitive:
-          type: boolean
-          title: Is Sensitive
-      type: object
-      required:
-      - id
-      - satellite_id
-      - name
-      - type
-      - power_draw
-      - is_active
-      - data_format
-      - is_sensitive
-      title: PayloadResponse
-    SatelliteCreate:
-      properties:
-        name:
-          type: string
-          maxLength: 100
-          minLength: 1
-          title: Name
-        orbit_type:
-          type: string
-          title: Orbit Type
-        power_capacity:
-          type: number
-          exclusiveMinimum: 0.0
-          title: Power Capacity
-      type: object
-      required:
-      - name
-      - orbit_type
-      - power_capacity
-      title: SatelliteCreate
-    SatelliteListResponse:
-      properties:
-        id:
-          type: integer
-          title: Id
-        name:
-          type: string
-          title: Name
-        orbit_type:
-          type: string
-          title: Orbit Type
-        status:
-          type: string
-          title: Status
-        power_capacity:
-          type: number
-          title: Power Capacity
-        current_power:
-          type: number
-          title: Current Power
-        in_signal:
-          type: boolean
-          title: In Signal
-        created_at:
-          type: string
-          format: date-time
-          title: Created At
-      type: object
-      required:
-      - id
-      - name
-      - orbit_type
-      - status
-      - power_capacity
-      - current_power
-      - in_signal
-      - created_at
-      title: SatelliteListResponse
-    SatelliteModeUpdate:
-      properties:
-        status:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Status
-        in_signal:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: In Signal
-        next_window_start:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Next Window Start
-      type: object
-      title: SatelliteModeUpdate
-    SatelliteResponse:
-      properties:
-        id:
-          type: integer
-          title: Id
-        name:
-          type: string
-          title: Name
-        orbit_type:
-          type: string
-          title: Orbit Type
-        status:
-          type: string
-          title: Status
-        power_capacity:
-          type: number
-          title: Power Capacity
-        current_power:
-          type: number
-          title: Current Power
-        in_signal:
-          type: boolean
-          title: In Signal
-        next_window_start:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Next Window Start
-        download_count:
-          type: integer
-          title: Download Count
-        created_at:
-          type: string
-          format: date-time
-          title: Created At
-        active_payloads:
-          type: integer
-          title: Active Payloads
-          default: 0
-      type: object
-      required:
-      - id
-      - name
-      - orbit_type
-      - status
-      - power_capacity
-      - current_power
-      - in_signal
-      - next_window_start
-      - download_count
-      - created_at
-      title: SatelliteResponse
-    TelemetryIngest:
-      properties:
-        readings:
+          title: Issued At
+        items:
           items:
-            $ref: '#/components/schemas/TelemetryReading'
+            $ref: '#/components/schemas/InvoiceItem'
+          type: array
+          title: Items
+        subtotal:
+          type: number
+          title: Subtotal
+        item_count:
+          type: integer
+          title: Item Count
+      type: object
+      required:
+      - invoice_number
+      - order_id
+      - customer_name
+      - customer_email
+      - status
+      - issued_at
+      - items
+      - subtotal
+      - item_count
+      title: InvoiceResponse
+    OrderAddItem:
+      properties:
+        book_id:
+          type: integer
+          title: Book Id
+        quantity:
+          type: integer
+          minimum: 1.0
+          title: Quantity
+      type: object
+      required:
+      - book_id
+      - quantity
+      title: OrderAddItem
+    OrderCreate:
+      properties:
+        customer_name:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Customer Name
+        customer_email:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Customer Email
+        items:
+          items:
+            $ref: '#/components/schemas/OrderItemCreate'
           type: array
           minItems: 1
-          title: Readings
+          title: Items
       type: object
       required:
-      - readings
-      title: TelemetryIngest
-    TelemetryIngestResponse:
+      - customer_name
+      - customer_email
+      - items
+      title: OrderCreate
+    OrderItemCreate:
       properties:
-        ingested:
+        book_id:
           type: integer
-          title: Ingested
-        warnings:
-          items:
-            type: string
-          type: array
-          title: Warnings
-          default: []
+          title: Book Id
+        quantity:
+          type: integer
+          minimum: 1.0
+          title: Quantity
       type: object
       required:
-      - ingested
-      title: TelemetryIngestResponse
-    TelemetryReading:
-      properties:
-        timestamp:
-          type: string
-          format: date-time
-          title: Timestamp
-        battery_level:
-          type: number
-          maximum: 100.0
-          minimum: 0.0
-          title: Battery Level
-        temperature_c:
-          type: number
-          title: Temperature C
-        radiation_msv:
-          type: number
-          minimum: 0.0
-          title: Radiation Msv
-        signal_strength_dbm:
-          type: number
-          title: Signal Strength Dbm
-      type: object
-      required:
-      - timestamp
-      - battery_level
-      - temperature_c
-      - radiation_msv
-      - signal_strength_dbm
-      title: TelemetryReading
-    TelemetryResponse:
+      - book_id
+      - quantity
+      title: OrderItemCreate
+    OrderItemResponse:
       properties:
         id:
           type: integer
           title: Id
-        satellite_id:
+        book_id:
           type: integer
-          title: Satellite Id
-        timestamp:
-          type: string
-          format: date-time
-          title: Timestamp
-        battery_level:
+          title: Book Id
+        quantity:
+          type: integer
+          title: Quantity
+        unit_price:
           type: number
-          title: Battery Level
-        temperature_c:
-          type: number
-          title: Temperature C
-        radiation_msv:
-          type: number
-          title: Radiation Msv
-        signal_strength_dbm:
-          type: number
-          title: Signal Strength Dbm
+          title: Unit Price
       type: object
       required:
       - id
-      - satellite_id
-      - timestamp
-      - battery_level
-      - temperature_c
-      - radiation_msv
-      - signal_strength_dbm
-      title: TelemetryResponse
+      - book_id
+      - quantity
+      - unit_price
+      title: OrderItemResponse
+    OrderListResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        customer_name:
+          type: string
+          title: Customer Name
+        customer_email:
+          type: string
+          title: Customer Email
+        status:
+          type: string
+          title: Status
+        total_price:
+          type: number
+          title: Total Price
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - customer_name
+      - customer_email
+      - status
+      - total_price
+      - created_at
+      title: OrderListResponse
+    OrderResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        customer_name:
+          type: string
+          title: Customer Name
+        customer_email:
+          type: string
+          title: Customer Email
+        status:
+          type: string
+          title: Status
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+        items:
+          items:
+            $ref: '#/components/schemas/OrderItemResponse'
+          type: array
+          title: Items
+        total_price:
+          type: number
+          title: Total Price
+      type: object
+      required:
+      - id
+      - customer_name
+      - customer_email
+      - status
+      - created_at
+      - updated_at
+      - items
+      - total_price
+      title: OrderResponse
+    OrderStatusUpdate:
+      properties:
+        status:
+          type: string
+          pattern: ^(confirmed|shipped|delivered|cancelled)$
+          title: Status
+      type: object
+      required:
+      - status
+      title: OrderStatusUpdate
+    PaginatedBooks:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/BookListResponse'
+          type: array
+          title: Items
+        total:
+          type: integer
+          title: Total
+        page:
+          type: integer
+          title: Page
+        page_size:
+          type: integer
+          title: Page Size
+        total_pages:
+          type: integer
+          title: Total Pages
+      type: object
+      required:
+      - items
+      - total
+      - page
+      - page_size
+      - total_pages
+      title: PaginatedBooks
+    PaginatedOrders:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/OrderListResponse'
+          type: array
+          title: Items
+        total:
+          type: integer
+          title: Total
+        page:
+          type: integer
+          title: Page
+        page_size:
+          type: integer
+          title: Page Size
+        total_pages:
+          type: integer
+          title: Total Pages
+      type: object
+      required:
+      - items
+      - total
+      - page
+      - page_size
+      - total_pages
+      title: PaginatedOrders
+    ReviewCreate:
+      properties:
+        rating:
+          type: integer
+          maximum: 5.0
+          minimum: 1.0
+          title: Rating
+        comment:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Comment
+        reviewer_name:
+          type: string
+          maxLength: 100
+          minLength: 1
+          title: Reviewer Name
+      type: object
+      required:
+      - rating
+      - reviewer_name
+      title: ReviewCreate
+    ReviewResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        book_id:
+          type: integer
+          title: Book Id
+        rating:
+          type: integer
+          title: Rating
+        comment:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Comment
+        reviewer_name:
+          type: string
+          title: Reviewer Name
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - book_id
+      - rating
+      - comment
+      - reviewer_name
+      - created_at
+      title: ReviewResponse
+    StatisticsSummary:
+      properties:
+        total_authors:
+          type: integer
+          title: Total Authors
+        total_categories:
+          type: integer
+          title: Total Categories
+        total_books:
+          type: integer
+          title: Total Books
+        total_tags:
+          type: integer
+          title: Total Tags
+        total_orders:
+          type: integer
+          title: Total Orders
+        total_reviews:
+          type: integer
+          title: Total Reviews
+        books_in_stock:
+          type: integer
+          title: Books In Stock
+        books_out_of_stock:
+          type: integer
+          title: Books Out Of Stock
+        total_revenue:
+          type: number
+          title: Total Revenue
+        average_book_price:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Average Book Price
+        average_rating:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Average Rating
+        orders_by_status:
+          type: object
+          title: Orders By Status
+      type: object
+      required:
+      - total_authors
+      - total_categories
+      - total_books
+      - total_tags
+      - total_orders
+      - total_reviews
+      - books_in_stock
+      - books_out_of_stock
+      - total_revenue
+      - average_book_price
+      - average_rating
+      - orders_by_status
+      title: StatisticsSummary
+    TagCreate:
+      properties:
+        name:
+          type: string
+          maxLength: 30
+          minLength: 1
+          title: Name
+      type: object
+      required:
+      - name
+      title: TagCreate
+    TagResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - name
+      - created_at
+      title: TagResponse
+    TagUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+            maxLength: 30
+            minLength: 1
+          - type: 'null'
+          title: Name
+      type: object
+      title: TagUpdate
     ValidationError:
       properties:
         loc:
@@ -1118,27 +2036,3 @@ components:
       - msg
       - type
       title: ValidationError
-    WindowsResponse:
-      properties:
-        satellite_id:
-          type: integer
-          title: Satellite Id
-        satellite_name:
-          type: string
-          title: Satellite Name
-        in_signal:
-          type: boolean
-          title: In Signal
-        next_window_start:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Next Window Start
-      type: object
-      required:
-      - satellite_id
-      - satellite_name
-      - in_signal
-      - next_window_start
-      title: WindowsResponse
