@@ -6,8 +6,14 @@ Diplomová práce zkoumající tři výzkumné otázky: vliv kontextu na kvalitu
 
 ---
 
-## Testuji s lokálním bookstorem
-## https://github.com/Akastan/bookstore-api
+## Testovaná API
+
+| API | Endpointy | Status kódy | Zaměření | Repozitář |
+|-----|-----------|-------------|----------|-----------|
+| **Bookstore API** | 40 | 10 | RQ1 (validita, coverage) | [github.com/Akastan/bookstore-api](https://github.com/Akastan/bookstore-api) |
+| **AstroOps API** | 20 | 22 | RQ2 (strategie, diverzita kódů) | [github.com/Akastan/astroops-api](https://github.com/Akastan/astroops-api) |
+
+Obě API běží na **portu 8000** — framework je spouští sekvenčně (jedno po druhém).
 
 ---
 
@@ -15,7 +21,14 @@ Diplomová práce zkoumající tři výzkumné otázky: vliv kontextu na kvalitu
 
 - **Python 3.12+**
 - **Docker Desktop** (musí běžet, pokud testované API používá Docker režim)
-- **API klíč** pro alespoň jeden LLM provider (Gemini, OpenAI, Anthropic, DeepSeek) nebo lokální model přes OllamaCompat
+- **API klíč** pro alespoň jeden LLM provider (Gemini, DeepSeek, Mistral)
+- Naklonované repozitáře obou API vedle tohoto frameworku:
+  ```
+  projekty/
+  ├── vibe-testing-framework/
+  ├── bookstore-api/
+  └── astroops-api/
+  ```
 
 ### 1. Instalace
 
@@ -39,59 +52,45 @@ Vytvořte `.env` soubor s API klíči:
 
 ```env
 GEMINI_API_KEY=váš_klíč
-OPENAI_API_KEY=váš_klíč
-ANTHROPIC_API_KEY=váš_klíč
 DEEPSEEK_API_KEY=váš_klíč
-LOCAL_LLM_KEY=váš_klíč
-LOCAL_LLM_URL=http://.../v1
+MISTRAL_API_KEY=váš_klíč
 ```
 
-Upravte `experiment.yaml` — zvolte LLM modely, úrovně kontextu, počet runů, teploty a testované API:
+Upravte `experiment.yaml` — zvolte LLM modely, úrovně kontextu, počet runů a testované API.
 
-```yaml
-experiment:
-  name: "diplomka_v10"
-  levels: ["L0", "L1", "L2", "L3", "L4"]
-  max_iterations: 5
-  runs_per_combination: 5
-  test_count: 30
-  temperatures: [0.4]
+### 3. Export vstupních dat
 
-llms:
-  - name: "gemini-3.1-flash-lite-preview"
-    provider: "gemini"
-    model: "gemini-3.1-flash-lite-preview"
-    api_key_env: "GEMINI_API_KEY"
+Framework potřebuje kontextová data (OpenAPI spec, dokumentace, zdrojový kód, DB schéma, testy) z obou API. Export se provádí centrálně přes `export_inputs.py`:
 
-apis:
-  - name: "bookstore"
-    docker: true
-    source_dir: "../bookstore-api"
-    base_url: "http://localhost:8000"
-    startup_wait: 20.0
-    inputs:
-      openapi: "inputs/openapi.yaml"
-      documentation: "inputs/documentation.md"
-      source_code: "inputs/source_code.py"
-      db_schema: "inputs/db_schema.sql"
-      existing_tests: "inputs/existing_tests.py"
-    framework_rules:
-      - "Timeout=30 na každém HTTP volání."
-      - "Unikátní stringy přes uuid4."
-      - "Na DELETE s 204 nevolej .json()."
-      - "Nepoužívej fixtures, conftest, setup_module."
-      - "Nevolej /reset endpoint."
-      - "Každý test musí být self-contained."
-    api_knowledge:
-      - 'create_book helper MUSÍ nastavit "stock": 10'
-      - "DELETE /books/{id}/tags používá REQUEST BODY: json={\"tag_ids\": [...]}."
-      - "PATCH /books/{id}/stock používá QUERY parametr: params={\"quantity\": N}."
-      - "Stock quantity je DELTA, ne absolutní hodnota."
-      - "Pro 'not found' endpointy API vrací 404, ne 422."
-      - "POST endpointy vracejí 201 při úspěchu, ne 200."
+```bash
+# Spusť bookstore na :8000, pak:
+python export_inputs.py bookstore
+
+# Zastav bookstore, spusť astroops na :8000, pak:
+python export_inputs.py astroops
+
+# Nebo jen soubory bez OpenAPI (servery nemusí běžet):
+python export_inputs.py files
 ```
 
-### 3. Spuštění experimentu
+Výstupní struktura:
+```
+inputs/
+├── api1_bookstore/
+│   ├── openapi.yaml        # L0
+│   ├── documentation.md    # L1
+│   ├── source_code.py      # L2
+│   ├── db_schema.sql       # L3
+│   └── existing_tests.py   # L4
+└── api2_astroops/
+    ├── openapi.yaml
+    ├── documentation.md
+    ├── source_code.py
+    ├── db_schema.sql
+    └── existing_tests.py
+```
+
+### 4. Spuštění experimentu
 
 ```bash
 # Docker Desktop musí běžet
@@ -99,7 +98,7 @@ apis:
 python main.py
 ```
 
-### 4. Výstupy
+### 5. Výstupy
 
 ```
 outputs/
@@ -115,7 +114,7 @@ coverage_results/
   summary.json                                                 # souhrnná tabulka
 ```
 
-### 5. Pomocné skripty
+### 6. Pomocné skripty
 
 ```bash
 # Automatizované měření code coverage (jeden soubor):
@@ -157,7 +156,7 @@ Metriky: test_type_distribution (happy/error/edge), status_code_diversity.
 | **H2a** | Happy path: L0 >60 %, L4 <40 %. S kontextem roste podíl error/edge testů |
 | **H2b** | Diverzita HTTP status kódů monotónně roste, největší skok na L2 |
 
-### RQ3 — Liší se modely z různých ekosystémů (USA, EU, Čína, open-weight) v kvalitě testů?
+### RQ3 — Liší se modely z různých ekosystémů (USA, EU, Čína) v kvalitě testů?
 
 Metriky: všechny z RQ1 porovnané napříč modely, cost-effectiveness.
 
@@ -336,12 +335,9 @@ Tím je zajištěno, že **jediná proměnná mezi levely je kontext**, ne skryt
 
 ```
 vibe-testing-framework/
-├── inputs/                    # Vstupní data pro testování
-│   ├── openapi.yaml
-│   ├── documentation.md
-│   ├── source_code.py
-│   ├── db_schema.sql
-│   └── existing_tests.py
+├── inputs/
+│   ├── api1_bookstore/        # Kontextová data pro Bookstore API
+│   └── api2_astroops/         # Kontextová data pro AstroOps API
 ├── outputs/                   # Vygenerované testy a logy
 ├── results/                   # JSON výsledky experimentů
 ├── coverage_results/          # Slim coverage JSONy
@@ -354,9 +350,11 @@ vibe-testing-framework/
 │   ├── phase5_metrics.py      # Výpočet metrik (9 automatických)
 │   └── phase6_diagnostics.py  # Diagnostiky pro obhajobu (10 diagnostik)
 ├── main.py                    # Hlavní experiment runner (LLM × API × Level × Temp × Run)
-├── llm_provider.py            # Abstrakce nad LLM providery (Gemini/...)
-├── config.py                  # Konfigurace pro manuální skripty
+├── llm_provider.py            # Abstrakce nad LLM providery (Gemini/DeepSeek/Mistral)
+├── token_tracker.py           # Přesné měření tokenů + pricing
+├── context_compressor.py      # Komprese kontextu (token savings)
 ├── experiment.yaml            # Konfigurace experimentu
+├── export_inputs.py           # Centrální export dat z obou API
 ├── generate_report.py         # Generátor Markdown reportu z JSON výsledků
 ├── run_coverage_manual.py     # Automatizované měření code coverage
 ├── .env                       # API klíče (není v gitu)
@@ -365,14 +363,12 @@ vibe-testing-framework/
 
 ## LLM Provideři
 
-| Provider | Modely                   | Poznámka         |
-|----------|--------------------------|------------------|
-| `gemini` | Gemini Flash, Flash Lite | Google genai SDK |
-| `-`      |                          |                  |
-| `-`      |                          |                  |
-| `-`      |                          |                  |
-| `-`      |                          |                  |
+| Provider | Model | Ekosystém |
+|----------|-------|-----------|
+| `gemini` | Gemini 3.1 Flash Lite Preview | Google (USA) |
+| `deepseek` | DeepSeek Chat | DeepSeek (Čína) |
+| `mistral` | Mistral Large 2411 | Mistral AI (EU/Francie) |
 
 ## Licence
 
-Projekt pro diplomovou práci – testování REST API pomocí LLM.
+Projekt pro diplomovou práci – Vibe Testing: využití vibe codingu pro automatizované generování testů softwaru.

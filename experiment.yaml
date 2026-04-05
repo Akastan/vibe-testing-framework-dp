@@ -4,13 +4,17 @@
 # api_knowledge ODSTRANĚNO — hinty jsou v documentation.md
 # (sekce "Poznámky pro integraci a testování").
 # Jediná nezávislá proměnná mezi levely = KONTEXT.
+#
+# OBĚ API běží na portu 8000 — framework je spouští
+# sekvenčně (jedno po druhém), takže nedochází ke kolizi.
 # ══════════════════════════════════════════════════════════
 
 experiment:
   name: "diplomka_v11"
-  levels: ["L0", "L1", "L2", "L3", "L4"]
+  #levels: ["L0", "L1", "L2", "L3", "L4"]
+  levels: ["L0"]
   max_iterations: 5
-  runs_per_combination: 5
+  runs_per_combination: 1
   test_count: 30
   temperatures: [0.4]
 
@@ -21,44 +25,32 @@ llms:
     model: "gemini-3.1-flash-lite-preview"
     api_key_env: "GEMINI_API_KEY"
 
-  - name: "mistral-large-2411"
-    provider: "mistral"
-    model: "mistral-large-2411"
-    api_key_env: "MISTRAL_API_KEY"
+  #- name: "mistral-large-2411"
+  #  provider: "mistral"
+  #  model: "mistral-large-2411"
+  #  api_key_env: "MISTRAL_API_KEY"
 
   # - name: "deepseek-chat"
   #   provider: "deepseek"
   #   model: "deepseek-chat"
   #   api_key_env: "DEEPSEEK_API_KEY"
 
-  # - name: "qwen25-coder-32b"
-  #   provider: "ollama_compat"
-  #   model: "qwen2.5-coder:32b-fast"
-  #   api_key_env: "LOCAL_LLM_KEY"
-  #   base_url_env: "LOCAL_LLM_URL"
-  #   max_tokens: 16384
-  #   num_ctx: 32768
-  #   verify_ssl: false
 
 # ── Testovaná API ────────────────────────────────────────
 apis:
+  # ── API 1: Bookstore ──────────────────────────────────
   - name: "bookstore"
     docker: true
     source_dir: "../bookstore-api"
     base_url: "http://localhost:8000"
     startup_wait: 20.0
     inputs:
-      openapi: "inputs/openapi.yaml"
-      documentation: "inputs/documentation.md"
-      source_code: "inputs/source_code.py"
-      db_schema: "inputs/db_schema.sql"
-      existing_tests: "inputs/existing_tests.py"
+      openapi: "inputs/api1_bookstore/openapi.yaml"
+      documentation: "inputs/api1_bookstore/documentation.md"
+      source_code: "inputs/api1_bookstore/source_code.py"
+      db_schema: "inputs/api1_bookstore/db_schema.sql"
+      existing_tests: "inputs/api1_bookstore/existing_tests.py"
 
-    # ── FRAMEWORK RULES ─────────────────────────────────
-    # JAK psát testy. Platí pro VŠECHNY levely.
-    # Nesmí obsahovat žádnou znalost o tom CO API dělá.
-    # Jen technické instrukce pro pytest + requests.
-    # ────────────────────────────────────────────────────
     framework_rules:
       - "Timeout=30 na každém HTTP volání."
       - >-
@@ -74,9 +66,41 @@ apis:
         Místo toho: assert response.status_code in (200, 201),
         f"Helper failed {response.status_code}: {response.text[:200]}"
 
-    # ── API KNOWLEDGE — PRÁZDNÉ ─────────────────────────
-    # Hinty přesunuty do documentation.md (sekce 4).
-    # L0 = čistě spec, L1+ = docs s testing notes.
-    # Žádná skrytá injekce mimo kontext.
-    # ────────────────────────────────────────────────────
+    api_knowledge: []
+
+  # ── API 2: AstroOps ───────────────────────────────────
+  # Stejný port 8000 — framework zastaví bookstore kontejner
+  # než spustí astroops (viz main.py: stop_managed_server).
+  - name: "astroops"
+    docker: true
+    source_dir: "../astroops-api"
+    base_url: "http://localhost:8000"
+    startup_wait: 20.0
+    inputs:
+      openapi: "inputs/api2_astroops/openapi.yaml"
+      documentation: "inputs/api2_astroops/documentation.md"
+      source_code: "inputs/api2_astroops/source_code.py"
+      db_schema: "inputs/api2_astroops/db_schema.sql"
+      existing_tests: "inputs/api2_astroops/existing_tests.py"
+
+    framework_rules:
+      - "Timeout=30 na každém HTTP volání."
+      - >-
+        Unikátní stringy přes uuid4:
+        unique(prefix) → f'{prefix}_{uuid.uuid4().hex[:8]}'
+      - "Nepoužívej fixtures, conftest, setup_module."
+      - "Nevolej /reset endpoint — framework resetuje DB automaticky."
+      - "Každý test musí být self-contained (vytvoří si data přes helpery)."
+      - "Na DELETE s 204 a 202 nevolej .json() pokud tělo neočekáváš."
+      - >-
+        V helper funkcích (create_satellite, create_payload...)
+        NEPOUŽÍVEJ raise_for_status().
+        Místo toho: assert response.status_code in (200, 201),
+        f"Helper failed {response.status_code}: {response.text[:200]}"
+      - >-
+        Všechny endpointy kromě /health a /reset vyžadují
+        header Authorization: Bearer <token>.
+        Používej konstantu AUTH = {"Authorization": "Bearer test-token"}
+        a přidávej ji ke KAŽDÉMU requestu v helperech i testech.
+
     api_knowledge: []
