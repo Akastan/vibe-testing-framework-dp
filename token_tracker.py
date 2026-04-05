@@ -43,9 +43,6 @@ DEFAULT_PRICING: dict[str, dict[str, float | None]] = {
     "deepseek-chat": {                          # V3.2 / V4
         "input": 0.28,  "output": 0.42,  "cached_input": 0.028,
     },
-    "deepseek-v4": {                            # V4 (březen 2026)
-        "input": 0.30,  "output": 0.50,  "cached_input": 0.03,
-    },
     # ═══ Mistral (USD per 1M tokenů) ═══
     # Zdroj: docs.mistral.ai/deployment/ai-studio/pricing
     "mistral-large-latest": {                   # Large 3
