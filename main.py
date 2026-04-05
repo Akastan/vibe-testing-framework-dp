@@ -284,7 +284,9 @@ def run_pipeline(
           f"{token_slim['completion_tokens']:,} out) "
           f"| {token_slim['total_calls']} calls")
     if token_slim["pricing_found"]:
-        print(f"  Cena:       ${token_slim['cost_usd']:.4f}")
+        print(f"  Cena input:  ${token_slim['cost_input_usd']:.4f}")
+        print(f"  Cena output: ${token_slim['cost_output_usd']:.4f}")
+        print(f"  Cena celkem: ${token_slim['cost_total_usd']:.4f}")
     else:
         print(f"  Cena:       N/A (model '{tracker.model}' není v pricing tabulce)")
 

@@ -205,11 +205,13 @@ class TokenTracker:
         cost = self.cost_usd()
         return {
             "total_calls": self.call_count(),
-            "prompt_tokens": self.total_prompt_tokens(),
-            "completion_tokens": self.total_completion_tokens(),
-            "total_tokens": self.total_tokens(),
+            "prompt_tokens": self.total_prompt_tokens(),  # Počet input tokenů
+            "completion_tokens": self.total_completion_tokens(),  # Počet output tokenů
+            "total_tokens": self.total_tokens(),  # Celkový počet
             "cached_tokens": self.total_cached_tokens(),
-            "cost_usd": cost["total_cost"],
+            "cost_input_usd": cost["input_cost"],  # Cena za input
+            "cost_output_usd": cost["output_cost"],  # Cena za output
+            "cost_total_usd": cost["total_cost"],  # Cena celkem
             "pricing_found": cost["pricing_found"],
         }
 

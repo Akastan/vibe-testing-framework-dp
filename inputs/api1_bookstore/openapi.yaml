@@ -1,9 +1,31 @@
 openapi: 3.1.0
 info:
   title: Bookstore API
-  description: REST API pro správu knihkupectví – knihy, autoři, kategorie, recenze,
+  description: 'REST API pro správu knihkupectví – knihy, autoři, kategorie, recenze,
     tagy a objednávky.
-  version: 3.0.2
+
+
+    **Autentizace:** Některé endpointy vyžadují hlavičku `X-API-Key`.
+
+
+    **Rate limiting:** Endpoint `/books/bulk` (3 req/30s) a `/books/{id}/discount`
+    (5 req/10s) mají rate limit. Při překročení vrací 429.
+
+
+    **Maintenance mode:** Při aktivním maintenance režimu vrací neadmin endpointy
+    503.
+
+
+    **Soft delete:** `DELETE /books/{id}` provede soft delete. `GET /books/{id}` na
+    smazanou knihu vrátí 410 Gone.
+
+
+    **ETags:** Detail endpointy vrací `ETag` header. `If-None-Match` → 304, `If-Match`
+    na PUT → 412 při neshodě.
+
+
+    **Nepoužívejte nepodporované HTTP metody** – vrací 405 Method Not Allowed.'
+  version: 4.0.0
 paths:
   /health:
     get:
@@ -17,6 +39,8 @@ paths:
           content:
             application/json:
               schema: {}
+        '405':
+          description: Method Not Allowed
   /authors:
     post:
       tags:
@@ -98,6 +122,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthorResponse'
+        '304':
+          description: Not Modified
+        '404':
+          description: Author not found
         '422':
           description: Validation Error
           content:
@@ -129,6 +157,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthorResponse'
+        '412':
+          description: Precondition Failed – ETag mismatch
         '422':
           description: Validation Error
           content:
@@ -150,6 +180,49 @@ paths:
       responses:
         '204':
           description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /authors/{author_id}/books:
+    get:
+      tags:
+      - Authors
+      summary: List Author Books
+      operationId: list_author_books_authors__author_id__books_get
+      parameters:
+      - name: author_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Author Id
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 10
+          title: Page Size
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBooks'
         '422':
           description: Validation Error
           content:
@@ -216,6 +289,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryResponse'
+        '304':
+          description: Not Modified
         '422':
           description: Validation Error
           content:
@@ -247,6 +322,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryResponse'
+        '412':
+          description: Precondition Failed – ETag mismatch
         '422':
           description: Validation Error
           content:
@@ -397,6 +474,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BookResponse'
+        '304':
+          description: Not Modified
+        '410':
+          description: Book has been deleted (soft delete)
         '422':
           description: Validation Error
           content:
@@ -428,6 +509,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BookResponse'
+        '412':
+          description: Precondition Failed – ETag mismatch
+        '410':
+          description: Book has been deleted
         '422':
           description: Validation Error
           content:
@@ -449,6 +534,39 @@ paths:
       responses:
         '204':
           description: Successful Response
+        '410':
+          description: Book already deleted
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/{book_id}/restore:
+    post:
+      tags:
+      - Books
+      summary: Restore Book
+      description: Restore a soft-deleted book.
+      operationId: restore_book_books__book_id__restore_post
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '400':
+          description: Book is not deleted
+        '404':
+          description: Book not found
         '422':
           description: Validation Error
           content:
@@ -481,6 +599,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReviewResponse'
+        '410':
+          description: Book has been deleted
         '422':
           description: Validation Error
           content:
@@ -566,6 +686,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DiscountResponse'
+        '429':
+          description: Rate limit exceeded (5 req/10s)
         '422':
           description: Validation Error
           content:
@@ -598,6 +720,93 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /books/{book_id}/cover:
+    post:
+      tags:
+      - Books
+      summary: Upload Cover
+      operationId: upload_cover_books__book_id__cover_post
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_upload_cover_books__book_id__cover_post'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoverUploadResponse'
+        '413':
+          description: File too large (max 2 MB)
+        '415':
+          description: Unsupported file type (only JPEG, PNG)
+        '410':
+          description: Book has been deleted
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Books
+      summary: Get Cover
+      operationId: get_cover_books__book_id__cover_get
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '404':
+          description: No cover uploaded
+        '410':
+          description: Book has been deleted
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Books
+      summary: Delete Cover
+      operationId: delete_cover_books__book_id__cover_delete
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      responses:
+        '204':
+          description: Successful Response
         '422':
           description: Validation Error
           content:
@@ -664,6 +873,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TagResponse'
+        '304':
+          description: Not Modified
         '422':
           description: Validation Error
           content:
@@ -695,6 +906,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TagResponse'
+        '412':
+          description: Precondition Failed – ETag mismatch
         '422':
           description: Validation Error
           content:
@@ -727,7 +940,6 @@ paths:
       tags:
       - Tags
       summary: Add Tags To Book
-      description: Přidá tagy ke knize. Již existující vazby se ignorují.
       operationId: add_tags_to_book_books__book_id__tags_post
       parameters:
       - name: book_id
@@ -759,7 +971,6 @@ paths:
       tags:
       - Tags
       summary: Remove Tags From Book
-      description: Odebere tagy z knihy.
       operationId: remove_tags_from_book_books__book_id__tags_delete
       parameters:
       - name: book_id
@@ -792,7 +1003,6 @@ paths:
       tags:
       - Orders
       summary: Create Order
-      description: Vytvoří objednávku, odečte sklad a zachytí aktuální ceny.
       operationId: create_order_orders_post
       requestBody:
         required: true
@@ -895,7 +1105,6 @@ paths:
       tags:
       - Orders
       summary: Delete Order
-      description: Smaže objednávku. Lze smazat pouze pending nebo cancelled objednávky.
       operationId: delete_order_orders__order_id__delete
       parameters:
       - name: order_id
@@ -918,8 +1127,6 @@ paths:
       tags:
       - Orders
       summary: Update Order Status
-      description: Změní stav objednávky dle povolených přechodů. Při zrušení vrátí
-        sklad.
       operationId: update_order_status_orders__order_id__status_patch
       parameters:
       - name: order_id
@@ -947,135 +1154,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /reset:
-    post:
-      tags:
-      - Testing
-      summary: Reset Database
-      description: Smaže všechna data z databáze. Pouze pro testovací účely.
-      operationId: reset_database_reset_post
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  /authors/{author_id}/books:
-    get:
-      tags:
-      - Authors
-      summary: List Author Books
-      description: Seznam knih daného autora s stránkováním.
-      operationId: list_author_books_authors__author_id__books_get
-      parameters:
-      - name: author_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Author Id
-      - name: page
-        in: query
-        required: false
-        schema:
-          type: integer
-          minimum: 1
-          default: 1
-          title: Page
-      - name: page_size
-        in: query
-        required: false
-        schema:
-          type: integer
-          maximum: 100
-          minimum: 1
-          default: 10
-          title: Page Size
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedBooks'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /books/bulk:
-    post:
-      tags:
-      - Books
-      summary: Bulk Create Books
-      description: 'Hromadné vytvoření knih. Každá kniha se validuje samostatně.
-
-        Vrací 201 pokud všechny uspěly, 207 pokud některé selhaly,
-
-        422 pokud všechny selhaly.'
-      operationId: bulk_create_books_books_bulk_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BulkBookCreate'
-        required: true
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /books/{book_id}/clone:
-    post:
-      tags:
-      - Books
-      summary: Clone Book
-      description: Vytvoří kopii knihy s novým ISBN. Stock se nekopíruje.
-      operationId: clone_book_books__book_id__clone_post
-      parameters:
-      - name: book_id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Book Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BookCloneRequest'
-      responses:
-        '201':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BookResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
   /orders/{order_id}/invoice:
     get:
       tags:
       - Orders
       summary: Get Invoice
-      description: 'Vygeneruje fakturu pro objednávku.
-
-        Dostupné pouze pro objednávky ve stavu confirmed, shipped nebo delivered.
-
-        Pending a cancelled → 403.'
       operationId: get_invoice_orders__order_id__invoice_get
       parameters:
       - name: order_id
@@ -1102,11 +1185,6 @@ paths:
       tags:
       - Orders
       summary: Add Item To Order
-      description: 'Přidá položku do existující objednávky.
-
-        Pouze pending objednávky lze modifikovat (jinak 403).
-
-        Duplicitní book_id v objednávce → 409.'
       operationId: add_item_to_order_orders__order_id__items_post
       parameters:
       - name: order_id
@@ -1134,13 +1212,180 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /books/bulk:
+    post:
+      tags:
+      - Books
+      summary: Bulk Create Books
+      operationId: bulk_create_books_books_bulk_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkBookCreate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '201':
+          description: All books created
+        '207':
+          description: Partial success
+        '401':
+          description: Invalid or missing API key
+        '422':
+          description: All books failed validation
+        '429':
+          description: Rate limit exceeded (3 req/30s)
+      security:
+      - APIKeyHeader: []
+  /books/{book_id}/clone:
+    post:
+      tags:
+      - Books
+      summary: Clone Book
+      operationId: clone_book_books__book_id__clone_post
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Book Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookCloneRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /exports/books:
+    post:
+      tags:
+      - Exports
+      summary: Create Book Export
+      description: Start async book export. Poll GET /exports/{job_id} for result.
+      operationId: create_book_export_exports_books_post
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJobCreated'
+        '401':
+          description: Invalid or missing API key
+      security:
+      - APIKeyHeader: []
+  /exports/orders:
+    post:
+      tags:
+      - Exports
+      summary: Create Order Export
+      description: Start async order export. Poll GET /exports/{job_id} for result.
+      operationId: create_order_export_exports_orders_post
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJobCreated'
+        '401':
+          description: Invalid or missing API key
+      security:
+      - APIKeyHeader: []
+  /exports/{job_id}:
+    get:
+      tags:
+      - Exports
+      summary: Get Export Job
+      operationId: get_export_job_exports__job_id__get
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Job Id
+      responses:
+        '200':
+          description: Export completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJobResult'
+        '202':
+          description: Export still processing
+        '404':
+          description: Export job not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /admin/maintenance:
+    get:
+      tags:
+      - Admin
+      summary: Get Maintenance Status
+      operationId: get_maintenance_status_admin_maintenance_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceStatus'
+    post:
+      tags:
+      - Admin
+      summary: Toggle Maintenance
+      operationId: toggle_maintenance_admin_maintenance_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceToggle'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaintenanceStatus'
+        '401':
+          description: Invalid or missing API key
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - APIKeyHeader: []
   /statistics/summary:
     get:
       tags:
       - Statistics
       summary: Get Statistics
-      description: Souhrnné statistiky knihkupectví. Obrat se počítá jen z delivered
-        objednávek.
       operationId: get_statistics_statistics_summary_get
       responses:
         '200':
@@ -1149,6 +1394,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StatisticsSummary'
+        '401':
+          description: Invalid or missing API key
+      security:
+      - APIKeyHeader: []
+  /catalog:
+    get:
+      tags:
+      - Deprecated
+      summary: Deprecated Catalog
+      description: 'Deprecated: use GET /books instead.'
+      operationId: deprecated_catalog_catalog_get
+      responses:
+        '301':
+          description: Moved Permanently to /books
+          content:
+            application/json:
+              schema: {}
+  /reset:
+    post:
+      tags:
+      - Testing
+      summary: Reset Database
+      description: Reset all data (DB + in-memory state). For testing only.
+      operationId: reset_database_reset_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
 components:
   schemas:
     AuthorCreate:
@@ -1196,6 +1471,10 @@ components:
           type: string
           format: date-time
           title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
       type: object
       required:
       - id
@@ -1203,6 +1482,7 @@ components:
       - bio
       - born_year
       - created_at
+      - updated_at
       title: AuthorResponse
     AuthorUpdate:
       properties:
@@ -1227,6 +1507,16 @@ components:
           title: Born Year
       type: object
       title: AuthorUpdate
+    Body_upload_cover_books__book_id__cover_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+      - file
+      title: Body_upload_cover_books__book_id__cover_post
     BookCloneRequest:
       properties:
         new_isbn:
@@ -1356,6 +1646,10 @@ components:
           type: string
           format: date-time
           title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
         author:
           $ref: '#/components/schemas/AuthorResponse'
         category:
@@ -1376,6 +1670,7 @@ components:
       - author_id
       - category_id
       - created_at
+      - updated_at
       - author
       - category
       title: BookResponse
@@ -1521,11 +1816,16 @@ components:
           - type: string
           - type: 'null'
           title: Description
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
       type: object
       required:
       - id
       - name
       - description
+      - updated_at
       title: CategoryResponse
     CategoryUpdate:
       properties:
@@ -1543,6 +1843,27 @@ components:
           title: Description
       type: object
       title: CategoryUpdate
+    CoverUploadResponse:
+      properties:
+        book_id:
+          type: integer
+          title: Book Id
+        filename:
+          type: string
+          title: Filename
+        content_type:
+          type: string
+          title: Content Type
+        size_bytes:
+          type: integer
+          title: Size Bytes
+      type: object
+      required:
+      - book_id
+      - filename
+      - content_type
+      - size_bytes
+      title: CoverUploadResponse
     DiscountRequest:
       properties:
         discount_percent:
@@ -1579,6 +1900,56 @@ components:
       - discount_percent
       - discounted_price
       title: DiscountResponse
+    ExportJobCreated:
+      properties:
+        job_id:
+          type: string
+          title: Job Id
+        status:
+          type: string
+          title: Status
+        created_at:
+          type: string
+          title: Created At
+      type: object
+      required:
+      - job_id
+      - status
+      - created_at
+      title: ExportJobCreated
+    ExportJobResult:
+      properties:
+        job_id:
+          type: string
+          title: Job Id
+        status:
+          type: string
+          title: Status
+        created_at:
+          type: string
+          title: Created At
+        completed_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Completed At
+        total:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Total
+        data:
+          anyOf:
+          - items: {}
+            type: array
+          - type: 'null'
+          title: Data
+      type: object
+      required:
+      - job_id
+      - status
+      - created_at
+      title: ExportJobResult
     HTTPValidationError:
       properties:
         detail:
@@ -1656,6 +2027,28 @@ components:
       - subtotal
       - item_count
       title: InvoiceResponse
+    MaintenanceStatus:
+      properties:
+        maintenance_mode:
+          type: boolean
+          title: Maintenance Mode
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - maintenance_mode
+      - message
+      title: MaintenanceStatus
+    MaintenanceToggle:
+      properties:
+        enabled:
+          type: boolean
+          title: Enabled
+      type: object
+      required:
+      - enabled
+      title: MaintenanceToggle
     OrderAddItem:
       properties:
         book_id:
@@ -1998,11 +2391,16 @@ components:
           type: string
           format: date-time
           title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
       type: object
       required:
       - id
       - name
       - created_at
+      - updated_at
       title: TagResponse
     TagUpdate:
       properties:
@@ -2036,3 +2434,8 @@ components:
       - msg
       - type
       title: ValidationError
+  securitySchemes:
+    APIKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key

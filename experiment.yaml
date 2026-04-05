@@ -11,10 +11,10 @@
 
 experiment:
   name: "diplomka_v11"
-  #levels: ["L0", "L1", "L2", "L3", "L4"]
-  levels: ["L0"]
+  levels: ["L0", "L1", "L2", "L3", "L4"]
+  #levels: ["L4"]
   max_iterations: 5
-  runs_per_combination: 1
+  runs_per_combination: 3
   test_count: 30
   temperatures: [0.4]
 

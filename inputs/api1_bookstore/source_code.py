@@ -1,30 +1,149 @@
 
 # ═══ FILE: app/main.py ═══
 
-from typing import Optional, List
 
-from fastapi import FastAPI, Depends, Query
+import os
+import time
+import uuid
+from datetime import datetime, timezone
+from typing import Optional, List
+from collections import defaultdict
+
+from fastapi import (
+    FastAPI, Depends, Query, Request, Response,
+    UploadFile, File, Security, HTTPException,
+)
+from fastapi.security import APIKeyHeader
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 from .database import engine, get_db, Base
-from . import crud, schemas
-from . import models
+from . import crud, schemas, models
 
-from fastapi.responses import JSONResponse
-
-# Vytvoření tabulek při startu
 Base.metadata.create_all(bind=engine)
+
+# ── Configuration ────────────────────────────────────────
+
+API_KEY = os.getenv("API_KEY", "test-api-key")
+MAX_COVER_SIZE = 2 * 1024 * 1024  # 2 MB
+ALLOWED_COVER_TYPES = {"image/jpeg", "image/png"}
+
+# ── In-memory state (cleared on /reset) ─────────────────
+
+maintenance_mode = False
+cover_storage: dict[int, dict] = {}        # book_id -> {data, filename, content_type, size}
+export_jobs: dict[str, dict] = {}           # job_id -> {status, created_at, complete_after, data}
+rate_limit_store: defaultdict = defaultdict(list)  # key -> [timestamps]
+
+# Rate limits: (max_requests, window_seconds)
+RATE_LIMITS = {
+    "bulk": (3, 30),
+    "discount": (5, 10),
+}
+
+MAINTENANCE_EXEMPT = {"/health", "/admin/maintenance", "/openapi.json", "/docs", "/redoc"}
+
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+
+def require_api_key(api_key: str = Security(api_key_header)):
+    if not api_key or api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    return api_key
+
+
+# ── App ──────────────────────────────────────────────────
 
 app = FastAPI(
     title="Bookstore API",
-    description="REST API pro správu knihkupectví – knihy, autoři, kategorie, recenze, tagy a objednávky.",
-    version="3.0.2",
+    description=(
+        "REST API pro správu knihkupectví – knihy, autoři, kategorie, recenze, "
+        "tagy a objednávky.\n\n"
+        "**Autentizace:** Některé endpointy vyžadují hlavičku `X-API-Key`.\n\n"
+        "**Rate limiting:** Endpoint `/books/bulk` (3 req/30s) a `/books/{id}/discount` "
+        "(5 req/10s) mají rate limit. Při překročení vrací 429.\n\n"
+        "**Maintenance mode:** Při aktivním maintenance režimu vrací neadmin endpointy 503.\n\n"
+        "**Soft delete:** `DELETE /books/{id}` provede soft delete. "
+        "`GET /books/{id}` na smazanou knihu vrátí 410 Gone.\n\n"
+        "**ETags:** Detail endpointy vrací `ETag` header. `If-None-Match` → 304, "
+        "`If-Match` na PUT → 412 při neshodě.\n\n"
+        "**Nepoužívejte nepodporované HTTP metody** – vrací 405 Method Not Allowed."
+    ),
+    version="4.0.0",
 )
+
+
+# ── Middleware (registration order: last registered = first executed) ──
+
+def _get_rate_limit_key(method: str, path: str) -> Optional[str]:
+    if method == "POST" and path == "/books/bulk":
+        return "bulk"
+    if method == "POST" and "/discount" in path and path.startswith("/books/"):
+        return "discount"
+    return None
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    key = _get_rate_limit_key(request.method, request.url.path)
+    if key and key in RATE_LIMITS:
+        max_req, window = RATE_LIMITS[key]
+        client_ip = request.client.host if request.client else "unknown"
+        store_key = f"{client_ip}:{key}"
+        now = time.time()
+        rate_limit_store[store_key] = [t for t in rate_limit_store[store_key] if t > now - window]
+        if len(rate_limit_store[store_key]) >= max_req:
+            oldest = rate_limit_store[store_key][0]
+            retry_after = int(window - (now - oldest)) + 1
+            return JSONResponse(
+                status_code=429,
+                content={"detail": f"Rate limit exceeded for this endpoint. Try again later."},
+                headers={"Retry-After": str(retry_after)},
+            )
+        rate_limit_store[store_key].append(now)
+    return await call_next(request)
+
+
+@app.middleware("http")
+async def maintenance_middleware(request: Request, call_next):
+    global maintenance_mode
+    if maintenance_mode and request.url.path not in MAINTENANCE_EXEMPT:
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Service temporarily unavailable for maintenance"},
+            headers={"Retry-After": "300"},
+        )
+    return await call_next(request)
+
+
+# ── ETag helpers ─────────────────────────────────────────
+
+def _check_etag_get(request: Request, response: Response, updated_at) -> Optional[Response]:
+    """For GET: set ETag, return 304 if If-None-Match matches."""
+    etag = crud.generate_etag(updated_at)
+    response.headers["ETag"] = f'"{etag}"'
+    if_none_match = request.headers.get("if-none-match")
+    if if_none_match and if_none_match.strip('"') == etag:
+        return Response(status_code=304, headers={"ETag": f'"{etag}"'})
+    return None
+
+
+def _check_etag_put(request: Request, updated_at):
+    """For PUT: check If-Match, raise 412 if mismatch."""
+    if_match = request.headers.get("if-match")
+    if if_match:
+        current_etag = crud.generate_etag(updated_at)
+        if if_match.strip('"') != current_etag:
+            raise HTTPException(
+                status_code=412,
+                detail="Precondition Failed: resource has been modified since last read",
+            )
 
 
 # ── Health ───────────────────────────────────────────────
 
-@app.get("/health", tags=["Health"])
+@app.get("/health", tags=["Health"],
+         responses={405: {"description": "Method Not Allowed"}})
 def health_check():
     return {"status": "ok"}
 
@@ -41,19 +160,38 @@ def list_authors(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
     return crud.get_authors(db, skip=skip, limit=limit)
 
 
-@app.get("/authors/{author_id}", response_model=schemas.AuthorResponse, tags=["Authors"])
-def get_author(author_id: int, db: Session = Depends(get_db)):
-    return crud.get_author(db, author_id)
+@app.get("/authors/{author_id}", response_model=schemas.AuthorResponse, tags=["Authors"],
+         responses={304: {"description": "Not Modified"}, 404: {"description": "Author not found"}})
+def get_author(author_id: int, request: Request, response: Response, db: Session = Depends(get_db)):
+    author = crud.get_author(db, author_id)
+    cached = _check_etag_get(request, response, author.updated_at)
+    if cached:
+        return cached
+    return author
 
 
-@app.put("/authors/{author_id}", response_model=schemas.AuthorResponse, tags=["Authors"])
-def update_author(author_id: int, author: schemas.AuthorUpdate, db: Session = Depends(get_db)):
+@app.put("/authors/{author_id}", response_model=schemas.AuthorResponse, tags=["Authors"],
+         responses={412: {"description": "Precondition Failed – ETag mismatch"}})
+def update_author(author_id: int, author: schemas.AuthorUpdate,
+                  request: Request, db: Session = Depends(get_db)):
+    existing = crud.get_author(db, author_id)
+    _check_etag_put(request, existing.updated_at)
     return crud.update_author(db, author_id, author)
 
 
 @app.delete("/authors/{author_id}", status_code=204, tags=["Authors"])
 def delete_author(author_id: int, db: Session = Depends(get_db)):
     crud.delete_author(db, author_id)
+
+
+@app.get("/authors/{author_id}/books", response_model=schemas.PaginatedBooks, tags=["Authors"])
+def list_author_books(
+    author_id: int,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    return crud.get_author_books(db, author_id, page=page, page_size=page_size)
 
 
 # ── Categories ───────────────────────────────────────────
@@ -68,13 +206,22 @@ def list_categories(db: Session = Depends(get_db)):
     return crud.get_categories(db)
 
 
-@app.get("/categories/{category_id}", response_model=schemas.CategoryResponse, tags=["Categories"])
-def get_category(category_id: int, db: Session = Depends(get_db)):
-    return crud.get_category(db, category_id)
+@app.get("/categories/{category_id}", response_model=schemas.CategoryResponse, tags=["Categories"],
+         responses={304: {"description": "Not Modified"}})
+def get_category(category_id: int, request: Request, response: Response, db: Session = Depends(get_db)):
+    cat = crud.get_category(db, category_id)
+    cached = _check_etag_get(request, response, cat.updated_at)
+    if cached:
+        return cached
+    return cat
 
 
-@app.put("/categories/{category_id}", response_model=schemas.CategoryResponse, tags=["Categories"])
-def update_category(category_id: int, category: schemas.CategoryUpdate, db: Session = Depends(get_db)):
+@app.put("/categories/{category_id}", response_model=schemas.CategoryResponse, tags=["Categories"],
+         responses={412: {"description": "Precondition Failed – ETag mismatch"}})
+def update_category(category_id: int, category: schemas.CategoryUpdate,
+                    request: Request, db: Session = Depends(get_db)):
+    existing = crud.get_category(db, category_id)
+    _check_etag_put(request, existing.updated_at)
     return crud.update_category(db, category_id, category)
 
 
@@ -108,24 +255,44 @@ def list_books(
     )
 
 
-@app.get("/books/{book_id}", response_model=schemas.BookResponse, tags=["Books"])
-def get_book(book_id: int, db: Session = Depends(get_db)):
-    return crud.get_book(db, book_id)
+@app.get("/books/{book_id}", response_model=schemas.BookResponse, tags=["Books"],
+         responses={304: {"description": "Not Modified"}, 410: {"description": "Book has been deleted (soft delete)"}})
+def get_book(book_id: int, request: Request, response: Response, db: Session = Depends(get_db)):
+    book = crud.get_book(db, book_id)
+    cached = _check_etag_get(request, response, book.updated_at)
+    if cached:
+        return cached
+    return book
 
 
-@app.put("/books/{book_id}", response_model=schemas.BookResponse, tags=["Books"])
-def update_book(book_id: int, book: schemas.BookUpdate, db: Session = Depends(get_db)):
+@app.put("/books/{book_id}", response_model=schemas.BookResponse, tags=["Books"],
+         responses={412: {"description": "Precondition Failed – ETag mismatch"},
+                    410: {"description": "Book has been deleted"}})
+def update_book(book_id: int, book: schemas.BookUpdate,
+                request: Request, db: Session = Depends(get_db)):
+    existing = crud.get_book(db, book_id)
+    _check_etag_put(request, existing.updated_at)
     return crud.update_book(db, book_id, book)
 
 
-@app.delete("/books/{book_id}", status_code=204, tags=["Books"])
+@app.delete("/books/{book_id}", status_code=204, tags=["Books"],
+            responses={410: {"description": "Book already deleted"}})
 def delete_book(book_id: int, db: Session = Depends(get_db)):
     crud.delete_book(db, book_id)
 
 
+@app.post("/books/{book_id}/restore", response_model=schemas.BookResponse, tags=["Books"],
+          responses={400: {"description": "Book is not deleted"}, 404: {"description": "Book not found"}})
+def restore_book(book_id: int, db: Session = Depends(get_db)):
+    """Restore a soft-deleted book."""
+    return crud.restore_book(db, book_id)
+
+
 # ── Reviews ──────────────────────────────────────────────
 
-@app.post("/books/{book_id}/reviews", response_model=schemas.ReviewResponse, status_code=201, tags=["Reviews"])
+@app.post("/books/{book_id}/reviews", response_model=schemas.ReviewResponse,
+          status_code=201, tags=["Reviews"],
+          responses={410: {"description": "Book has been deleted"}})
 def create_review(book_id: int, review: schemas.ReviewCreate, db: Session = Depends(get_db)):
     return crud.create_review(db, book_id, review)
 
@@ -142,7 +309,8 @@ def get_book_rating(book_id: int, db: Session = Depends(get_db)):
 
 # ── Discount ─────────────────────────────────────────────
 
-@app.post("/books/{book_id}/discount", response_model=schemas.DiscountResponse, tags=["Books"])
+@app.post("/books/{book_id}/discount", response_model=schemas.DiscountResponse, tags=["Books"],
+          responses={429: {"description": "Rate limit exceeded (5 req/10s)"}})
 def apply_discount(book_id: int, discount: schemas.DiscountRequest, db: Session = Depends(get_db)):
     return crud.apply_discount(db, book_id, discount)
 
@@ -152,6 +320,55 @@ def apply_discount(book_id: int, discount: schemas.DiscountRequest, db: Session 
 @app.patch("/books/{book_id}/stock", response_model=schemas.BookResponse, tags=["Books"])
 def update_stock(book_id: int, quantity: int = Query(...), db: Session = Depends(get_db)):
     return crud.update_stock(db, book_id, quantity)
+
+
+# ── Cover Upload ─────────────────────────────────────────
+
+@app.post("/books/{book_id}/cover", response_model=schemas.CoverUploadResponse, tags=["Books"],
+          responses={
+              413: {"description": "File too large (max 2 MB)"},
+              415: {"description": "Unsupported file type (only JPEG, PNG)"},
+              410: {"description": "Book has been deleted"},
+          })
+async def upload_cover(book_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    crud.get_book(db, book_id)
+    if file.content_type not in ALLOWED_COVER_TYPES:
+        raise HTTPException(
+            status_code=415,
+            detail=f"Unsupported file type: {file.content_type}. Allowed: image/jpeg, image/png",
+        )
+    data = await file.read()
+    if len(data) > MAX_COVER_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large: {len(data)} bytes. Maximum: {MAX_COVER_SIZE} bytes (2 MB)",
+        )
+    cover_storage[book_id] = {
+        "data": data, "filename": file.filename or "cover",
+        "content_type": file.content_type, "size": len(data),
+    }
+    return schemas.CoverUploadResponse(
+        book_id=book_id, filename=file.filename or "cover",
+        content_type=file.content_type, size_bytes=len(data),
+    )
+
+
+@app.get("/books/{book_id}/cover", tags=["Books"],
+         responses={404: {"description": "No cover uploaded"}, 410: {"description": "Book has been deleted"}})
+def get_cover(book_id: int, db: Session = Depends(get_db)):
+    crud.get_book(db, book_id)
+    if book_id not in cover_storage:
+        raise HTTPException(status_code=404, detail="No cover uploaded for this book")
+    c = cover_storage[book_id]
+    return Response(content=c["data"], media_type=c["content_type"])
+
+
+@app.delete("/books/{book_id}/cover", status_code=204, tags=["Books"])
+def delete_cover(book_id: int, db: Session = Depends(get_db)):
+    crud.get_book(db, book_id)
+    if book_id not in cover_storage:
+        raise HTTPException(status_code=404, detail="No cover uploaded for this book")
+    del cover_storage[book_id]
 
 
 # ── Tags ─────────────────────────────────────────────────
@@ -166,13 +383,22 @@ def list_tags(db: Session = Depends(get_db)):
     return crud.get_tags(db)
 
 
-@app.get("/tags/{tag_id}", response_model=schemas.TagResponse, tags=["Tags"])
-def get_tag(tag_id: int, db: Session = Depends(get_db)):
-    return crud.get_tag(db, tag_id)
+@app.get("/tags/{tag_id}", response_model=schemas.TagResponse, tags=["Tags"],
+         responses={304: {"description": "Not Modified"}})
+def get_tag(tag_id: int, request: Request, response: Response, db: Session = Depends(get_db)):
+    tag = crud.get_tag(db, tag_id)
+    cached = _check_etag_get(request, response, tag.updated_at)
+    if cached:
+        return cached
+    return tag
 
 
-@app.put("/tags/{tag_id}", response_model=schemas.TagResponse, tags=["Tags"])
-def update_tag(tag_id: int, tag: schemas.TagUpdate, db: Session = Depends(get_db)):
+@app.put("/tags/{tag_id}", response_model=schemas.TagResponse, tags=["Tags"],
+         responses={412: {"description": "Precondition Failed – ETag mismatch"}})
+def update_tag(tag_id: int, tag: schemas.TagUpdate,
+               request: Request, db: Session = Depends(get_db)):
+    existing = crud.get_tag(db, tag_id)
+    _check_etag_put(request, existing.updated_at)
     return crud.update_tag(db, tag_id, tag)
 
 
@@ -183,13 +409,11 @@ def delete_tag(tag_id: int, db: Session = Depends(get_db)):
 
 @app.post("/books/{book_id}/tags", response_model=schemas.BookResponse, tags=["Tags"])
 def add_tags_to_book(book_id: int, action: schemas.BookTagAction, db: Session = Depends(get_db)):
-    """Přidá tagy ke knize. Již existující vazby se ignorují."""
     return crud.add_tags_to_book(db, book_id, action.tag_ids)
 
 
 @app.delete("/books/{book_id}/tags", response_model=schemas.BookResponse, tags=["Tags"])
 def remove_tags_from_book(book_id: int, action: schemas.BookTagAction, db: Session = Depends(get_db)):
-    """Odebere tagy z knihy."""
     return crud.remove_tags_from_book(db, book_id, action.tag_ids)
 
 
@@ -197,7 +421,6 @@ def remove_tags_from_book(book_id: int, action: schemas.BookTagAction, db: Sessi
 
 @app.post("/orders", response_model=schemas.OrderResponse, status_code=201, tags=["Orders"])
 def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
-    """Vytvoří objednávku, odečte sklad a zachytí aktuální ceny."""
     o = crud.create_order(db, order)
     return crud.get_order_response(o)
 
@@ -222,26 +445,183 @@ def get_order(order_id: int, db: Session = Depends(get_db)):
 
 @app.patch("/orders/{order_id}/status", response_model=schemas.OrderResponse, tags=["Orders"])
 def update_order_status(
-    order_id: int,
-    status_update: schemas.OrderStatusUpdate,
+    order_id: int, status_update: schemas.OrderStatusUpdate,
     db: Session = Depends(get_db),
 ):
-    """Změní stav objednávky dle povolených přechodů. Při zrušení vrátí sklad."""
     o = crud.update_order_status(db, order_id, status_update.status)
     return crud.get_order_response(o)
 
 
 @app.delete("/orders/{order_id}", status_code=204, tags=["Orders"])
 def delete_order(order_id: int, db: Session = Depends(get_db)):
-    """Smaže objednávku. Lze smazat pouze pending nebo cancelled objednávky."""
     crud.delete_order(db, order_id)
 
 
-# ── Reset (pro testovací framework) ──────────────────────
+@app.get("/orders/{order_id}/invoice", response_model=schemas.InvoiceResponse, tags=["Orders"])
+def get_invoice(order_id: int, db: Session = Depends(get_db)):
+    return crud.generate_invoice(db, order_id)
+
+
+@app.post("/orders/{order_id}/items", response_model=schemas.OrderResponse,
+          status_code=201, tags=["Orders"])
+def add_item_to_order(order_id: int, data: schemas.OrderAddItem, db: Session = Depends(get_db)):
+    order = crud.add_item_to_order(db, order_id, data)
+    return crud.get_order_response(order)
+
+
+# ── Bulk Create Books ────────────────────────────────────
+
+@app.post("/books/bulk", tags=["Books"],
+          responses={
+              201: {"description": "All books created"},
+              207: {"description": "Partial success"},
+              401: {"description": "Invalid or missing API key"},
+              422: {"description": "All books failed validation"},
+              429: {"description": "Rate limit exceeded (3 req/30s)"},
+          })
+def bulk_create_books(
+    data: schemas.BulkBookCreate,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_api_key),
+):
+    result = crud.bulk_create_books(db, data)
+    if result.failed == 0:
+        return JSONResponse(status_code=201, content=result.model_dump(mode="json"))
+    elif result.created == 0:
+        return JSONResponse(status_code=422, content=result.model_dump(mode="json"))
+    else:
+        return JSONResponse(status_code=207, content=result.model_dump(mode="json"))
+
+
+# ── Clone Book ───────────────────────────────────────────
+
+@app.post("/books/{book_id}/clone", response_model=schemas.BookResponse,
+          status_code=201, tags=["Books"])
+def clone_book(book_id: int, data: schemas.BookCloneRequest, db: Session = Depends(get_db)):
+    return crud.clone_book(db, book_id, data)
+
+
+# ── Async Exports ────────────────────────────────────────
+
+@app.post("/exports/books", status_code=202, tags=["Exports"],
+          response_model=schemas.ExportJobCreated,
+          responses={401: {"description": "Invalid or missing API key"}})
+def create_book_export(db: Session = Depends(get_db), _: str = Depends(require_api_key)):
+    """Start async book export. Poll GET /exports/{job_id} for result."""
+    job_id = str(uuid.uuid4())
+    books = db.query(models.Book).filter(models.Book.is_deleted == False).all()
+    data = [
+        {"id": b.id, "title": b.title, "isbn": b.isbn, "price": b.price,
+         "stock": b.stock, "author_id": b.author_id, "category_id": b.category_id}
+        for b in books
+    ]
+    now = time.time()
+    export_jobs[job_id] = {
+        "status": "processing",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "complete_after": now + 2,  # Simulated 2s processing
+        "data": data,
+        "total": len(data),
+    }
+    return schemas.ExportJobCreated(
+        job_id=job_id, status="processing",
+        created_at=export_jobs[job_id]["created_at"],
+    )
+
+
+@app.post("/exports/orders", status_code=202, tags=["Exports"],
+          response_model=schemas.ExportJobCreated,
+          responses={401: {"description": "Invalid or missing API key"}})
+def create_order_export(db: Session = Depends(get_db), _: str = Depends(require_api_key)):
+    """Start async order export. Poll GET /exports/{job_id} for result."""
+    job_id = str(uuid.uuid4())
+    orders = db.query(models.Order).all()
+    data = [
+        {"id": o.id, "customer_name": o.customer_name, "status": o.status,
+         "total_price": round(sum(i.unit_price * i.quantity for i in o.items), 2),
+         "item_count": len(o.items), "created_at": o.created_at.isoformat()}
+        for o in orders
+    ]
+    now = time.time()
+    export_jobs[job_id] = {
+        "status": "processing",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "complete_after": now + 2,
+        "data": data,
+        "total": len(data),
+    }
+    return schemas.ExportJobCreated(
+        job_id=job_id, status="processing",
+        created_at=export_jobs[job_id]["created_at"],
+    )
+
+
+@app.get("/exports/{job_id}", tags=["Exports"],
+         responses={
+             200: {"description": "Export completed", "model": schemas.ExportJobResult},
+             202: {"description": "Export still processing"},
+             404: {"description": "Export job not found"},
+         })
+def get_export_job(job_id: str):
+    job = export_jobs.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Export job {job_id} not found")
+
+    if time.time() < job["complete_after"]:
+        return JSONResponse(
+            status_code=202,
+            content={"job_id": job_id, "status": "processing", "created_at": job["created_at"]},
+        )
+    return schemas.ExportJobResult(
+        job_id=job_id, status="completed", created_at=job["created_at"],
+        completed_at=datetime.now(timezone.utc).isoformat(),
+        total=job["total"], data=job["data"],
+    )
+
+
+# ── Admin ────────────────────────────────────────────────
+
+@app.post("/admin/maintenance", response_model=schemas.MaintenanceStatus, tags=["Admin"],
+          responses={401: {"description": "Invalid or missing API key"}})
+def toggle_maintenance(data: schemas.MaintenanceToggle, _: str = Depends(require_api_key)):
+    global maintenance_mode
+    maintenance_mode = data.enabled
+    msg = "Maintenance mode activated" if data.enabled else "Maintenance mode deactivated"
+    return schemas.MaintenanceStatus(maintenance_mode=maintenance_mode, message=msg)
+
+
+@app.get("/admin/maintenance", response_model=schemas.MaintenanceStatus, tags=["Admin"])
+def get_maintenance_status():
+    return schemas.MaintenanceStatus(
+        maintenance_mode=maintenance_mode,
+        message="Maintenance mode is active" if maintenance_mode else "System operational",
+    )
+
+
+# ── Statistics (protected) ───────────────────────────────
+
+@app.get("/statistics/summary", response_model=schemas.StatisticsSummary, tags=["Statistics"],
+         responses={401: {"description": "Invalid or missing API key"}})
+def get_statistics(db: Session = Depends(get_db), _: str = Depends(require_api_key)):
+    return crud.get_statistics(db)
+
+
+# ── Deprecated Redirect ──────────────────────────────────
+
+@app.get("/catalog", tags=["Deprecated"],
+         responses={301: {"description": "Moved Permanently to /books"}},
+         status_code=301)
+def deprecated_catalog():
+    """Deprecated: use GET /books instead."""
+    return RedirectResponse(url="/books", status_code=301)
+
+
+# ── Reset ────────────────────────────────────────────────
 
 @app.post("/reset", tags=["Testing"])
 def reset_database(db: Session = Depends(get_db)):
-    """Smaže všechna data z databáze. Pouze pro testovací účely."""
+    """Reset all data (DB + in-memory state). For testing only."""
+    global maintenance_mode
     db.execute(models.Review.__table__.delete())
     db.execute(models.OrderItem.__table__.delete())
     db.execute(models.Order.__table__.delete())
@@ -251,97 +631,18 @@ def reset_database(db: Session = Depends(get_db)):
     db.execute(models.Category.__table__.delete())
     db.execute(models.Author.__table__.delete())
     db.commit()
-    return {"status": "ok", "message": "Database reset complete"}
-
-
-# ── Author's Books ───────────────────────────────────────
-
-@app.get("/authors/{author_id}/books", response_model=schemas.PaginatedBooks,
-         tags=["Authors"])
-def list_author_books(
-    author_id: int,
-    page: int = Query(1, ge=1),
-    page_size: int = Query(10, ge=1, le=100),
-    db: Session = Depends(get_db),
-):
-    """Seznam knih daného autora s stránkováním."""
-    return crud.get_author_books(db, author_id, page=page, page_size=page_size)
-
-
-# ── Bulk Create Books ────────────────────────────────────
-
-@app.post("/books/bulk", tags=["Books"])
-def bulk_create_books(
-    data: schemas.BulkBookCreate, db: Session = Depends(get_db),
-):
-    """
-    Hromadné vytvoření knih. Každá kniha se validuje samostatně.
-    Vrací 201 pokud všechny uspěly, 207 pokud některé selhaly,
-    422 pokud všechny selhaly.
-    """
-    result = crud.bulk_create_books(db, data)
-
-    if result.failed == 0:
-        return JSONResponse(status_code=201, content=result.model_dump())
-    elif result.created == 0:
-        return JSONResponse(status_code=422, content=result.model_dump())
-    else:
-        return JSONResponse(status_code=207, content=result.model_dump())
-
-
-# ── Clone Book ───────────────────────────────────────────
-
-@app.post("/books/{book_id}/clone", response_model=schemas.BookResponse,
-          status_code=201, tags=["Books"])
-def clone_book(
-    book_id: int, data: schemas.BookCloneRequest,
-    db: Session = Depends(get_db),
-):
-    """Vytvoří kopii knihy s novým ISBN. Stock se nekopíruje."""
-    return crud.clone_book(db, book_id, data)
-
-
-# ── Invoice ──────────────────────────────────────────────
-
-@app.get("/orders/{order_id}/invoice", response_model=schemas.InvoiceResponse,
-         tags=["Orders"])
-def get_invoice(order_id: int, db: Session = Depends(get_db)):
-    """
-    Vygeneruje fakturu pro objednávku.
-    Dostupné pouze pro objednávky ve stavu confirmed, shipped nebo delivered.
-    Pending a cancelled → 403.
-    """
-    return crud.generate_invoice(db, order_id)
-
-
-# ── Add Item to Order ────────────────────────────────────
-
-@app.post("/orders/{order_id}/items", response_model=schemas.OrderResponse,
-          status_code=201, tags=["Orders"])
-def add_item_to_order(
-    order_id: int, data: schemas.OrderAddItem,
-    db: Session = Depends(get_db),
-):
-    """
-    Přidá položku do existující objednávky.
-    Pouze pending objednávky lze modifikovat (jinak 403).
-    Duplicitní book_id v objednávce → 409.
-    """
-    order = crud.add_item_to_order(db, order_id, data)
-    return crud.get_order_response(order)
-
-
-# ── Statistics ───────────────────────────────────────────
-
-@app.get("/statistics/summary", response_model=schemas.StatisticsSummary,
-         tags=["Statistics"])
-def get_statistics(db: Session = Depends(get_db)):
-    """Souhrnné statistiky knihkupectví. Obrat se počítá jen z delivered objednávek."""
-    return crud.get_statistics(db)
+    # Clear in-memory state
+    maintenance_mode = False
+    cover_storage.clear()
+    export_jobs.clear()
+    rate_limit_store.clear()
+    return {"status": "ok", "message": "Database and state reset complete"}
 
 # ═══ FILE: app/crud.py ═══
 
+
 import math
+import hashlib
 from datetime import datetime, timezone
 
 from fastapi import HTTPException
@@ -349,6 +650,12 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from . import models, schemas
+
+
+# ═══ ETag helper ═════════════════════════════════════════
+
+def generate_etag(updated_at) -> str:
+    return hashlib.md5(str(updated_at).encode()).hexdigest()
 
 
 # ═══ Authors ═════════════════════════════════════════════
@@ -376,6 +683,7 @@ def update_author(db: Session, author_id: int, data: schemas.AuthorUpdate):
     author = get_author(db, author_id)
     for k, v in data.model_dump(exclude_unset=True).items():
         setattr(author, k, v)
+    author.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(author)
     return author
@@ -383,7 +691,10 @@ def update_author(db: Session, author_id: int, data: schemas.AuthorUpdate):
 
 def delete_author(db: Session, author_id: int):
     author = get_author(db, author_id)
-    book_count = db.query(models.Book).filter(models.Book.author_id == author_id).count()
+    book_count = db.query(models.Book).filter(
+        models.Book.author_id == author_id,
+        models.Book.is_deleted == False,
+    ).count()
     if book_count > 0:
         raise HTTPException(
             status_code=409,
@@ -428,6 +739,7 @@ def update_category(db: Session, category_id: int, data: schemas.CategoryUpdate)
             raise HTTPException(status_code=409, detail=f"Category '{update['name']}' already exists")
     for k, v in update.items():
         setattr(cat, k, v)
+    cat.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(cat)
     return cat
@@ -435,7 +747,10 @@ def update_category(db: Session, category_id: int, data: schemas.CategoryUpdate)
 
 def delete_category(db: Session, category_id: int):
     cat = get_category(db, category_id)
-    book_count = db.query(models.Book).filter(models.Book.category_id == category_id).count()
+    book_count = db.query(models.Book).filter(
+        models.Book.category_id == category_id,
+        models.Book.is_deleted == False,
+    ).count()
     if book_count > 0:
         raise HTTPException(
             status_code=409,
@@ -446,6 +761,24 @@ def delete_category(db: Session, category_id: int):
 
 
 # ═══ Books ═══════════════════════════════════════════════
+
+def get_book(db: Session, book_id: int) -> models.Book:
+    """Returns 404 if not found, 410 if soft-deleted."""
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail=f"Book with id {book_id} not found")
+    if book.is_deleted:
+        raise HTTPException(status_code=410, detail=f"Book with id {book_id} has been deleted")
+    return book
+
+
+def get_book_include_deleted(db: Session, book_id: int) -> models.Book:
+    """Internal: returns book regardless of soft-delete status. 404 only."""
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail=f"Book with id {book_id} not found")
+    return book
+
 
 def create_book(db: Session, data: schemas.BookCreate) -> models.Book:
     get_author(db, data.author_id)
@@ -459,24 +792,17 @@ def create_book(db: Session, data: schemas.BookCreate) -> models.Book:
     return book
 
 
-def get_book(db: Session, book_id: int) -> models.Book:
-    book = db.query(models.Book).filter(models.Book.id == book_id).first()
-    if not book:
-        raise HTTPException(status_code=404, detail=f"Book with id {book_id} not found")
-    return book
-
-
 def get_books(
     db: Session, page: int = 1, page_size: int = 10,
     search: str = None, author_id: int = None,
     category_id: int = None, min_price: float = None,
-    max_price: float = None
+    max_price: float = None,
 ) -> schemas.PaginatedBooks:
-    q = db.query(models.Book)
+    q = db.query(models.Book).filter(models.Book.is_deleted == False)
     if search:
         q = q.filter(or_(
             models.Book.title.ilike(f"%{search}%"),
-            models.Book.isbn.ilike(f"%{search}%")
+            models.Book.isbn.ilike(f"%{search}%"),
         ))
     if author_id:
         q = q.filter(models.Book.author_id == author_id)
@@ -490,10 +816,9 @@ def get_books(
     total = q.count()
     total_pages = math.ceil(total / page_size) if total > 0 else 1
     items = q.offset((page - 1) * page_size).limit(page_size).all()
-
     return schemas.PaginatedBooks(
         items=items, total=total, page=page,
-        page_size=page_size, total_pages=total_pages
+        page_size=page_size, total_pages=total_pages,
     )
 
 
@@ -507,27 +832,44 @@ def update_book(db: Session, book_id: int, data: schemas.BookUpdate):
     if "isbn" in update:
         dup = db.query(models.Book).filter(
             models.Book.isbn == update["isbn"],
-            models.Book.id != book_id
+            models.Book.id != book_id,
         ).first()
         if dup:
             raise HTTPException(status_code=409, detail=f"Book with ISBN '{update['isbn']}' already exists")
     for k, v in update.items():
         setattr(book, k, v)
+    book.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(book)
     return book
 
 
 def delete_book(db: Session, book_id: int):
+    """Soft delete — sets is_deleted=True, preserves reviews and tags."""
     book = get_book(db, book_id)
-    db.delete(book)
+    book.is_deleted = True
+    book.deleted_at = datetime.now(timezone.utc)
+    book.updated_at = datetime.now(timezone.utc)
     db.commit()
+
+
+def restore_book(db: Session, book_id: int) -> models.Book:
+    """Restore a soft-deleted book. 404 if not found, 400 if not deleted."""
+    book = get_book_include_deleted(db, book_id)
+    if not book.is_deleted:
+        raise HTTPException(status_code=400, detail=f"Book with id {book_id} is not deleted")
+    book.is_deleted = False
+    book.deleted_at = None
+    book.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(book)
+    return book
 
 
 # ═══ Reviews ═════════════════════════════════════════════
 
 def create_review(db: Session, book_id: int, data: schemas.ReviewCreate):
-    get_book(db, book_id)
+    get_book(db, book_id)  # 404/410 check
     review = models.Review(book_id=book_id, **data.model_dump())
     db.add(review)
     db.commit()
@@ -549,7 +891,7 @@ def get_book_average_rating(db: Session, book_id: int) -> dict:
     return {"book_id": book_id, "average_rating": round(avg, 2), "review_count": len(reviews)}
 
 
-# ═══ Discount (business logika) ══════════════════════════
+# ═══ Discount ════════════════════════════════════════════
 
 def apply_discount(db: Session, book_id: int, data: schemas.DiscountRequest):
     book = get_book(db, book_id)
@@ -557,18 +899,18 @@ def apply_discount(db: Session, book_id: int, data: schemas.DiscountRequest):
     if current_year - book.published_year < 1:
         raise HTTPException(
             status_code=400,
-            detail="Discount can only be applied to books published more than 1 year ago"
+            detail="Discount can only be applied to books published more than 1 year ago",
         )
     discounted = round(book.price * (1 - data.discount_percent / 100), 2)
     return schemas.DiscountResponse(
         book_id=book.id, title=book.title,
         original_price=book.price,
         discount_percent=data.discount_percent,
-        discounted_price=discounted
+        discounted_price=discounted,
     )
 
 
-# ═══ Stock management ════════════════════════════════════
+# ═══ Stock ═══════════════════════════════════════════════
 
 def update_stock(db: Session, book_id: int, quantity: int):
     book = get_book(db, book_id)
@@ -576,9 +918,10 @@ def update_stock(db: Session, book_id: int, quantity: int):
     if new_stock < 0:
         raise HTTPException(
             status_code=400,
-            detail=f"Insufficient stock. Current: {book.stock}, requested change: {quantity}"
+            detail=f"Insufficient stock. Current: {book.stock}, requested change: {quantity}",
         )
     book.stock = new_stock
+    book.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(book)
     return book
@@ -613,12 +956,13 @@ def update_tag(db: Session, tag_id: int, data: schemas.TagUpdate):
     if "name" in update:
         dup = db.query(models.Tag).filter(
             models.Tag.name == update["name"],
-            models.Tag.id != tag_id
+            models.Tag.id != tag_id,
         ).first()
         if dup:
             raise HTTPException(status_code=409, detail=f"Tag '{update['name']}' already exists")
     for k, v in update.items():
         setattr(tag, k, v)
+    tag.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(tag)
     return tag
@@ -626,11 +970,10 @@ def update_tag(db: Session, tag_id: int, data: schemas.TagUpdate):
 
 def delete_tag(db: Session, tag_id: int):
     tag = get_tag(db, tag_id)
-    book_count = len(tag.books)
-    if book_count > 0:
+    if len(tag.books) > 0:
         raise HTTPException(
             status_code=409,
-            detail=f"Cannot delete tag with {book_count} associated book(s). Remove tag from books first."
+            detail=f"Cannot delete tag with {len(tag.books)} associated book(s). Remove tag from books first.",
         )
     db.delete(tag)
     db.commit()
@@ -670,15 +1013,10 @@ VALID_STATUS_TRANSITIONS = {
 
 
 def create_order(db: Session, data: schemas.OrderCreate) -> models.Order:
-    # Validace: kontrola duplicitních book_id v položkách
     book_ids = [item.book_id for item in data.items]
     if len(book_ids) != len(set(book_ids)):
-        raise HTTPException(
-            status_code=400,
-            detail="Duplicate book_id in order items"
-        )
+        raise HTTPException(status_code=400, detail="Duplicate book_id in order items")
 
-    # Validace: kontrola existence knih a dostatku skladu
     order_items = []
     for item in data.items:
         book = get_book(db, item.book_id)
@@ -686,26 +1024,22 @@ def create_order(db: Session, data: schemas.OrderCreate) -> models.Order:
             raise HTTPException(
                 status_code=400,
                 detail=f"Insufficient stock for book '{book.title}'. "
-                       f"Available: {book.stock}, requested: {item.quantity}"
+                       f"Available: {book.stock}, requested: {item.quantity}",
             )
         order_items.append((book, item))
 
-    # Vytvoření objednávky
     order = models.Order(
         customer_name=data.customer_name,
         customer_email=data.customer_email,
         status="pending",
     )
     db.add(order)
-    db.flush()  # získáme order.id
+    db.flush()
 
-    # Vytvoření položek a odečtení skladu
     for book, item in order_items:
         oi = models.OrderItem(
-            order_id=order.id,
-            book_id=item.book_id,
-            quantity=item.quantity,
-            unit_price=book.price,  # zachycení ceny v momentě objednávky
+            order_id=order.id, book_id=item.book_id,
+            quantity=item.quantity, unit_price=book.price,
         )
         db.add(oi)
         book.stock -= item.quantity
@@ -745,7 +1079,6 @@ def get_orders(
             customer_email=o.customer_email, status=o.status,
             total_price=round(total_price, 2), created_at=o.created_at,
         ))
-
     return schemas.PaginatedOrders(
         items=items, total=total, page=page,
         page_size=page_size, total_pages=total_pages,
@@ -755,21 +1088,17 @@ def get_orders(
 def update_order_status(db: Session, order_id: int, new_status: str) -> models.Order:
     order = get_order(db, order_id)
     allowed = VALID_STATUS_TRANSITIONS.get(order.status, [])
-
     if new_status not in allowed:
         raise HTTPException(
             status_code=400,
             detail=f"Cannot transition from '{order.status}' to '{new_status}'. "
-                   f"Allowed transitions: {allowed if allowed else 'none (terminal state)'}"
+                   f"Allowed transitions: {allowed if allowed else 'none (terminal state)'}",
         )
-
-    # Při zrušení objednávky vrátíme sklad
     if new_status == "cancelled":
         for item in order.items:
             book = db.query(models.Book).filter(models.Book.id == item.book_id).first()
             if book:
                 book.stock += item.quantity
-
     order.status = new_status
     order.updated_at = datetime.now(timezone.utc)
     db.commit()
@@ -783,9 +1112,8 @@ def delete_order(db: Session, order_id: int):
         raise HTTPException(
             status_code=400,
             detail=f"Cannot delete order in '{order.status}' state. "
-                   f"Only pending or cancelled orders can be deleted."
+                   f"Only pending or cancelled orders can be deleted.",
         )
-    # Pokud je pending, vrátíme sklad
     if order.status == "pending":
         for item in order.items:
             book = db.query(models.Book).filter(models.Book.id == item.book_id).first()
@@ -796,7 +1124,6 @@ def delete_order(db: Session, order_id: int):
 
 
 def get_order_response(order: models.Order) -> dict:
-    """Helper pro sestavení odpovědi s total_price."""
     total_price = sum(i.unit_price * i.quantity for i in order.items)
     return {
         "id": order.id,
@@ -813,8 +1140,11 @@ def get_order_response(order: models.Order) -> dict:
 # ── Author's Books ───────────────────────────────────────
 
 def get_author_books(db: Session, author_id: int, page: int = 1, page_size: int = 10):
-    get_author(db, author_id)  # 404 pokud neexistuje
-    q = db.query(models.Book).filter(models.Book.author_id == author_id)
+    get_author(db, author_id)
+    q = db.query(models.Book).filter(
+        models.Book.author_id == author_id,
+        models.Book.is_deleted == False,
+    )
     total = q.count()
     total_pages = math.ceil(total / page_size) if total > 0 else 1
     items = q.offset((page - 1) * page_size).limit(page_size).all()
@@ -827,87 +1157,53 @@ def get_author_books(db: Session, author_id: int, page: int = 1, page_size: int 
 # ── Bulk Create Books ────────────────────────────────────
 
 def bulk_create_books(db: Session, data: schemas.BulkBookCreate) -> schemas.BulkCreateResponse:
-    """
-    Vytvoří knihy hromadně. Každá se validuje samostatně.
-    Úspěšné se commitnou, neúspěšné vrátí chybu.
-    Vrací 207 pokud je mix úspěchů a chyb, 201 pokud vše OK, 422 pokud vše selže.
-    """
     results = []
     created_count = 0
     failed_count = 0
 
     for i, book_data in enumerate(data.books):
         try:
-            # Validace autora
-            author = db.query(models.Author).filter(
-                models.Author.id == book_data.author_id
-            ).first()
+            author = db.query(models.Author).filter(models.Author.id == book_data.author_id).first()
             if not author:
                 raise ValueError(f"Author with id {book_data.author_id} not found")
-
-            # Validace kategorie
-            cat = db.query(models.Category).filter(
-                models.Category.id == book_data.category_id
-            ).first()
+            cat = db.query(models.Category).filter(models.Category.id == book_data.category_id).first()
             if not cat:
                 raise ValueError(f"Category with id {book_data.category_id} not found")
-
-            # Validace ISBN unikátnosti
-            if db.query(models.Book).filter(
-                models.Book.isbn == book_data.isbn
-            ).first():
+            if db.query(models.Book).filter(models.Book.isbn == book_data.isbn).first():
                 raise ValueError(f"Book with ISBN '{book_data.isbn}' already exists")
 
-            # Vytvoření
             book = models.Book(**book_data.model_dump())
             db.add(book)
-            db.flush()  # získáme ID bez commitu
+            db.flush()
             db.refresh(book)
-
-            results.append(schemas.BulkResultItem(
-                index=i, status="created", book=book,
-            ))
+            results.append(schemas.BulkResultItem(index=i, status="created", book=book))
             created_count += 1
-
         except (ValueError, Exception) as e:
-            results.append(schemas.BulkResultItem(
-                index=i, status="error", error=str(e),
-            ))
+            results.append(schemas.BulkResultItem(index=i, status="error", error=str(e)))
             failed_count += 1
 
     if created_count > 0:
-        db.commit()  # commit jen úspěšné
+        db.commit()
     else:
         db.rollback()
 
     return schemas.BulkCreateResponse(
-        total=len(data.books),
-        created=created_count,
-        failed=failed_count,
-        results=results,
+        total=len(data.books), created=created_count,
+        failed=failed_count, results=results,
     )
 
 
 # ── Clone Book ───────────────────────────────────────────
 
 def clone_book(db: Session, book_id: int, data: schemas.BookCloneRequest) -> models.Book:
-    source = get_book(db, book_id)  # 404 pokud neexistuje
-
-    # ISBN unikátnost
+    source = get_book(db, book_id)
     if db.query(models.Book).filter(models.Book.isbn == data.new_isbn).first():
-        raise HTTPException(
-            status_code=409,
-            detail=f"Book with ISBN '{data.new_isbn}' already exists",
-        )
-
+        raise HTTPException(status_code=409, detail=f"Book with ISBN '{data.new_isbn}' already exists")
     clone = models.Book(
         title=data.new_title or f"{source.title} (copy)",
-        isbn=data.new_isbn,
-        price=source.price,
-        published_year=source.published_year,
-        stock=data.stock,  # stock se NEKOPÍRUJE — explicitně nastavený nebo 0
-        author_id=source.author_id,
-        category_id=source.category_id,
+        isbn=data.new_isbn, price=source.price,
+        published_year=source.published_year, stock=data.stock,
+        author_id=source.author_id, category_id=source.category_id,
     )
     db.add(clone)
     db.commit()
@@ -919,15 +1215,12 @@ def clone_book(db: Session, book_id: int, data: schemas.BookCloneRequest) -> mod
 
 def generate_invoice(db: Session, order_id: int) -> schemas.InvoiceResponse:
     order = get_order(db, order_id)
-
-    # Faktura jen pro potvrzené+ objednávky
     if order.status in ("pending", "cancelled"):
         raise HTTPException(
             status_code=403,
             detail=f"Cannot generate invoice for order in '{order.status}' state. "
                    f"Order must be confirmed, shipped, or delivered.",
         )
-
     items = []
     subtotal = 0.0
     for oi in order.items:
@@ -936,50 +1229,32 @@ def generate_invoice(db: Session, order_id: int) -> schemas.InvoiceResponse:
         items.append(schemas.InvoiceItem(
             book_title=book.title if book else "Unknown",
             isbn=book.isbn if book else "N/A",
-            quantity=oi.quantity,
-            unit_price=oi.unit_price,
-            line_total=line_total,
+            quantity=oi.quantity, unit_price=oi.unit_price, line_total=line_total,
         ))
         subtotal += line_total
-
     return schemas.InvoiceResponse(
-        invoice_number=f"INV-{order.id:06d}",
-        order_id=order.id,
-        customer_name=order.customer_name,
-        customer_email=order.customer_email,
-        status=order.status,
-        issued_at=datetime.now(timezone.utc).isoformat(),
-        items=items,
-        subtotal=round(subtotal, 2),
-        item_count=len(items),
+        invoice_number=f"INV-{order.id:06d}", order_id=order.id,
+        customer_name=order.customer_name, customer_email=order.customer_email,
+        status=order.status, issued_at=datetime.now(timezone.utc).isoformat(),
+        items=items, subtotal=round(subtotal, 2), item_count=len(items),
     )
 
 
 # ── Add Item to Pending Order ────────────────────────────
 
-def add_item_to_order(
-    db: Session, order_id: int, data: schemas.OrderAddItem,
-) -> models.Order:
+def add_item_to_order(db: Session, order_id: int, data: schemas.OrderAddItem) -> models.Order:
     order = get_order(db, order_id)
-
-    # Jen pending objednávky lze modifikovat
     if order.status != "pending":
         raise HTTPException(
             status_code=403,
-            detail=f"Cannot modify order in '{order.status}' state. "
-                   f"Only pending orders can be modified.",
+            detail=f"Cannot modify order in '{order.status}' state. Only pending orders can be modified.",
         )
-
-    # Kontrola duplicitního book_id
     existing_book_ids = {oi.book_id for oi in order.items}
     if data.book_id in existing_book_ids:
         raise HTTPException(
             status_code=409,
-            detail=f"Book {data.book_id} is already in this order. "
-                   f"Use a separate order or modify the existing item.",
+            detail=f"Book {data.book_id} is already in this order.",
         )
-
-    # Validace knihy a skladu
     book = get_book(db, data.book_id)
     if book.stock < data.quantity:
         raise HTTPException(
@@ -987,17 +1262,12 @@ def add_item_to_order(
             detail=f"Insufficient stock for book '{book.title}'. "
                    f"Available: {book.stock}, requested: {data.quantity}",
         )
-
-    # Přidání položky + odečtení skladu
     oi = models.OrderItem(
-        order_id=order.id,
-        book_id=data.book_id,
-        quantity=data.quantity,
-        unit_price=book.price,
+        order_id=order.id, book_id=data.book_id,
+        quantity=data.quantity, unit_price=book.price,
     )
     db.add(oi)
     book.stock -= data.quantity
-
     order.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(order)
@@ -1007,46 +1277,37 @@ def add_item_to_order(
 # ── Statistics ───────────────────────────────────────────
 
 def get_statistics(db: Session) -> schemas.StatisticsSummary:
-    total_books = db.query(models.Book).count()
-    total_orders = db.query(models.Order).count()
+    total_books = db.query(models.Book).filter(models.Book.is_deleted == False).count()
+    in_stock = db.query(models.Book).filter(
+        models.Book.stock > 0, models.Book.is_deleted == False,
+    ).count()
 
-    # Knihy na skladě vs vyprodané
-    in_stock = db.query(models.Book).filter(models.Book.stock > 0).count()
+    delivered = db.query(models.Order).filter(models.Order.status == "delivered").all()
+    revenue = sum(
+        sum(i.unit_price * i.quantity for i in order.items)
+        for order in delivered
+    )
 
-    # Celkový obrat (jen z delivered objednávek)
-    delivered = db.query(models.Order).filter(
-        models.Order.status == "delivered"
-    ).all()
-    revenue = 0.0
-    for order in delivered:
-        revenue += sum(i.unit_price * i.quantity for i in order.items)
-
-    # Průměrná cena knih
     avg_price = None
     if total_books > 0:
-        prices = [b.price for b in db.query(models.Book).all()]
+        prices = [b.price for b in db.query(models.Book).filter(models.Book.is_deleted == False).all()]
         avg_price = round(sum(prices) / len(prices), 2)
 
-    # Průměrné hodnocení
     avg_rating = None
     reviews = db.query(models.Review).all()
     if reviews:
         avg_rating = round(sum(r.rating for r in reviews) / len(reviews), 2)
 
-    # Objednávky dle stavu
     status_counts = {}
     for status in ["pending", "confirmed", "shipped", "delivered", "cancelled"]:
-        count = db.query(models.Order).filter(
-            models.Order.status == status
-        ).count()
-        status_counts[status] = count
+        status_counts[status] = db.query(models.Order).filter(models.Order.status == status).count()
 
     return schemas.StatisticsSummary(
         total_authors=db.query(models.Author).count(),
         total_categories=db.query(models.Category).count(),
         total_books=total_books,
         total_tags=db.query(models.Tag).count(),
-        total_orders=total_orders,
+        total_orders=db.query(models.Order).count(),
         total_reviews=len(reviews),
         books_in_stock=in_stock,
         books_out_of_stock=total_books - in_stock,
@@ -1057,6 +1318,7 @@ def get_statistics(db: Session) -> schemas.StatisticsSummary:
     )
 
 # ═══ FILE: app/schemas.py ═══
+
 
 from pydantic import BaseModel, Field
 from typing import Optional, List
@@ -1083,6 +1345,7 @@ class AuthorResponse(BaseModel):
     bio: Optional[str]
     born_year: Optional[int]
     created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
@@ -1104,12 +1367,13 @@ class CategoryResponse(BaseModel):
     id: int
     name: str
     description: Optional[str]
+    updated_at: datetime
 
     class Config:
         from_attributes = True
 
 
-# ── Tags (před Books kvůli referenci v BookResponse) ─────
+# ── Tags ─────────────────────────────────────────────────
 
 class TagCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=30)
@@ -1123,6 +1387,7 @@ class TagResponse(BaseModel):
     id: int
     name: str
     created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
@@ -1164,6 +1429,7 @@ class BookResponse(BaseModel):
     author_id: int
     category_id: int
     created_at: datetime
+    updated_at: datetime
     author: AuthorResponse
     category: CategoryResponse
     tags: List[TagResponse] = Field(default_factory=list)
@@ -1309,7 +1575,7 @@ class BulkBookCreate(BaseModel):
 
 class BulkResultItem(BaseModel):
     index: int
-    status: str  # "created" | "error"
+    status: str
     book: Optional[BookResponse] = None
     error: Optional[str] = None
 
@@ -1374,35 +1640,75 @@ class StatisticsSummary(BaseModel):
     average_rating: Optional[float]
     orders_by_status: dict
 
+
+# ── Cover Upload ─────────────────────────────────────────
+
+class CoverUploadResponse(BaseModel):
+    book_id: int
+    filename: str
+    content_type: str
+    size_bytes: int
+
+
+# ── Export Jobs ──────────────────────────────────────────
+
+class ExportJobCreated(BaseModel):
+    job_id: str
+    status: str
+    created_at: str
+
+
+class ExportJobResult(BaseModel):
+    job_id: str
+    status: str
+    created_at: str
+    completed_at: Optional[str] = None
+    total: Optional[int] = None
+    data: Optional[list] = None
+
+
+# ── Maintenance ──────────────────────────────────────────
+
+class MaintenanceToggle(BaseModel):
+    enabled: bool
+
+
+class MaintenanceStatus(BaseModel):
+    maintenance_mode: bool
+    message: str
+
+
 # ═══ FILE: app/models.py ═══
+
 
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
-
 from .database import Base
+from sqlalchemy import (
+    Column, Integer, String, Float, Text, ForeignKey,
+    CheckConstraint, DateTime, Table, Boolean,
+)
 
-from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey, CheckConstraint, DateTime, Table
 
 class Author(Base):
     __tablename__ = "authors"
-
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     bio = Column(Text, nullable=True)
     born_year = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     books = relationship("Book", back_populates="author")
 
 
 class Category(Base):
     __tablename__ = "categories"
-
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50), nullable=False, unique=True)
     description = Column(Text, nullable=True)
-
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     books = relationship("Book", back_populates="category")
+
 
 book_tags = Table(
     "book_tags",
@@ -1411,19 +1717,21 @@ book_tags = Table(
     Column("tag_id", Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
 )
 
+
 class Book(Base):
     __tablename__ = "books"
-
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
     isbn = Column(String(13), nullable=False, unique=True)
     price = Column(Float, nullable=False)
-    tags = relationship("Tag", secondary=book_tags, back_populates="books")
     published_year = Column(Integer, nullable=False)
     stock = Column(Integer, nullable=False, default=0)
     author_id = Column(Integer, ForeignKey("authors.id"), nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    is_deleted = Column(Boolean, default=False, nullable=False)
+    deleted_at = Column(DateTime, nullable=True)
 
     __table_args__ = (
         CheckConstraint("price >= 0", name="check_price_positive"),
@@ -1432,12 +1740,12 @@ class Book(Base):
 
     author = relationship("Author", back_populates="books")
     category = relationship("Category", back_populates="books")
+    tags = relationship("Tag", secondary=book_tags, back_populates="books")
     reviews = relationship("Review", back_populates="book", cascade="all, delete-orphan")
 
 
 class Review(Base):
     __tablename__ = "reviews"
-
     id = Column(Integer, primary_key=True, index=True)
     book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
     rating = Column(Integer, nullable=False)
@@ -1448,23 +1756,20 @@ class Review(Base):
     __table_args__ = (
         CheckConstraint("rating >= 1 AND rating <= 5", name="check_rating_range"),
     )
-
     book = relationship("Book", back_populates="reviews")
 
 
 class Tag(Base):
     __tablename__ = "tags"
-
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(30), nullable=False, unique=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     books = relationship("Book", secondary=book_tags, back_populates="tags")
 
 
 class Order(Base):
     __tablename__ = "orders"
-
     id = Column(Integer, primary_key=True, index=True)
     customer_name = Column(String(100), nullable=False)
     customer_email = Column(String(200), nullable=False)
@@ -1473,13 +1778,11 @@ class Order(Base):
     updated_at = Column(DateTime,
                         default=lambda: datetime.now(timezone.utc),
                         onupdate=lambda: datetime.now(timezone.utc))
-
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
 
 
 class OrderItem(Base):
     __tablename__ = "order_items"
-
     id = Column(Integer, primary_key=True, index=True)
     order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
     book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
@@ -1489,6 +1792,5 @@ class OrderItem(Base):
     __table_args__ = (
         CheckConstraint("quantity >= 1", name="check_quantity_positive"),
     )
-
     order = relationship("Order", back_populates="items")
     book = relationship("Book")
