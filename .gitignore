@@ -1,16 +1,29 @@
-# Skryté soubory s klíči
-.env
-.coverage
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Virtuální prostředí
+# Virtual environment
 .venv/
 venv/
-env/
 
-# Cache soubory (Python a Pytest)
-__pycache__/
+# API keys
+.env
+
+# Coverage
+.coverage
+htmlcov/
+
+# Pytest
 .pytest_cache/
-*.pyc
 
-# (Volitelné) Složka s výstupy
-# outputs/
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
