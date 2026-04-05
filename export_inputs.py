@@ -1,14 +1,8 @@
 """
-Centrální export vstupních dat pro vibe-testing-framework.
+Centrální export vstupních dat pro vibe-testing-framework (Bookstore API).
 
-Stahuje kontext (L0-L4) z externích lokálních repozitářů
-a ukládá do složky inputs/ uvnitř frameworku.
-
-OBĚ API běží na portu 8000 — exportuj je PO JEDNOM:
-    python export_inputs.py bookstore      # bookstore musí běžet na :8000
-    python export_inputs.py astroops       # astroops musí běžet na :8000
-    python export_inputs.py all            # exportuj jen soubory (bez OpenAPI)
-    python export_inputs.py                # interaktivní výběr
+Stahuje kontext (L0-L4) z lokálního repozitáře a ukládá do složky inputs/bookstore.
+Pokud není repozitář nalezen na výchozí cestě, zeptá se na ni.
 """
 
 import os
@@ -16,50 +10,54 @@ import sys
 import shutil
 import requests
 import yaml
+import glob
+import sqlite3
 
-APIS = [
-    {
-        "id": "api1_bookstore",
-        "short": "bookstore",
-        "server_url": "http://localhost:8000",
-        "repo_path": "../bookstore-api",
-        "files": {
-            "l1_docs": "docs/documentation.md",
-            "l2_source": [
-                "app/main.py",
-                "app/crud.py",
-                "app/schemas.py",
-                "app/models.py",
-            ],
-            "l3_schema": "db_schema.sql",
-            "l4_tests": "tests/test_existing.py",
-        }
-    },
-    {
-        "id": "api2_astroops",
-        "short": "astroops",
-        "server_url": "http://localhost:8000",
-        "repo_path": "../astroops-api",
-        "files": {
-            "l1_docs": "docs/documentation.md",
-            "l2_source": [
-                "app/main.py",
-                "app/crud.py",
-                "app/schemas.py",
-                "app/models.py",
-            ],
-            "l3_schema": "db_schema.sql",
-            "l4_tests": "tests/test_existing.py",
-        }
-    }
-]
+SERVER_URL = "http://localhost:8000"
+FRAMEWORK_INPUTS = os.path.join("inputs", "bookstore")
 
-FRAMEWORK_INPUTS = "inputs"
+FILES_TO_EXPORT = {
+    "l1_docs": "docs/documentation.md",
+    "l2_source": [
+        "app/main.py",
+        "app/crud.py",
+        "app/schemas.py",
+        "app/models.py",
+    ],
+    "l3_schema": "db_schema.sql",
+    "l4_tests": "tests/test_existing.py",
+}
 
 
-def export_openapi(api_cfg, output_dir):
+def get_repo_path() -> str:
+    """Zjistí cestu k repozitáři. Zkusí výchozí, jinak se zeptá uživatele."""
+    default_path = "../bookstore-api"
+
+    if os.path.isdir(default_path):
+        print(f"✅ Nalezena výchozí složka repozitáře: {default_path}")
+        return default_path
+
+    print(f"⚠️ Výchozí složka '{default_path}' nebyla nalezena.")
+    while True:
+        user_path = input("Najděte složku bookstore-api (zadejte absolutní nebo relativní cestu, např. C:/Projekty/bookstore-api): ").strip()
+
+        # Odstranění uvozovek, pokud uživatel přetáhl složku do terminálu
+        user_path = user_path.strip("\"'")
+
+        if not user_path:
+            print("❌ Cesta nesmí být prázdná. (Pro zrušení stiskněte Ctrl+C)")
+            continue
+
+        if os.path.isdir(user_path):
+            print(f"✅ Složka nalezena: {user_path}")
+            return user_path
+        else:
+            print(f"❌ Složka '{user_path}' neexistuje. Zkuste to prosím znovu.")
+
+
+def export_openapi(output_dir):
     """L0: Stáhne OpenAPI spec z běžícího serveru."""
-    url = f"{api_cfg['server_url']}/openapi.json"
+    url = f"{SERVER_URL}/openapi.json"
     path = os.path.join(output_dir, "openapi.yaml")
 
     try:
@@ -67,7 +65,6 @@ def export_openapi(api_cfg, output_dir):
         r.raise_for_status()
         spec = r.json()
 
-        # Ověř že to je správné API
         title = spec.get("info", {}).get("title", "")
         print(f"  ℹ️  API title: {title}")
 
@@ -77,12 +74,13 @@ def export_openapi(api_cfg, output_dir):
         print(f"  ✅ L0: OpenAPI spec ({path_count} cest) → {path}")
 
     except requests.exceptions.RequestException as e:
-        print(f"  ❌ L0: Nelze stáhnout OpenAPI z {url}. Běží server? (Chyba: {e})")
+        print(f"  ⚠️  L0: Nelze stáhnout OpenAPI z {url}. Běží server? (Chyba: {e})")
+        print("      Pokračuji bez L0 (OpenAPI).")
 
 
-def export_file(api_cfg, file_key, output_name, output_dir, step_name):
+def export_file(repo_path, file_key, output_name, output_dir, step_name):
     """L1, L3, L4: Zkopíruje jeden soubor z repozitáře."""
-    src = os.path.join(api_cfg["repo_path"], api_cfg["files"][file_key])
+    src = os.path.join(repo_path, FILES_TO_EXPORT[file_key])
     dst = os.path.join(output_dir, output_name)
 
     if os.path.exists(src):
@@ -93,15 +91,15 @@ def export_file(api_cfg, file_key, output_name, output_dir, step_name):
         print(f"  ⚠️  {step_name}: Nenalezeno v {src} — přeskakuji")
 
 
-def export_source_code(api_cfg, output_dir):
+def export_source_code(repo_path, output_dir):
     """L2: Spojí specifikované zdrojové kódy do jednoho souboru."""
     dst = os.path.join(output_dir, "source_code.py")
     total_lines = 0
     files_processed = 0
 
     with open(dst, "w", encoding="utf-8") as out:
-        for rel_path in api_cfg["files"]["l2_source"]:
-            fpath = os.path.join(api_cfg["repo_path"], rel_path)
+        for rel_path in FILES_TO_EXPORT["l2_source"]:
+            fpath = os.path.join(repo_path, rel_path)
 
             if not os.path.exists(fpath):
                 print(f"  ⚠️  L2: Soubor {fpath} neexistuje — přeskakuji")
@@ -118,12 +116,12 @@ def export_source_code(api_cfg, output_dir):
     if files_processed > 0:
         print(f"  ✅ L2: Zdrojový kód ({files_processed} souborů, ~{total_lines} řádků) → {dst}")
     else:
-        print(f"  ❌ L2: Žádné zdrojové soubory nenalezeny pro {api_cfg['id']}.")
+        print(f"  ❌ L2: Žádné zdrojové soubory nenalezeny.")
 
 
-def export_db_schema(api_cfg, output_dir):
+def export_db_schema(repo_path, output_dir):
     """L3: Zkopíruje DB schéma. Pokud neexistuje, pokusí se vygenerovat z SQLite."""
-    src = os.path.join(api_cfg["repo_path"], api_cfg["files"]["l3_schema"])
+    src = os.path.join(repo_path, FILES_TO_EXPORT["l3_schema"])
     dst = os.path.join(output_dir, "db_schema.sql")
 
     if os.path.exists(src):
@@ -132,10 +130,7 @@ def export_db_schema(api_cfg, output_dir):
         print(f"  ✅ L3: DB schéma ({size:,} B) → {dst}")
         return
 
-    import glob
-    import sqlite3
-
-    db_files = glob.glob(os.path.join(api_cfg["repo_path"], "*.db"))
+    db_files = glob.glob(os.path.join(repo_path, "*.db"))
     if not db_files:
         print(f"  ⚠️  L3: Nenalezeno {src} ani žádný .db soubor — přeskakuji")
         return
@@ -157,85 +152,47 @@ def export_db_schema(api_cfg, output_dir):
         print(f"  ❌ L3: Chyba při exportu schématu z {db_path}: {e}")
 
 
-def process_api(api, skip_openapi=False):
-    """Exportuje vstupy pro jedno API."""
-    api_id = api["id"]
-    print(f"\n🚀 Zpracovávám: {api_id}")
-
-    output_dir = os.path.join(FRAMEWORK_INPUTS, api_id)
-    os.makedirs(output_dir, exist_ok=True)
-
-    if not os.path.exists(api["repo_path"]):
-        print(f"  ❌ Složka repozitáře {api['repo_path']} nenalezena! Přeskakuji.\n")
-        return
-
-    if not skip_openapi:
-        export_openapi(api, output_dir)
-    else:
-        print(f"  ⏭️  L0: OpenAPI přeskočeno (server neběží)")
-
-    export_file(api, "l1_docs", "documentation.md", output_dir, "L1")
-    export_source_code(api, output_dir)
-    export_db_schema(api, output_dir)
-    export_file(api, "l4_tests", "existing_tests.py", output_dir, "L4")
-
-    print(f"{'─' * 40}")
-
-
 def print_structure():
     """Vypíše strukturu výstupních souborů."""
     print(f"\nVýstupní struktura:")
-    for api in APIS:
-        d = os.path.join(FRAMEWORK_INPUTS, api["id"])
-        if os.path.exists(d):
-            files = os.listdir(d)
-            print(f"  {d}/")
-            for f in sorted(files):
-                size = os.path.getsize(os.path.join(d, f))
-                print(f"    {f} ({size:,} B)")
+    if os.path.exists(FRAMEWORK_INPUTS):
+        files = os.listdir(FRAMEWORK_INPUTS)
+        print(f"  {FRAMEWORK_INPUTS}/")
+        for f in sorted(files):
+            size = os.path.getsize(os.path.join(FRAMEWORK_INPUTS, f))
+            print(f"    {f} ({size:,} B)")
+    else:
+        print(f"  Složka {FRAMEWORK_INPUTS} nebyla vytvořena.")
+
+
+def main():
+    print(f"\n📦 Export vstupů pro Bookstore API\n{'═' * 40}")
+
+    # Získání správné cesty
+    repo_path = get_repo_path()
+
+    print(f"\n🚀 Zahajuji export ze složky: {repo_path}")
+    os.makedirs(FRAMEWORK_INPUTS, exist_ok=True)
+
+    # L0: OpenAPI
+    export_openapi(FRAMEWORK_INPUTS)
+
+    # L1: Dokumentace
+    export_file(repo_path, "l1_docs", "documentation.md", FRAMEWORK_INPUTS, "L1")
+
+    # L2: Zdrojové kódy
+    export_source_code(repo_path, FRAMEWORK_INPUTS)
+
+    # L3: DB Schéma
+    export_db_schema(repo_path, FRAMEWORK_INPUTS)
+
+    # L4: Testy
+    export_file(repo_path, "l4_tests", "existing_tests.py", FRAMEWORK_INPUTS, "L4")
+
+    print(f"{'─' * 40}")
+    print_structure()
+    print(f"\n🎉 Export dokončen.")
 
 
 if __name__ == "__main__":
-    arg = sys.argv[1].lower() if len(sys.argv) > 1 else None
-
-    print(f"\n📦 Export vstupů do '{FRAMEWORK_INPUTS}/'\n")
-
-    if arg in ("bookstore", "astroops"):
-        # Export jednoho API (server musí běžet na :8000)
-        api = next(a for a in APIS if a["short"] == arg)
-        print(f"⚠️  Ujisti se, že {arg} server běží na {api['server_url']}")
-        process_api(api, skip_openapi=False)
-
-    elif arg == "all":
-        # Export souborů bez OpenAPI (servery nemusí běžet)
-        print("📁 Export souborů (bez OpenAPI — servery nemusí běžet)")
-        for api in APIS:
-            process_api(api, skip_openapi=True)
-
-    elif arg == "files":
-        # Alias pro "all"
-        print("📁 Export souborů (bez OpenAPI — servery nemusí běžet)")
-        for api in APIS:
-            process_api(api, skip_openapi=True)
-
-    else:
-        # Interaktivní
-        print("Obě API používají port 8000 — exportuj po jednom:\n")
-        print("  python export_inputs.py bookstore   # bookstore běží na :8000")
-        print("  python export_inputs.py astroops    # astroops běží na :8000")
-        print("  python export_inputs.py files       # jen soubory (bez OpenAPI)")
-        print()
-
-        choice = input("Co chceš exportovat? [bookstore/astroops/files]: ").strip().lower()
-        if choice in ("bookstore", "astroops"):
-            api = next(a for a in APIS if a["short"] == choice)
-            process_api(api, skip_openapi=False)
-        elif choice in ("files", "all"):
-            for api in APIS:
-                process_api(api, skip_openapi=True)
-        else:
-            print("❌ Neznámá volba.")
-            sys.exit(1)
-
-    print_structure()
-    print(f"\n🎉 Export dokončen.")
+    main()
