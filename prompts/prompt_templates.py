@@ -1,9 +1,10 @@
 """
-Unified Prompt Framework – v6 (batch repair).
+Unified Prompt Framework – v7 (context-aware repair + safe helpers).
 
-Změny oproti v5:
-  - repair_batch_prompt: hromadná oprava failing testů v 1 promptu
-  - repair_single_prompt zachován jako fallback (nepoužívá se v hlavním flow)
+Změny oproti v6:
+  - repair_batch_prompt: přidán kontext API → LLM ví CO opravuje
+  - repair_helpers_prompt: přidán kontext + explicitní instrukce zachovat importy
+  - Oba repair prompty obsahují _knowledge_block() pro L1+
 """
 from __future__ import annotations
 
@@ -52,6 +53,15 @@ class PromptBuilder:
             f"{names}\n"
             f"Soustřeď se POUZE na ostatní failing testy.\n"
         )
+
+    def _context_block(self, context: str, max_chars: int = 4000) -> str:
+        """Zkrácený kontext API pro repair prompty."""
+        if not context:
+            return ""
+        trimmed = context[:max_chars]
+        if len(context) > max_chars:
+            trimmed += "\n... (zkráceno)"
+        return f"\nAPI KONTEXT (pro pochopení očekávaného chování):\n{trimmed}\n"
 
     # ══════════════════════════════════════════════════
     #  FÁZE 2: Plánování
@@ -156,6 +166,7 @@ NO MARKDOWN BLOCKS (do not use ```python), NO PROSE, NO EXPLANATIONS.
         self,
         test_entries: list[tuple[str, str, str]],
         helpers: str,
+        context: str,
         base_url: str,
         stale_tests: list[str] | None = None,
     ) -> str:
@@ -164,6 +175,7 @@ NO MARKDOWN BLOCKS (do not use ```python), NO PROSE, NO EXPLANATIONS.
         Args:
             test_entries: [(test_name, test_code, error_msg), ...]
             helpers: kód helper funkcí
+            context: API kontext (zkrácený)
             base_url: base URL API
             stale_tests: seznam stale testů (pro info)
         """
@@ -175,8 +187,8 @@ NO MARKDOWN BLOCKS (do not use ```python), NO PROSE, NO EXPLANATIONS.
 
         return f"""Oprav tyto selhávající testovací funkce. Každý test má svůj kód a chybu.
 BASE_URL = "{base_url}"
-
-DOSTUPNÉ HELPERY:
+{self._context_block(context)}
+DOSTUPNÉ HELPERY (NEMĚŇ JE, pouze je používej):
 {helpers}
 
 SELHÁVAJÍCÍ TESTY ({len(test_entries)}):
@@ -186,23 +198,25 @@ SELHÁVAJÍCÍ TESTY ({len(test_entries)}):
 CRITICAL CODING INSTRUCTIONS:
 - Oprav KAŽDOU funkci výše. Zachovej přesné názvy funkcí.
 - Používej existující helper funkce, nevymýšlej nové.
-- Pokud test ověřuje jen status kód, přidej i kontrolu response body.
+- Analyzuj CHYBU u každého testu a oprav PŘÍČINU, ne jen symptom:
+  - Pokud assert selže na špatném status kódu → zkontroluj jestli test posílá správná data dle API kontextu
+  - Pokud assert selže na hodnotě v response → zkontroluj jestli test ověřuje správné pole/hodnotu
+  - Pokud test padne na setup (helper) → zkontroluj jestli test správně vytváří prerekvizity
 - Vrať POUZE opravené funkce (def test_...), žádné helpery ani importy.
 
 YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (all {len(test_entries)} fixed functions).
 NO MARKDOWN BLOCKS, NO PROSE, NO IMPORTS, NO HELPERS, NO EXPLANATIONS.
 """
 
-
     def repair_helpers_prompt(
         self, helpers: str, sample_errors: list[str],
-        failing_count: int, base_url: str,
+        failing_count: int, context: str, base_url: str,
     ) -> str:
         errors_text = "\n".join(sample_errors)
         return f"""Většina testů padá kvůli bugu v helper funkcích. Oprav helpery.
 BASE_URL = "{base_url}"
-
-AKTUÁLNÍ HELPERY:
+{self._context_block(context)}
+AKTUÁLNÍ HELPERY (vrať KOMPLETNÍ opravenou verzi VČETNĚ VŠECH importů):
 {helpers}
 
 UKÁZKY CHYB ({failing_count} testů celkem padá):
@@ -210,11 +224,18 @@ UKÁZKY CHYB ({failing_count} testů celkem padá):
 {self._knowledge_block()}{self._framework_block()}
 =========================================
 CRITICAL CODING INSTRUCTIONS:
+- Vrať KOMPLETNÍ blok: všechny importy + všechny helper funkce.
+- NEVYNECHEJ žádný import ani helper který je v AKTUÁLNÍ verzi výše.
 - Zachovej signatury helperů kompatibilní s existujícími testy.
 - Zajisti unikátní názvy přes uuid4 (unique() helper).
+- Analyzuj CHYBY a oprav ROOT CAUSE v helperech:
+  - Pokud helpery posílají špatný formát dat → oprav dle API kontextu
+  - Pokud helpery neposílají povinné hlavičky (API key, ETag) → přidej je
+  - Pokud helpery mají špatnou URL/metodu → oprav dle API kontextu
 
-YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (the fixed helpers and imports).
+YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (all imports + all helpers).
 NO MARKDOWN BLOCKS, NO PROSE, NO EXPLANATIONS.
+The code MUST start with import statements.
 """
 
     def fill_tests_prompt(

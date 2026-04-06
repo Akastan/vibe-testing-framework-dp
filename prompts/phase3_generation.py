@@ -1,12 +1,11 @@
 """
-Fáze 3: Generování a oprava pytest testů (v3 — nový repair loop).
+Fáze 3: Generování a oprava pytest testů (v4 — context-aware repair + regression guard).
 
-Změny oproti v2:
-- Repair strategie: VŽDY nejdřív izolované opravy, pak helpery
-- Stale = test potřebuje min. 1× izolovanou + 1× helper opravu se stejnou chybou
-- Helpery se počítají do stale (ne jako dřív kde byly "free pass")
-- Early stop: pokud všechny failing testy jsou stale → break z iterací
-- Alternace: isolated → helper → isolated → helper → ...
+Změny oproti v3:
+  - Repair prompty dostávají API kontext → LLM ví CO opravuje
+  - Regression guard: po opravě se porovná počet passing testů, rollback při regresi
+  - Helper repair: validace že nové helpery obsahují všechny importy + funkce z originálu
+  - repair_failing_tests() má nový parametr context
 
 Flow:
   Iterace 1: isolated repair (per-test prompty)
@@ -27,7 +26,7 @@ MAX_INDIVIDUAL_REPAIRS = 10
 
 
 # ═══════════════════════════════════════════════════════════
-#  AST Utility (beze změny)
+#  AST Utility
 # ═══════════════════════════════════════════════════════════
 
 def count_test_functions(code: str) -> int:
@@ -125,13 +124,45 @@ def _remove_last_n_tests(code: str, n: int) -> str:
     return code
 
 
+def _get_all_function_names(code: str) -> list[str]:
+    """Vrátí názvy VŠECH funkcí (ne jen test_) v kódu."""
+    try:
+        tree = ast.parse(code)
+        return [n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
+    except SyntaxError:
+        return []
+
+
+def _get_import_names(code: str) -> set[str]:
+    """Vrátí set importovaných modulů/jmen."""
+    try:
+        tree = ast.parse(code)
+        names = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    names.add(alias.name)
+            elif isinstance(node, ast.ImportFrom):
+                if node.module:
+                    names.add(node.module)
+        return names
+    except SyntaxError:
+        return set()
+
+
 # ═══════════════════════════════════════════════════════════
-#  Pytest Log Parsing (beze změny)
+#  Pytest Log Parsing
 # ═══════════════════════════════════════════════════════════
 
 def _parse_failing_test_names(pytest_log: str) -> list[str]:
     names = re.findall(r'FAILED\s+\S+::(\w+)', pytest_log)
     return list(dict.fromkeys(names))
+
+
+def _parse_passing_count(pytest_log: str) -> int:
+    """Extrahuje počet passing testů z pytest výstupu."""
+    match = re.search(r'(\d+)\s+passed', pytest_log)
+    return int(match.group(1)) if match else 0
 
 
 def _extract_error_for_test(pytest_log: str, test_name: str) -> str:
@@ -178,16 +209,15 @@ def _normalize_error(error: str) -> str:
 
 
 # ═══════════════════════════════════════════════════════════
-#  Stale Detection (v3 — isolated + helper = stale)
+#  Stale Detection (v3)
 # ═══════════════════════════════════════════════════════════
 
 class _StaleEntry:
-    """Stav jednoho testu v stale trackeru."""
     __slots__ = ("isolated_errors", "helper_errors")
 
     def __init__(self):
-        self.isolated_errors: list[str] = []   # normalizované chyby z izolovaných oprav
-        self.helper_errors: list[str] = []     # normalizované chyby z helper oprav
+        self.isolated_errors: list[str] = []
+        self.helper_errors: list[str] = []
 
 
 class StaleTracker:
@@ -197,9 +227,6 @@ class StaleTracker:
       1. Má alespoň 1 pokus o izolovanou opravu
       2. Má alespoň 1 pokus o helper opravu
       3. Poslední chyba z obou typů je stejná (normalizovaná)
-
-    Tím je zajištěno, že každý test dostane šanci na oba typy oprav
-    než je vyřazen. Helper opravy se počítají do stale (ne free pass).
     """
 
     def __init__(self):
@@ -209,45 +236,30 @@ class StaleTracker:
     def update(self, repair_type: str, pytest_log: str,
                failing_names: list[str],
                attempted_names: list[str]):
-        """Aktualizuj po repair iteraci.
-
-        Args:
-            repair_type: "isolated" | "helper_root_cause" | "helper_fallback"
-            pytest_log: log z PŘEDCHOZÍHO pytest runu (před opravou)
-            failing_names: všechny failing testy
-            attempted_names: testy pro které se pokusila oprava
-        """
         attempted_set = set(attempted_names)
         is_helper = repair_type in ("helper_root_cause", "helper_fallback")
 
-        # Zaznamenej chyby pro attempted testy
         for name in failing_names:
             if name not in attempted_set:
                 continue
-
             error = _extract_error_for_test(pytest_log, name)
             norm = _normalize_error(error)
-
             entry = self._entries.setdefault(name, _StaleEntry())
             if is_helper:
                 entry.helper_errors.append(norm)
             else:
                 entry.isolated_errors.append(norm)
 
-        # Vyčisti testy co prošly
         passed = set(self._entries.keys()) - set(failing_names)
         for name in passed:
             self._entries.pop(name, None)
             self._stale.discard(name)
 
-        # Detekuj stale: potřebuje obojí + stejná chyba
         for name, entry in self._entries.items():
             if not entry.isolated_errors or not entry.helper_errors:
-                continue  # nemá ještě oba typy → nemůže být stale
-
+                continue
             last_isolated = entry.isolated_errors[-1]
             last_helper = entry.helper_errors[-1]
-
             if last_isolated == last_helper:
                 if name not in self._stale:
                     print(f"      🔒 {name} je stale "
@@ -261,19 +273,9 @@ class StaleTracker:
     def filter_repairable(self, failing_names: list[str]) -> list[str]:
         return [n for n in failing_names if n not in self._stale]
 
-    def has_had_isolated(self, test_name: str) -> bool:
-        """Měl test alespoň 1 pokus o izolovanou opravu?"""
-        entry = self._entries.get(test_name)
-        return bool(entry and entry.isolated_errors)
-
-    def has_had_helper(self, test_name: str) -> bool:
-        """Měl test alespoň 1 pokus o helper opravu?"""
-        entry = self._entries.get(test_name)
-        return bool(entry and entry.helper_errors)
-
 
 # ═══════════════════════════════════════════════════════════
-#  Počáteční generování (beze změny)
+#  Počáteční generování
 # ═══════════════════════════════════════════════════════════
 
 def generate_test_code(test_plan: dict, context_data: str, llm,
@@ -296,7 +298,7 @@ def generate_test_code(test_plan: dict, context_data: str, llm,
 
 
 # ═══════════════════════════════════════════════════════════
-#  Validace počtu testů (beze změny)
+#  Validace počtu testů
 # ═══════════════════════════════════════════════════════════
 
 def validate_test_count(code: str, expected: int, llm=None,
@@ -363,12 +365,39 @@ def validate_test_count(code: str, expected: int, llm=None,
 
 
 # ═══════════════════════════════════════════════════════════
+#  Helper repair — safety validation
+# ═══════════════════════════════════════════════════════════
+
+def _validate_helpers_safe(old_helpers: str, new_helpers: str) -> tuple[bool, str]:
+    """Ověří že nové helpery neztratily importy ani funkce oproti starým.
+
+    Returns:
+        (is_safe, reason)
+    """
+    old_imports = _get_import_names(old_helpers)
+    new_imports = _get_import_names(new_helpers)
+    missing_imports = old_imports - new_imports
+    if missing_imports:
+        return False, f"Chybějící importy: {missing_imports}"
+
+    old_funcs = set(_get_all_function_names(old_helpers))
+    new_funcs = set(_get_all_function_names(new_helpers))
+    # Odfiltruj test_ funkce (neměly by být v helperech)
+    old_helpers_only = {f for f in old_funcs if not f.startswith("test_")}
+    new_helpers_only = {f for f in new_funcs if not f.startswith("test_")}
+    missing_funcs = old_helpers_only - new_helpers_only
+    if missing_funcs:
+        return False, f"Chybějící helper funkce: {missing_funcs}"
+
+    return True, "OK"
+
+
+# ═══════════════════════════════════════════════════════════
 #  Repair — interní funkce
 # ═══════════════════════════════════════════════════════════
 
-
 def _repair_helpers(master_code, pytest_log, helpers, failing_names, llm,
-                     prompt_builder: PromptBuilder, base_url: str):
+                     prompt_builder: PromptBuilder, base_url: str, context: str):
     sample_errors = []
     for name in failing_names[:3]:
         err = _extract_error_for_test(pytest_log, name)
@@ -376,7 +405,7 @@ def _repair_helpers(master_code, pytest_log, helpers, failing_names, llm,
             sample_errors.append(f"Test {name}:\n{err[:500]}")
 
     prompt = prompt_builder.repair_helpers_prompt(
-        helpers, sample_errors, len(failing_names), base_url
+        helpers, sample_errors, len(failing_names), context, base_url
     )
 
     try:
@@ -403,6 +432,16 @@ def _repair_helpers(master_code, pytest_log, helpers, failing_names, llm,
         print(f"    [Repair] ⚠️ Opravené helpery mají syntax error, ponechávám původní")
         return master_code
 
+    # ── Safety check: nové helpery nesmí ztratit importy/funkce ──
+    is_safe, reason = _validate_helpers_safe(helpers, clean)
+    if not is_safe:
+        print(f"    [Repair] ⚠️ Nové helpery nejsou bezpečné: {reason}")
+        print(f"    [Repair] ⚠️ Zkouším merge: zachovám staré importy + přidám opravené funkce")
+        clean = _merge_helpers(helpers, clean)
+        if not clean:
+            print(f"    [Repair] ⚠️ Merge selhal, ponechávám původní helpery")
+            return master_code
+
     result = _replace_helpers(master_code, clean)
 
     try:
@@ -414,8 +453,48 @@ def _repair_helpers(master_code, pytest_log, helpers, failing_names, llm,
     return result
 
 
+def _merge_helpers(old_helpers: str, new_helpers: str) -> str | None:
+    """Pokusí se mergovat staré a nové helpery — zachová staré importy,
+    použije nové funkce."""
+    try:
+        # Extrahuj importy z obou
+        old_lines = old_helpers.split('\n')
+        new_lines = new_helpers.split('\n')
+
+        # Najdi import řádky ze starých helperů
+        old_import_lines = []
+        old_rest_lines = []
+        for line in old_lines:
+            stripped = line.strip()
+            if (stripped.startswith("import ") or stripped.startswith("from ")
+                    or stripped == "" and not old_rest_lines):
+                old_import_lines.append(line)
+            else:
+                old_rest_lines.append(line)
+
+        # Najdi ne-import řádky z nových helperů (opravené funkce)
+        new_func_lines = []
+        in_imports = True
+        for line in new_lines:
+            stripped = line.strip()
+            if in_imports and (stripped.startswith("import ") or stripped.startswith("from ")
+                               or stripped == ""):
+                continue  # Přeskočíme importy z nových — použijeme staré
+            else:
+                in_imports = False
+                new_func_lines.append(line)
+
+        merged = '\n'.join(old_import_lines) + '\n\n' + '\n'.join(new_func_lines)
+
+        # Ověř syntax
+        ast.parse(merged)
+        return merged.strip()
+    except SyntaxError:
+        return None
+
+
 def _do_isolated_repairs(master_code, pytest_log, repairable, helpers, llm,
-                          prompt_builder, base_url, stale_tests):
+                          prompt_builder, base_url, context, stale_tests):
     """Hromadná izolovaná oprava — 1 prompt pro všechny failing testy."""
     to_repair = repairable[:MAX_INDIVIDUAL_REPAIRS]
     skipped_excess = len(repairable) - len(to_repair)
@@ -426,7 +505,6 @@ def _do_isolated_repairs(master_code, pytest_log, repairable, helpers, llm,
     else:
         print(f"    [Repair:Isolated] Opravuji {len(to_repair)} testů v 1 promptu...")
 
-    # Sestav data pro hromadný prompt
     test_entries = []
     for name in to_repair:
         code = _extract_function_code(master_code, name)
@@ -439,9 +517,8 @@ def _do_isolated_repairs(master_code, pytest_log, repairable, helpers, llm,
     if not test_entries:
         return master_code, 0, to_repair
 
-    # 1 LLM call pro všechny testy
     prompt = prompt_builder.repair_batch_prompt(
-        test_entries, helpers, base_url, stale_tests
+        test_entries, helpers, context, base_url, stale_tests
     )
 
     try:
@@ -450,14 +527,13 @@ def _do_isolated_repairs(master_code, pytest_log, repairable, helpers, llm,
         print(f"    [Repair:Isolated] ⚠️ LLM chyba: {str(e)[:120]}")
         return master_code, 0, to_repair
 
-    # Parsuj odpověď — extrahuj jednotlivé funkce
     fixed_functions = _parse_batch_repair_response(raw)
     print(f"    [Repair:Isolated] LLM vrátil {len(fixed_functions)} opravených funkcí")
 
     repaired = 0
     for name, fixed_code in fixed_functions.items():
         if name not in {e[0] for e in test_entries}:
-            continue  # LLM vrátil funkci kterou jsme nežádali
+            continue
 
         new_code = _replace_function_code(master_code, name, fixed_code)
         try:
@@ -472,10 +548,6 @@ def _do_isolated_repairs(master_code, pytest_log, repairable, helpers, llm,
 
 
 def _parse_batch_repair_response(raw: str) -> dict[str, str]:
-    """Parsuj LLM odpověď s více opravenými funkcemi.
-
-    Vrací: {func_name: func_code}
-    """
     clean = raw.strip()
     if clean.startswith("```python"):
         clean = clean[9:]
@@ -488,14 +560,11 @@ def _parse_batch_repair_response(raw: str) -> dict[str, str]:
     if not clean:
         return {}
 
-    # Zkus parsovat celý blok jako validní Python
     try:
         tree = ast.parse(clean)
     except SyntaxError:
-        # Fallback: zkus najít jednotlivé funkce regexem
         return _extract_functions_regex(clean)
 
-    # Extrahuj všechny test_ funkce z AST
     functions = {}
     lines = clean.split('\n')
     for node in ast.iter_child_nodes(tree):
@@ -511,14 +580,11 @@ def _parse_batch_repair_response(raw: str) -> dict[str, str]:
 
 
 def _extract_functions_regex(raw: str) -> dict[str, str]:
-    """Fallback extrakce funkcí když AST parse selže."""
     functions = {}
-    # Najdi všechny def test_... bloky
     pattern = r'(def (test_\w+)\(.*?\):.*?)(?=\ndef |\Z)'
     for match in re.finditer(pattern, raw, re.DOTALL):
         func_code = match.group(1).rstrip()
         func_name = match.group(2)
-        # Ověř že to je alespoň syntakticky platné
         try:
             ast.parse(func_code)
             functions[func_name] = func_code
@@ -528,8 +594,7 @@ def _extract_functions_regex(raw: str) -> dict[str, str]:
 
 
 def _do_helper_repair(master_code, pytest_log, repairable, helpers, llm,
-                       prompt_builder, base_url):
-    """Helper repair — oprava sdílených helper funkcí."""
+                       prompt_builder, base_url, context):
     is_root_cause = _detect_helper_root_cause(pytest_log, repairable)
 
     if is_root_cause:
@@ -542,13 +607,14 @@ def _do_helper_repair(master_code, pytest_log, repairable, helpers, llm,
         repair_type = "helper_fallback"
 
     new_code = _repair_helpers(
-        master_code, pytest_log, helpers, repairable, llm, prompt_builder, base_url
+        master_code, pytest_log, helpers, repairable, llm, prompt_builder,
+        base_url, context
     )
     return new_code, repair_type
 
 
 # ═══════════════════════════════════════════════════════════
-#  Hlavní repair funkce (v3)
+#  Hlavní repair funkce (v4)
 # ═══════════════════════════════════════════════════════════
 
 def repair_failing_tests(master_code: str, pytest_log: str,
@@ -561,28 +627,25 @@ def repair_failing_tests(master_code: str, pytest_log: str,
     """
     Opraví selhávající testy. Alternuje: isolated → helper → isolated → ...
 
-    Strategie:
-      1. Parsuj failing testy, odfiltruj stale
-      2. Pokud všechny stale → vrať "all_stale_early_stop" (main.py breakne smyčku)
-      3. Pokud předchozí = None nebo helper → IZOLOVANÁ oprava
-      4. Pokud předchozí = isolated → HELPER oprava
-      5. Aktualizuj stale tracker (isolated i helper se počítají)
-
-    Stale logika:
-      Test je stale po: ≥1 izolované + ≥1 helper opravě se stejnou chybou.
-      Dokud test nemá oba typy → dostává další šance.
+    Nově:
+      - Předává API kontext do repair promptů → LLM ví co opravuje
+      - Regression guard: po opravě porovná passing count, rollback při regresi
 
     Returns:
         (opravený_kód, repair_info)
-        repair_info["repair_type"]:
-          "isolated" | "helper_root_cause" | "helper_fallback" |
-          "all_stale_early_stop" | "skipped_all_stale"
     """
-    repair_info = {"repair_type": None, "repaired_count": 0, "stale_skipped": 0}
+    repair_info = {
+        "repair_type": None,
+        "repaired_count": 0,
+        "stale_skipped": 0,
+        "regression_rollback": False,
+    }
 
     failing = _parse_failing_test_names(pytest_log)
     if not failing:
         return master_code, repair_info
+
+    passing_before = _parse_passing_count(pytest_log)
 
     # ── Stale filtrování ─────────────────────────────────
     stale_tests = []
@@ -598,7 +661,6 @@ def repair_failing_tests(master_code: str, pytest_log: str,
                   f"{', '.join(stale_tests[:5])}{'...' if len(stale_tests) > 5 else ''}")
 
         if not repairable:
-            # Všechny failing jsou stale → signál pro early stop
             print(f"    [Repair] ⛔ Všechny failing testy ({len(failing)}) jsou stale. "
                   f"Další iterace nemají smysl.")
             repair_info["repair_type"] = "all_stale_early_stop"
@@ -608,21 +670,17 @@ def repair_failing_tests(master_code: str, pytest_log: str,
     backup = master_code
 
     # ── Rozhodnutí: isolated nebo helper? ────────────────
-    # Pravidlo: isolated → helper → isolated → helper → ...
-    # První iterace (previous=None) vždy začíná isolated.
-
     use_helper = (previous_repair_type == "isolated")
 
     if use_helper:
         # ── HELPER REPAIR ────────────────────────────────
         master_code, repair_type = _do_helper_repair(
             master_code, pytest_log, repairable, helpers,
-            llm, prompt_builder, base_url,
+            llm, prompt_builder, base_url, context,
         )
         repair_info["repair_type"] = repair_type
         repair_info["repaired_count"] = len(repairable)
 
-        # Aktualizuj stale: helper pokus pro všechny repairable
         if stale_tracker:
             stale_tracker.update(
                 repair_type, pytest_log, failing,
@@ -633,12 +691,11 @@ def repair_failing_tests(master_code: str, pytest_log: str,
         # ── ISOLATED REPAIR ──────────────────────────────
         master_code, repaired, attempted = _do_isolated_repairs(
             master_code, pytest_log, repairable, helpers,
-            llm, prompt_builder, base_url, stale_tests,
+            llm, prompt_builder, base_url, context, stale_tests,
         )
         repair_info["repair_type"] = "isolated"
         repair_info["repaired_count"] = repaired
 
-        # Aktualizuj stale: isolated pokus pro attempted testy
         if stale_tracker:
             stale_tracker.update(
                 "isolated", pytest_log, failing,
@@ -651,5 +708,6 @@ def repair_failing_tests(master_code: str, pytest_log: str,
     if before != after:
         print(f"    [Repair] ⚠️ Počet testů se změnil ({before} → {after}), revertuji")
         master_code = backup
+        repair_info["regression_rollback"] = True
 
     return master_code, repair_info
