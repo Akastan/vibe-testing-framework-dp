@@ -14,7 +14,7 @@ experiment:
   levels: ["L0", "L1", "L2", "L3", "L4"]
   #levels: ["L4"]
   max_iterations: 5
-  runs_per_combination: 5
+  runs_per_combination: 1
   test_count: 30
   temperatures: [0.4]
 

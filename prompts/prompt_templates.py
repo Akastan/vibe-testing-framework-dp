@@ -139,6 +139,10 @@ CRITICAL CODING INSTRUCTIONS:
    - Error: ověř detail (assert "detail" in r.json())
    - GET seznam: ověř strukturu (assert "items" in data nebo assert isinstance(data, list))
    - Side effects: po vytvoření ověř snížení skladu, po smazání ověř 404 na GET
+3. UKLÍZENÍ GLOBÁLNÍHO STAVU (TEARDOWN):
+   - Pokud test mění globální stav API (např. zapíná maintenance mode, mění globální nastavení), MUSÍŠ tento stav v tom samém testu na konci vrátit zpět do výchozího stavu (vypnout ho)! 
+   - Pokud to neuděláš, zablokuješ API a všechny další testy spadnou na 503.
+4. NEGENERUJ test na reset databáze ani /reset endpoint
 
 YOU MUST RESPOND WITH ONLY VALID PYTHON CODE.
 NO MARKDOWN BLOCKS (do not use ```python), NO PROSE, NO EXPLANATIONS.
