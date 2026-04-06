@@ -253,3 +253,20 @@ def extract_usage_mistral(response) -> dict | None:
         "total_tokens": getattr(usage, "total_tokens", 0) or 0,
         "cached_tokens": 0,
     }
+
+
+def extract_usage_openai(response) -> dict | None:
+    """
+    OpenAI-kompatibilní response (DeepSeek, OpenAI, atd.).
+    response.usage: prompt_tokens, completion_tokens, total_tokens,
+    prompt_cache_hit_tokens (DeepSeek specifické)
+    """
+    usage = getattr(response, "usage", None)
+    if not usage:
+        return None
+    return {
+        "prompt_tokens": getattr(usage, "prompt_tokens", 0) or 0,
+        "completion_tokens": getattr(usage, "completion_tokens", 0) or 0,
+        "total_tokens": getattr(usage, "total_tokens", 0) or 0,
+        "cached_tokens": getattr(usage, "prompt_cache_hit_tokens", 0) or 0,
+    }
