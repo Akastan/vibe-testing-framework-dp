@@ -13,6 +13,12 @@ Opravy:
   - Detekce opakující se chyby → nepředávat LLM jako feedback
   - API identity tracking: při přepnutí na jiné API na stejném portu
     se předchozí automaticky zastaví
+
+v2 změny:
+  - Maintenance mode recovery: pokud /reset vrátí 503 maintenance,
+    automaticky vypne maintenance a zopakuje reset
+  - Detekce maintenance 503 v pytest výstupu jako infra chyba
+    → nepředávat LLM k opravě, místo toho recovery + retry
 """
 import os
 import sys
@@ -38,6 +44,9 @@ _active_api: dict[str, str] = {}
 INFRA_RETRY_MAX = 2
 INFRA_RETRY_DELAY = 5  # sekund
 
+# API klíč pro admin operace (maintenance mode recovery)
+_DEFAULT_API_KEY = "test-api-key"
+
 
 # ═══════════════════════════════════════════════════════════
 #  Pomocné funkce – lokální režim
@@ -59,7 +68,10 @@ def _resolve_python(api_cfg: dict) -> str:
 
 def _is_server_running(base_url: str) -> bool:
     try:
-        return req.get(f"{base_url}/health", timeout=2).status_code == 200
+        r = req.get(f"{base_url}/health", timeout=2)
+        # Health endpoint může vracet 200 i 503 (maintenance mode)
+        # Server běží v obou případech
+        return r.status_code in (200, 503)
     except Exception:
         return False
 
@@ -264,12 +276,67 @@ def stop_managed_server(api_cfg: dict):
     _active_api.pop(key, None)
 
 
+# ═══════════════════════════════════════════════════════════
+#  Maintenance Mode Recovery (v2)
+# ═══════════════════════════════════════════════════════════
+
+def _disable_maintenance_mode(base_url: str, api_key: str = _DEFAULT_API_KEY) -> bool:
+    """Pokusí se vypnout maintenance mode přes admin endpoint.
+
+    Volá se automaticky když /reset nebo /health vrátí 503 s maintenance hláškou.
+    """
+    try:
+        r = req.post(
+            f"{base_url}/admin/maintenance",
+            json={"enabled": False},
+            headers={"X-API-Key": api_key, "Content-Type": "application/json"},
+            timeout=5,
+        )
+        if r.status_code == 200:
+            print(f"    [Maintenance] ✅ Maintenance mode vypnut.")
+            time.sleep(0.5)
+            return True
+        else:
+            print(f"    [Maintenance] ⚠️ Nepodařilo se vypnout (status {r.status_code})")
+            return False
+    except Exception as e:
+        print(f"    [Maintenance] ❌ Chyba: {e}")
+        return False
+
+
+def _is_maintenance_response(status_code: int, text: str) -> bool:
+    """Detekuje zda response je maintenance mode 503."""
+    return status_code == 503 and "maintenance" in text.lower()
+
+
 def _reset_database(base_url: str) -> bool:
+    """Resetuje databázi s automatickou maintenance mode recovery.
+
+    Pokud /reset vrátí 503 maintenance → vypne maintenance → retry reset.
+    """
     try:
         r = req.post(f"{base_url}/reset", timeout=10)
         if r.status_code == 200:
             time.sleep(0.5)
             return True
+
+        # ── Maintenance mode recovery ────────────────────
+        if _is_maintenance_response(r.status_code, r.text):
+            print(f"    [Reset] ⚠️ Server je v maintenance mode. Vypínám...")
+            if _disable_maintenance_mode(base_url):
+                # Retry reset po vypnutí maintenance
+                r2 = req.post(f"{base_url}/reset", timeout=10)
+                if r2.status_code == 200:
+                    time.sleep(0.5)
+                    print(f"    [Reset] ✅ Reset úspěšný po vypnutí maintenance.")
+                    return True
+                else:
+                    print(f"    [Reset] ⚠️ Reset po maintenance recovery selhal: "
+                          f"{r2.status_code}: {r2.text[:100]}")
+                    return False
+            else:
+                return False
+
         print(f"    [Reset] ⚠️ Status {r.status_code}: {r.text[:100]}")
         return False
     except Exception as e:
@@ -293,6 +360,14 @@ INFRA_ERROR_PATTERNS = [
 
 _infra_regex = re.compile("|".join(INFRA_ERROR_PATTERNS), re.IGNORECASE)
 
+# Maintenance 503 pattern — samostatně od infra chyb
+# protože vyžaduje jinou recovery strategii (ne restart, ale disable maintenance)
+_maintenance_regex = re.compile(
+    r"503.*maintenance|maintenance.*503|"
+    r"Service temporarily unavailable for maintenance",
+    re.IGNORECASE,
+)
+
 
 def _detect_infra_errors(pytest_output: str) -> tuple[bool, str | None]:
     failed_blocks = re.findall(
@@ -304,6 +379,29 @@ def _detect_infra_errors(pytest_output: str) -> tuple[bool, str | None]:
     if not match:
         return False, None
     return True, match.group(0)
+
+
+def _detect_maintenance_poisoning(pytest_output: str) -> bool:
+    """Detekuje zda většina testů padla kvůli maintenance mode 503.
+
+    Toto je speciální případ — ne infra chyba (server běží),
+    ale otravný stav způsobený předchozím testem.
+    """
+    match = _maintenance_regex.search(pytest_output)
+    if not match:
+        return False
+
+    # Spočítej kolik FAILED testů má 503 maintenance
+    error_lines = re.findall(r'E\s+.*503.*maintenance|E\s+.*maintenance.*503',
+                             pytest_output, re.IGNORECASE)
+    failed_count = pytest_output.count("FAILED")
+
+    if failed_count == 0:
+        return False
+
+    # Pokud ≥50% failů je kvůli maintenance → poisoning
+    ratio = len(error_lines) / failed_count
+    return ratio >= 0.5
 
 
 def _detect_single_root_cause(pytest_output: str) -> tuple[bool, str | None]:
@@ -377,6 +475,10 @@ def run_tests_and_validate(
             _managed_servers[key] = proc
             _active_api[key] = api_cfg["name"]
 
+    # ── Preventivní: vždy zkus vypnout maintenance před resetem ──
+    # (pro případ že předchozí test ho nechal zapnutý)
+    _ensure_maintenance_off(base_url)
+
     # ── Reset databáze před každým spuštěním testů ───────
     print(f"    [Reset] Čistím databázi...")
     if not _reset_database(base_url):
@@ -414,6 +516,29 @@ def run_tests_and_validate(
             if returncode == 0:
                 return True, full_log
 
+            # ── Maintenance mode poisoning check (v2) ────
+            if _detect_maintenance_poisoning(full_log):
+                print(f"    ⚠️ Maintenance mode poisoning detekován!")
+                print(f"    🔧 Vypínám maintenance mode a opakuji testy...")
+                _disable_maintenance_mode(base_url)
+                time.sleep(1)
+                _reset_database(base_url)
+
+                if attempt < INFRA_RETRY_MAX:
+                    continue
+                else:
+                    # Poslední pokus — přidej hint do logu
+                    hint = (
+                        f"\n\n=== FRAMEWORK HINT ===\n"
+                        f"Maintenance mode poisoning: test zapnul maintenance "
+                        f"a nestihl ho vypnout.\n"
+                        f"Framework automaticky vypnul maintenance a resetoval DB, "
+                        f"ale všechny retry vyčerpány.\n"
+                        f"Zkontroluj test_toggle_maintenance_mode — musí VŽDY "
+                        f"vypnout maintenance na konci (i při chybě).\n"
+                    )
+                    return False, full_log + hint
+
             is_infra, pattern = _detect_infra_errors(full_log)
             if is_infra and attempt < INFRA_RETRY_MAX:
                 print(f"    ⚠️ Infra chyba detekována ({pattern})")
@@ -437,6 +562,15 @@ def run_tests_and_validate(
             is_single, root_msg = _detect_single_root_cause(full_log)
             if is_single:
                 print(f"    ⚠️ Všechny chyby mají stejnou příčinu: {root_msg[:120]}")
+
+                # Speciální check: single root cause = maintenance 503
+                if _maintenance_regex.search(root_msg or ""):
+                    print(f"    🔧 Root cause je maintenance mode. Vypínám...")
+                    _disable_maintenance_mode(base_url)
+                    time.sleep(1)
+                    _reset_database(base_url)
+                    if attempt < INFRA_RETRY_MAX:
+                        continue
 
                 if _infra_regex.search(root_msg or ""):
                     if attempt < INFRA_RETRY_MAX:
@@ -467,3 +601,18 @@ def run_tests_and_validate(
             return False, last_log
 
     return False, last_log
+
+
+def _ensure_maintenance_off(base_url: str):
+    """Preventivní check: pokud server odpovídá 503 maintenance, vypne ho.
+
+    Volá se PŘED resetem na začátku každé iterace.
+    Řeší případ kdy předchozí test nechal maintenance zapnutý.
+    """
+    try:
+        r = req.get(f"{base_url}/health", timeout=3)
+        if _is_maintenance_response(r.status_code, r.text):
+            print(f"    [Maintenance] ⚠️ Server je v maintenance mode (z předchozího testu). Vypínám...")
+            _disable_maintenance_mode(base_url)
+    except Exception:
+        pass  # Server neběží — to řeší _ensure_correct_api
