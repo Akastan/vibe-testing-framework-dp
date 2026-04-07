@@ -143,6 +143,7 @@ PLÁN TESTŮ:
 CRITICAL CODING INSTRUCTIONS:
 1. UNIKÁTNÍ NÁZVY (povinné, jinak testy kolidují):
    - Pro unikátní názvy použij uuid4 suffix: def unique(prefix="test"): return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
+   - Tato funkce přidá 9 znaků (_ + 8 unique znaků). Důležité pro názvy omezené na počet znaků
    - V KAŽDÉM helper volání generuj unikátní názvy.
 2. KVALITA ASERCÍ: Nekontroluj POUZE status kód. Každý test by měl ověřit i odpověď:
    - Happy path (201/200): ověř klíče v response body (assert "id" in data)

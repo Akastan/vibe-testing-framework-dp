@@ -1,18 +1,16 @@
 """
-Fáze 3: Generování a oprava pytest testů (v4 — context-aware repair + regression guard).
+Fáze 3: Generování a oprava pytest testů (v5 — stale refresh + helper retry).
 
-Změny oproti v3:
-  - Repair prompty dostávají API kontext → LLM ví CO opravuje
-  - Regression guard: po opravě se porovná počet passing testů, rollback při regresi
-  - Helper repair: validace že nové helpery obsahují všechny importy + funkce z originálu
-  - repair_failing_tests() má nový parametr context
+Změny oproti v4:
+  - StaleTracker.refresh_with_current_errors(): odblokuje testy jejichž chyba se změnila
+  - Nová alternační logika: helper retry pokud helper změnil chybu (progres)
+  - repair_failing_tests() vrací "errors_changed" v repair_info
 
-Flow:
-  Iterace 1: isolated repair (per-test prompty)
-  Iterace 2: helper repair (pokud root cause, jinak isolated znovu)
-  Iterace 3: isolated (pro ne-stale testy)
-  Iterace 4: helper
-  ...dokud nejsou všechny stale nebo max_iterations
+Flow alternace:
+  - previous == None nebo isolated → helper (pokud root cause) nebo isolated
+  - previous == isolated → helper
+  - previous == helper + chyba se změnila → ZNOVU helper (progres!)
+  - previous == helper + chyba stejná → isolated (a pravděpodobně stale)
 """
 import ast
 import json
@@ -209,7 +207,7 @@ def _normalize_error(error: str) -> str:
 
 
 # ═══════════════════════════════════════════════════════════
-#  Stale Detection (v3)
+#  Stale Detection (v5 — s refresh logikou)
 # ═══════════════════════════════════════════════════════════
 
 class _StaleEntry:
@@ -227,6 +225,10 @@ class StaleTracker:
       1. Má alespoň 1 pokus o izolovanou opravu
       2. Má alespoň 1 pokus o helper opravu
       3. Poslední chyba z obou typů je stejná (normalizovaná)
+
+    v5: refresh_with_current_errors() odblokuje testy jejichž chyba
+    se mezitím změnila (např. helper repair opravil root cause ale
+    zavedl nový bug → jiná chyba = progres, ne stale).
     """
 
     def __init__(self):
@@ -266,6 +268,89 @@ class StaleTracker:
                           f"(isolated {len(entry.isolated_errors)}× + "
                           f"helper {len(entry.helper_errors)}×, stejná chyba)")
                 self._stale.add(name)
+
+    def refresh_with_current_errors(self, pytest_log: str,
+                                     failing_names: list[str]) -> list[str]:
+        """Zkontroluje aktuální chyby stale testů. Pokud se chyba změnila,
+        odblokuje test (smaže historii) → dostane novou šanci na opravu.
+
+        Returns:
+            Seznam odblokovaných testů.
+        """
+        unstaled = []
+        for name in list(self._stale):
+            if name not in failing_names:
+                # Test prošel! Odstraň ze stale i entries.
+                self._stale.discard(name)
+                self._entries.pop(name, None)
+                unstaled.append(name)
+                continue
+
+            current_error = _extract_error_for_test(pytest_log, name)
+            current_norm = _normalize_error(current_error)
+
+            entry = self._entries.get(name)
+            if not entry:
+                continue
+
+            # Porovnej s poslední známou chybou (z obou seznamů)
+            last_known = set()
+            if entry.isolated_errors:
+                last_known.add(entry.isolated_errors[-1])
+            if entry.helper_errors:
+                last_known.add(entry.helper_errors[-1])
+
+            if last_known and current_norm not in last_known:
+                # Chyba se změnila! → odblokuj, resetuj historii
+                self._stale.discard(name)
+                entry.isolated_errors.clear()
+                entry.helper_errors.clear()
+                unstaled.append(name)
+
+        if unstaled:
+            print(f"      🔓 {len(unstaled)} testů odblokováno (chyba se změnila): "
+                  f"{', '.join(unstaled[:5])}{'...' if len(unstaled) > 5 else ''}")
+
+        return unstaled
+
+    def detect_errors_changed(self, pytest_log: str,
+                               failing_names: list[str]) -> bool:
+        """Zjistí zda se chyby failing testů změnily oproti poslední iteraci.
+
+        Používá se pro rozhodnutí: opakovat helper repair (progres)
+        nebo přepnout na isolated (žádný progres).
+        """
+        changed = 0
+        total = 0
+        for name in failing_names:
+            entry = self._entries.get(name)
+            if not entry:
+                continue
+
+            current_error = _extract_error_for_test(pytest_log, name)
+            current_norm = _normalize_error(current_error)
+
+            # Porovnej s poslední známou chybou
+            last_known = None
+            if entry.helper_errors:
+                last_known = entry.helper_errors[-1]
+            elif entry.isolated_errors:
+                last_known = entry.isolated_errors[-1]
+
+            if last_known is not None:
+                total += 1
+                if current_norm != last_known:
+                    changed += 1
+
+        if total == 0:
+            return False
+
+        # Pokud ≥50% testů má jinou chybu, považuj za "errors changed"
+        ratio = changed / total
+        if ratio >= 0.5:
+            print(f"      🔄 Chyby se změnily u {changed}/{total} testů ({ratio:.0%})")
+            return True
+        return False
 
     def get_stale(self) -> list[str]:
         return sorted(self._stale)
@@ -614,7 +699,7 @@ def _do_helper_repair(master_code, pytest_log, repairable, helpers, llm,
 
 
 # ═══════════════════════════════════════════════════════════
-#  Hlavní repair funkce (v4)
+#  Hlavní repair funkce (v5)
 # ═══════════════════════════════════════════════════════════
 
 def repair_failing_tests(master_code: str, pytest_log: str,
@@ -625,11 +710,18 @@ def repair_failing_tests(master_code: str, pytest_log: str,
                          previous_repair_type: str | None = None,
                          ) -> tuple[str, dict]:
     """
-    Opraví selhávající testy. Alternuje: isolated → helper → isolated → ...
+    Opraví selhávající testy. Alternuje: isolated → helper → ...
 
-    Nově:
-      - Předává API kontext do repair promptů → LLM ví co opravuje
-      - Regression guard: po opravě porovná passing count, rollback při regresi
+    v5 změny:
+      - refresh_with_current_errors(): odblokuje testy jejichž chyba se změnila
+      - Helper retry: pokud předchozí helper změnil chybu (progres), opakuj helper
+      - repair_info obsahuje "errors_changed" flag
+
+    Alternační logika:
+      - previous == None → isolated
+      - previous == "isolated" → helper
+      - previous == helper + errors_changed → HELPER ZNOVU (progres!)
+      - previous == helper + errors_same → isolated
 
     Returns:
         (opravený_kód, repair_info)
@@ -639,6 +731,7 @@ def repair_failing_tests(master_code: str, pytest_log: str,
         "repaired_count": 0,
         "stale_skipped": 0,
         "regression_rollback": False,
+        "errors_changed": False,
     }
 
     failing = _parse_failing_test_names(pytest_log)
@@ -647,11 +740,19 @@ def repair_failing_tests(master_code: str, pytest_log: str,
 
     passing_before = _parse_passing_count(pytest_log)
 
-    # ── Stale filtrování ─────────────────────────────────
+    # ── Stale filtrování (s refresh logikou) ─────────────
     stale_tests = []
     repairable = failing
+    errors_changed = False
 
     if stale_tracker:
+        # NOVÉ v5: Zjisti zda se chyby změnily oproti minulé iteraci
+        errors_changed = stale_tracker.detect_errors_changed(pytest_log, failing)
+        repair_info["errors_changed"] = errors_changed
+
+        # NOVÉ v5: Odblokuj stale testy jejichž chyba se změnila
+        unstaled = stale_tracker.refresh_with_current_errors(pytest_log, failing)
+
         stale_tests = stale_tracker.get_stale()
         repairable = stale_tracker.filter_repairable(failing)
         repair_info["stale_skipped"] = len(stale_tests)
@@ -670,7 +771,28 @@ def repair_failing_tests(master_code: str, pytest_log: str,
     backup = master_code
 
     # ── Rozhodnutí: isolated nebo helper? ────────────────
-    use_helper = (previous_repair_type == "isolated")
+    # v5: Nová logika s helper retry při progresu
+    is_prev_helper = previous_repair_type in (
+        "helper_root_cause", "helper_fallback",
+    )
+
+    if previous_repair_type is None:
+        # První iterace → isolated
+        use_helper = False
+    elif previous_repair_type == "isolated":
+        # Po isolated → helper
+        use_helper = True
+    elif is_prev_helper and errors_changed:
+        # Po helper + chyby se změnily → ZNOVU HELPER (progres!)
+        print(f"    [Repair] 🔄 Helper repair udělal progres (chyby se změnily). "
+              f"Opakuji helper repair...")
+        use_helper = True
+    elif is_prev_helper and not errors_changed:
+        # Po helper + chyby stejné → přepni na isolated
+        use_helper = False
+    else:
+        # Fallback: alternuj
+        use_helper = (previous_repair_type == "isolated")
 
     if use_helper:
         # ── HELPER REPAIR ────────────────────────────────
