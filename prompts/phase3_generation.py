@@ -359,6 +359,135 @@ class StaleTracker:
         return [n for n in failing_names if n not in self._stale]
 
 
+
+# ═══════════════════════════════════════════════════════════
+#  Import Sanitizer
+# ═══════════════════════════════════════════════════════════
+
+# Knihovny které NEJSOU dostupné v test prostředí
+_BANNED_IMPORTS = {
+    "PIL", "pillow", "numpy", "pandas", "matplotlib",
+    "scipy", "sklearn", "flask", "django", "fastapi",
+    "sqlalchemy", "pydantic", "httpx", "aiohttp",
+}
+
+# Mapování: pokud se v kódu vyskytne daný pattern → potřebuje tento import
+_AUTO_IMPORTS = {
+    "datetime.now":       "from datetime import datetime",
+    "datetime.utcnow":    "from datetime import datetime",
+    "datetime(":          "from datetime import datetime",
+    "timezone.utc":       "from datetime import timezone",
+    "timedelta(":         "from datetime import timedelta",
+    "json.dumps":         "import json",
+    "json.loads":         "import json",
+    "base64.b64encode":   "import base64",
+    "base64.b64decode":   "import base64",
+    "os.path":            "import os",
+    "os.environ":         "import os",
+    "re.search":          "import re",
+    "re.match":           "import re",
+    "re.findall":         "import re",
+    "copy.deepcopy":      "import copy",
+    "random.randint":     "import random",
+    "random.choice":      "import random",
+    "string.ascii":       "import string",
+    "math.ceil":          "import math",
+    "math.floor":         "import math",
+}
+
+
+def _fix_imports(code: str) -> str:
+    """Opraví importy ve vygenerovaném kódu:
+    1. Odstraní importy nedostupných knihoven (PIL, numpy, ...)
+    2. Přidá chybějící importy standardní knihovny (datetime, json, ...)
+
+    Returns:
+        Opravený kód.
+    """
+    lines = code.split('\n')
+    changes_made = False
+
+    # ── 1) Odstranění banned importů ─────────────────────
+    cleaned_lines = []
+    for line in lines:
+        stripped = line.strip()
+
+        # "from PIL import ..." nebo "import PIL"
+        is_banned = False
+        if stripped.startswith("from "):
+            module = stripped.split()[1].split(".")[0]
+            if module in _BANNED_IMPORTS:
+                is_banned = True
+        elif stripped.startswith("import "):
+            # "import numpy" nebo "import numpy as np"
+            modules = stripped[7:].split(",")
+            for m in modules:
+                mod_name = m.strip().split()[0].split(".")[0]
+                if mod_name in _BANNED_IMPORTS:
+                    is_banned = True
+                    break
+
+        if is_banned:
+            print(f"    [ImportFix] ❌ Odstraněn nedostupný import: {stripped}")
+            changes_made = True
+            continue
+
+        cleaned_lines.append(line)
+
+    # ── 2) Detekce chybějících importů ───────────────────
+    code_body = '\n'.join(cleaned_lines)
+    existing_imports = set()
+    for line in cleaned_lines:
+        stripped = line.strip()
+        if stripped.startswith("import ") or stripped.startswith("from "):
+            existing_imports.add(stripped)
+
+    missing_imports = []
+    for pattern, import_stmt in _AUTO_IMPORTS.items():
+        if pattern in code_body and import_stmt not in existing_imports:
+            # Ověř že import ještě není přítomen v jiné formě
+            # např. "from datetime import datetime, timezone" pokrývá oba
+            module_name = import_stmt.split()[-1]  # "datetime", "json", etc.
+
+            already_imported = False
+            for existing in existing_imports:
+                if module_name in existing:
+                    already_imported = True
+                    break
+
+            if not already_imported:
+                missing_imports.append(import_stmt)
+                existing_imports.add(import_stmt)  # Prevent duplicates
+
+    if missing_imports:
+        # Deduplikace
+        missing_imports = list(dict.fromkeys(missing_imports))
+        print(f"    [ImportFix] ➕ Přidávám chybějící importy: {missing_imports}")
+        changes_made = True
+
+        # Najdi pozici pro vložení (za poslední existující import)
+        last_import_idx = -1
+        for i, line in enumerate(cleaned_lines):
+            stripped = line.strip()
+            if stripped.startswith("import ") or stripped.startswith("from "):
+                last_import_idx = i
+
+        insert_pos = last_import_idx + 1 if last_import_idx >= 0 else 0
+        for imp in reversed(missing_imports):
+            cleaned_lines.insert(insert_pos, imp)
+
+    if changes_made:
+        result = '\n'.join(cleaned_lines)
+        # Ověř že výsledek je validní Python
+        try:
+            ast.parse(result)
+            return result
+        except SyntaxError:
+            print(f"    [ImportFix] ⚠️ Oprava importů způsobila syntax error, vracím originál")
+            return code
+
+    return code
+
 def _is_truncated(code: str) -> bool:
     """Detekuje zda byl kód oříznut (nevalidní AST)."""
     try:
@@ -423,6 +552,9 @@ def generate_test_code(test_plan: dict, context_data: str, llm,
     if clean.endswith("```"):
         clean = clean[:-3]
     clean = clean.strip()
+
+    clean = _fix_imports(clean)
+
 
     # ── NOVÉ: Truncation detection ───────────────────────
     if _is_truncated(clean):
