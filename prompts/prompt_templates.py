@@ -76,7 +76,6 @@ API KONTEXT:
 =========================================
 CRITICAL INSTRUCTIONS FOR OUTPUT:
 Na základě API kontextu výše vytvoř testovací plán s PŘESNĚ {test_count} testy.
-Rozhodni sám, které endpointy a scénáře jsou nejdůležitější pro otestování.
 
 PRAVIDLA PRO TESTY:
 - type = "happy_path" | "edge_case" | "error"
@@ -105,6 +104,8 @@ POŽADOVANÁ JSON STRUKTURA:
   ]
 }}
 
+Rozhodni sám, které endpointy a scénáře jsou nejdůležitější pro otestování.
+PLAN EXACTLY {test_count} TESTS.
 YOU MUST RESPOND WITH ONLY VALID JSON. 
 NO MARKDOWN, NO PROSE, NO EXPLANATIONS.
 Start your response with {{ and end with }}.
@@ -155,6 +156,7 @@ CRITICAL CODING INSTRUCTIONS:
    - Pokud to neuděláš, zablokuješ API a všechny další testy spadnou na 503.
 4. NEGENERUJ test na reset databáze ani /reset endpoint
 
+STRIKTNĚ SE DRŽ PLÁNU A VYGENERUJ PŘESNĚ DANÝ POČET TESTŮ.
 YOU MUST RESPOND WITH ONLY VALID PYTHON CODE.
 NO MARKDOWN BLOCKS (do not use ```python), NO PROSE, NO EXPLANATIONS.
 """
