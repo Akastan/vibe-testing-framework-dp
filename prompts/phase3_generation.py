@@ -359,6 +359,50 @@ class StaleTracker:
         return [n for n in failing_names if n not in self._stale]
 
 
+def _is_truncated(code: str) -> bool:
+    """Detekuje zda byl kód oříznut (nevalidní AST)."""
+    try:
+        ast.parse(code)
+        return False
+    except SyntaxError:
+        return True
+
+
+def _salvage_truncated_code(code: str) -> str:
+    """Pokusí se zachránit oříznutý kód — ořízne na poslední kompletní funkci.
+
+    Strategie: odebírej řádky od konce dokud AST neprojde.
+    Optimalizace: skáče po blocích, pak jemně.
+    """
+    lines = code.split('\n')
+
+    # Rychlý pokus: najdi poslední 'def test_' a ořízni před ním
+    last_test_start = None
+    for i in range(len(lines) - 1, -1, -1):
+        stripped = lines[i].strip()
+        if stripped.startswith('def test_'):
+            last_test_start = i
+            break
+
+    if last_test_start is not None:
+        # Ořízni nekompletní poslední test
+        candidate = '\n'.join(lines[:last_test_start]).rstrip()
+        if not _is_truncated(candidate) and count_test_functions(candidate) > 0:
+            salvaged_count = count_test_functions(candidate)
+            print(f"    [Salvage] Oříznutý kód zachráněn: {salvaged_count} kompletních testů")
+            return candidate
+
+    # Fallback: ořezávej řádky od konce po blocích
+    for cut in range(1, min(200, len(lines))):
+        candidate = '\n'.join(lines[:-cut]).rstrip()
+        if not _is_truncated(candidate) and count_test_functions(candidate) > 0:
+            salvaged_count = count_test_functions(candidate)
+            print(f"    [Salvage] Fallback: {salvaged_count} kompletních testů (ořízl {cut} řádků)")
+            return candidate
+
+    print(f"    [Salvage] ⚠️ Nepodařilo se zachránit kód")
+    return code
+
 # ═══════════════════════════════════════════════════════════
 #  Počáteční generování
 # ═══════════════════════════════════════════════════════════
@@ -378,8 +422,17 @@ def generate_test_code(test_plan: dict, context_data: str, llm,
         clean = clean[3:]
     if clean.endswith("```"):
         clean = clean[:-3]
+    clean = clean.strip()
 
-    return clean.strip()
+    # ── NOVÉ: Truncation detection ───────────────────────
+    if _is_truncated(clean):
+        print(f"    ⚠️ TRUNCATION DETECTED — kód je syntakticky nevalidní (pravděpodobně max_tokens limit)")
+        original_lines = len(clean.split('\n'))
+        clean = _salvage_truncated_code(clean)
+        salvaged_lines = len(clean.split('\n'))
+        print(f"    [Salvage] {original_lines} → {salvaged_lines} řádků")
+
+    return clean
 
 
 # ═══════════════════════════════════════════════════════════
@@ -390,7 +443,19 @@ def validate_test_count(code: str, expected: int, llm=None,
                         prompt_builder: PromptBuilder = None,
                         base_url: str = "http://localhost:8000",
                         context: str = "") -> str:
+    # ── NOVÉ: Pokud kód stále není validní AST, pokus o salvage ──
+    if _is_truncated(code):
+        print(f"    [Validace] ⚠️ Kód je stále truncated, zkouším salvage...")
+        code = _salvage_truncated_code(code)
+
     actual = count_test_functions(code)
+
+    # ── NOVÉ: Pokud AST vrátí 0 ale kód není prázdný → problém ──
+    if actual == 0 and len(code.strip()) > 100:
+        print(f"    [Validace] ⚠️ 0 testů detekováno ale kód není prázdný "
+              f"({len(code)} znaků) — pravděpodobně stále broken")
+        return code
+
     if actual == expected:
         return code
 
