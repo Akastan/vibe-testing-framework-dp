@@ -1,0 +1,304 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_ok",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Overeni dostupnosti API"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni autora s validnimi daty"
+        },
+        {
+          "name": "create_author_invalid_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Vytvoreni autora s prazdnym jmenem"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Ziskani neexistujiciho autora"
+        },
+        {
+          "name": "get_author_etag_not_modified",
+          "type": "edge_case",
+          "expected_status": 304,
+          "description": "Overeni ETag cache pro autora"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni nove knihy"
+        },
+        {
+          "name": "create_book_invalid_price",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Vytvoreni knihy se zapornou cenou"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Overeni strankovani seznamu knih"
+        },
+        {
+          "name": "list_books_filter_price",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Filtrovani knih podle ceny"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_deleted_book",
+          "type": "edge_case",
+          "expected_status": 410,
+          "description": "Ziskani smazane knihy"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_book_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Uspesne soft smazani knihy"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_book_not_deleted",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Obnova knihy, ktera nebyla smazana"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Pridani recenze ke knize"
+        },
+        {
+          "name": "create_review_invalid_rating",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Recenze s hodnocenim mimo rozsah"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Prekroceni rate limitu pro slevy"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_invalid_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Nahrani nepodporovaneho typu souboru"
+        },
+        {
+          "name": "upload_cover_too_large",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Nahrani souboru vetsiho nez 2MB"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_valid",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Pridani tagu ke knize"
+        },
+        {
+          "name": "add_tags_empty_list",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Pridani prazdneho pole tagu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoreni objednavky"
+        },
+        {
+          "name": "create_order_empty_items",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Objednavka bez polozek"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_status_invalid",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Aktualizace stavu na neplatnou hodnotu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Hromadne vytvoreni bez API klice"
+        },
+        {
+          "name": "bulk_create_limit_exceeded",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Prekroceni rate limitu pro bulk"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "start_export_authorized",
+          "type": "happy_path",
+          "expected_status": 202,
+          "description": "Spusteni exportu knih"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/{job_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_export_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Ziskani neexistujiciho jobu"
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/maintenance",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "toggle_maintenance_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Zmena rezimu bez admin prav"
+        }
+      ]
+    },
+    {
+      "endpoint": "/statistics/summary",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_stats_authorized",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ziskani statistik"
+        },
+        {
+          "name": "get_stats_unauthorized",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Ziskani statistik bez opravneni"
+        }
+      ]
+    },
+    {
+      "endpoint": "/catalog",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "catalog_deprecated_redirect",
+          "type": "edge_case",
+          "expected_status": 301,
+          "description": "Overeni presmerovani z deprecated endpointu"
+        }
+      ]
+    }
+  ]
+}

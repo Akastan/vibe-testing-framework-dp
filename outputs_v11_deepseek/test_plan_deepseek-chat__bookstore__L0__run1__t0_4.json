@@ -1,0 +1,286 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověření, že API běží a health endpoint vrací 200."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření autora s platnými povinnými údaji (jméno)."
+        },
+        {
+          "name": "create_author_missing_required_field",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o vytvoření autora bez povinného pole 'name'."
+        },
+        {
+          "name": "create_author_name_too_long",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o vytvoření autora s příliš dlouhým jménem (>100 znaků)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_with_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získání seznamu autorů s výchozími parametry paginace."
+        },
+        {
+          "name": "list_authors_with_custom_limit",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Získání seznamu autorů s vlastním limitem a skip parametrem."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získání detailu existujícího autora podle ID."
+        },
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Pokus o získání detailu autora s neexistujícím ID."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_etag",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Aktualizace autora s platným If-Match header (ETag)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření knihy se všemi platnými povinnými údaji."
+        },
+        {
+          "name": "create_book_invalid_isbn_length",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o vytvoření knihy s ISBN kratším než 10 znaků."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_filters",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získání seznamu knih s filtry (search, author_id, price range)."
+        },
+        {
+          "name": "list_books_invalid_page_size",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o získání seznamu knih s page_size > 100."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_by_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získání detailu existující knihy podle ID."
+        },
+        {
+          "name": "get_book_soft_deleted",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Pokus o získání detailu knihy, která byla soft smazána."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_book_soft_delete",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Soft delete existující knihy."
+        },
+        {
+          "name": "delete_book_already_deleted",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Pokus o smazání již soft smazané knihy."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Obnovení soft smazané knihy."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_for_book",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření recenze pro existující knihu."
+        },
+        {
+          "name": "create_review_rating_out_of_range",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o vytvoření recenze s hodnocením mimo rozsah 1-5."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_valid_discount",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Aplikace platné slevy na knihu (0-50%)."
+        },
+        {
+          "name": "apply_discount_rate_limit_exceeded",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Překročení rate limitu (5 req/10s) pro endpoint slevy."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_valid_cover_image",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Nahrání platného obrázku obálky (JPEG/PNG, max 2 MB)."
+        },
+        {
+          "name": "upload_cover_file_too_large",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Pokus o nahrání obrázku obálky většího než 2 MB."
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags/{tag_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_tag_etag_mismatch",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Pokus o aktualizaci tagu s neplatným If-Match header (ETag mismatch)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_with_items",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření objednávky s platnými položkami a údaji zákazníka."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_valid",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Aktualizace stavu objednávky na platnou hodnotu (confirmed/shipped/delivered/cancelled)."
+        },
+        {
+          "name": "update_order_status_invalid",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o aktualizaci stavu objednávky na neplatnou hodnotu."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_books_without_api_key",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Pokus o hromadné vytvoření knih bez API klíče."
+        },
+        {
+          "name": "bulk_create_books_rate_limit_exceeded",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Překročení rate limitu (3 req/30s) pro hromadné vytváření knih."
+        }
+      ]
+    }
+  ]
+}

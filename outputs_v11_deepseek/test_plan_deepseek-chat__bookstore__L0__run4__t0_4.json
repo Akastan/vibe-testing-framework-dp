@@ -1,0 +1,322 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověření, že API běží a health endpoint odpovídá."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření autora s platnými povinnými údaji (jméno)."
+        },
+        {
+          "name": "create_author_missing_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o vytvoření autora bez povinného pole 'name'."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_with_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získání seznamu autorů s výchozími parametry paginace."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získání detailu existujícího autora."
+        },
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Pokus o získání detailu neexistujícího autora."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_etag_mismatch",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Aktualizace autora s neplatným If-Match header (ETag)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření knihy se všemi platnými povinnými údaji."
+        },
+        {
+          "name": "create_book_invalid_isbn_length",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Vytvoření knihy s ISBN kratším než 10 znaků."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_filters",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získání seznamu knih s filtry (author_id, min_price)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_soft_deleted",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Pokus o získání detailu soft-deleted knihy."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_book_soft_delete",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Soft delete existující knihy."
+        },
+        {
+          "name": "delete_book_already_deleted",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Pokus o smazání již soft-deleted knihy."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Obnovení soft-deleted knihy."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_for_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Pokus o přidání recenze k soft-deleted knize."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_rate_limit_exceeded",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Překročení rate limitu (5 req/10s) pro aplikaci slevy."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_file_too_large",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Nahrání obálky větší než 2 MB."
+        },
+        {
+          "name": "upload_cover_unsupported_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Nahrání obálky v nepodporovaném formátu (např. PDF)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_books_without_api_key",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Hromadné vytvoření knih bez API klíče."
+        },
+        {
+          "name": "bulk_create_books_rate_limit_exceeded",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Překročení rate limitu (3 req/30s) pro hromadné vytváření."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_with_multiple_items",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření objednávky s více položkami."
+        },
+        {
+          "name": "create_order_empty_items",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Vytvoření objednávky s prázdným seznamem položek."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_invalid_value",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Aktualizace stavu objednávky na neplatnou hodnotu."
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_export_without_api_key",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Zahájení exportu knih bez API klíče."
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/{job_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_export_job_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Pokus o získání stavu neexistující exportní úlohy."
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/maintenance",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "toggle_maintenance_without_api_key",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Změna režimu údržby bez API klíče."
+        }
+      ]
+    },
+    {
+      "endpoint": "/statistics/summary",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_statistics_without_api_key",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Získání statistik bez API klíče."
+        }
+      ]
+    },
+    {
+      "endpoint": "/catalog",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "deprecated_catalog_redirect",
+          "type": "edge_case",
+          "expected_status": 301,
+          "description": "Ověření, že deprecated endpoint /catalog přesměruje na /books."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_to_book_empty_list",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Přidání tagů k knize s prázdným seznamem tag_ids."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories/{category_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_category_name_too_long",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Aktualizace kategorie s názvem delším než 50 znaků."
+        }
+      ]
+    }
+  ]
+}

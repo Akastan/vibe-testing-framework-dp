@@ -1,0 +1,108 @@
+# Log pro: test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py
+# Čas spuštění: 2026-04-08T15:45:12.148189
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 1 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_health_check_returns_200 PASSED [  3%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_author_success PASSED [  6%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_author_missing_name_422 PASSED [ 10%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_author_by_id_success PASSED [ 13%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_author_not_found_404 PASSED [ 16%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_delete_author_without_books_204 PASSED [ 20%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_delete_author_with_books_409 PASSED [ 23%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_book_success PASSED [ 26%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_book_duplicate_isbn_409 PASSED [ 30%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_book_success PASSED [ 33%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_soft_deleted_book_410 PASSED [ 36%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_soft_delete_book_204 PASSED [ 40%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_restore_soft_deleted_book_200 PASSED [ 43%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_restore_not_deleted_book_400 PASSED [ 46%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_apply_discount_to_old_book_200 FAILED [ 50%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_apply_discount_to_new_book_400 PASSED [ 53%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_apply_discount_rate_limit_429 PASSED [ 56%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_increase_stock_success PASSED [ 60%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_decrease_stock_below_zero_400 PASSED [ 63%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_review_success PASSED [ 66%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_review_for_deleted_book_410 PASSED [ 70%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_order_success PASSED [ 73%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_order_insufficient_stock_400 PASSED [ 76%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_update_order_status_valid_transition_200 PASSED [ 80%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_update_order_status_invalid_transition_400 PASSED [ 83%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_invoice_for_confirmed_order_200 PASSED [ 86%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_invoice_for_pending_order_403 PASSED [ 90%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_bulk_create_books_partial_success_207 PASSED [ 93%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_bulk_create_books_missing_api_key_401 PASSED [ 96%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_clone_book_success PASSED [100%]
+
+================================== FAILURES ===================================
+_____________________ test_apply_discount_to_old_book_200 _____________________
+outputs\test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py:198: in test_apply_discount_to_old_book_200
+    assert data["discounted_price"] == book["price"] * (1 - 10.0 / 100)
+E   assert 17.99 == (19.99 * (1 - (10.0 / 100)))
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_apply_discount_to_old_book_200
+======================== 1 failed, 29 passed in 2.96s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 2 | pytest returncode=0
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_health_check_returns_200 PASSED [  3%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_author_success PASSED [  6%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_author_missing_name_422 PASSED [ 10%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_author_by_id_success PASSED [ 13%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_author_not_found_404 PASSED [ 16%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_delete_author_without_books_204 PASSED [ 20%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_delete_author_with_books_409 PASSED [ 23%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_book_success PASSED [ 26%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_book_duplicate_isbn_409 PASSED [ 30%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_book_success PASSED [ 33%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_soft_deleted_book_410 PASSED [ 36%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_soft_delete_book_204 PASSED [ 40%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_restore_soft_deleted_book_200 PASSED [ 43%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_restore_not_deleted_book_400 PASSED [ 46%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_apply_discount_to_old_book_200 PASSED [ 50%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_apply_discount_to_new_book_400 PASSED [ 53%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_apply_discount_rate_limit_429 PASSED [ 56%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_increase_stock_success PASSED [ 60%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_decrease_stock_below_zero_400 PASSED [ 63%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_review_success PASSED [ 66%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_review_for_deleted_book_410 PASSED [ 70%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_order_success PASSED [ 73%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_create_order_insufficient_stock_400 PASSED [ 76%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_update_order_status_valid_transition_200 PASSED [ 80%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_update_order_status_invalid_transition_400 PASSED [ 83%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_invoice_for_confirmed_order_200 PASSED [ 86%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_get_invoice_for_pending_order_403 PASSED [ 90%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_bulk_create_books_partial_success_207 PASSED [ 93%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_bulk_create_books_missing_api_key_401 PASSED [ 96%]
+outputs/test_generated_deepseek-chat__bookstore__L1__run3__t0_4.py::test_clone_book_success PASSED [100%]
+
+============================= 30 passed in 2.89s ==============================
+
+

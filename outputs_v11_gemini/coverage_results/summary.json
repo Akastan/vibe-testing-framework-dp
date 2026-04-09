@@ -1,0 +1,9 @@
+[
+  {
+    "tag": "gemini-3_1-flash-lite-preview__L4__run4",
+    "file": "test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run4__t0_4.py",
+    "coverage": 74.52923686818632,
+    "passed": 26,
+    "failed": 4
+  }
+]

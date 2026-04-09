@@ -1,0 +1,9 @@
+[
+  {
+    "tag": "deepseek-chat__L4__run3",
+    "file": "test_generated_deepseek-chat__bookstore__L4__run3__t0_4.py",
+    "coverage": 73.73637264618434,
+    "passed": 29,
+    "failed": 1
+  }
+]

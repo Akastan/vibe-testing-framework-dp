@@ -1,0 +1,274 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Ověří, že health check endpoint vrací 200 OK."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření autora s povinným polem name a volitelnými bio a born_year."
+        },
+        {
+          "name": "create_author_missing_name_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Pokus o vytvoření autora bez povinného pole name vrátí 422."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získání detailu existujícího autora."
+        },
+        {
+          "name": "get_author_not_found_404",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Pokus o získání detailu neexistujícího autora vrátí 404."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books_204",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Smazání autora, který nemá přiřazené žádné knihy."
+        },
+        {
+          "name": "delete_author_with_books_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Pokus o smazání autora, který má přiřazené knihy, vrátí 409 Conflict."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření knihy se všemi povinnými poli (title, isbn, price, published_year, author_id, category_id)."
+        },
+        {
+          "name": "create_book_duplicate_isbn_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Pokus o vytvoření knihy s duplicitním ISBN vrátí 409 Conflict."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získání detailu existující knihy."
+        },
+        {
+          "name": "get_soft_deleted_book_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Pokus o získání detailu soft-deleted knihy vrátí 410 Gone."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book_204",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Soft delete existující knihy."
+        },
+        {
+          "name": "delete_already_deleted_book_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Pokus o smazání již soft-deleted knihy vrátí 410 Gone."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Obnovení soft-deleted knihy."
+        },
+        {
+          "name": "restore_not_deleted_book_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Pokus o obnovení knihy, která není smazaná, vrátí 400."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_old_book_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Aplikace slevy na knihu vydanou před více než 1 rokem."
+        },
+        {
+          "name": "apply_discount_to_new_book_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Pokus o aplikaci slevy na knihu vydanou v aktuálním roce vrátí 400."
+        },
+        {
+          "name": "apply_discount_rate_limit_429",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Překročení rate limitu (5 req/10s) pro discount endpoint vrátí 429."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "increase_stock_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Zvýšení skladu knihy pomocí kladné delty."
+        },
+        {
+          "name": "decrease_stock_below_zero_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Pokus o snížení skladu pod nulu vrátí 400."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Přidání recenze ke knize s ratingem 1-5 a reviewer_name."
+        },
+        {
+          "name": "create_review_for_deleted_book_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Pokus o přidání recenze k soft-deleted knize vrátí 410."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Vytvoření objednávky s dostatečným skladem a platnými položkami."
+        },
+        {
+          "name": "create_order_insufficient_stock_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Pokus o vytvoření objednávky s nedostatečným skladem vrátí 400."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_valid_transition_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Změna stavu objednávky na povolený následující stav (např. pending -> confirmed)."
+        },
+        {
+          "name": "update_order_status_invalid_transition_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Pokus o změnu stavu na nepovolený přechod (např. delivered -> cancelled) vrátí 400."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/invoice",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_invoice_for_confirmed_order_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Získání faktury pro objednávku ve stavu confirmed."
+        },
+        {
+          "name": "get_invoice_for_pending_order_403",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Pokus o získání faktury pro pending objednávku vrátí 403 Forbidden."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_books_partial_success_207",
+          "type": "edge_case",
+          "expected_status": 207,
+          "description": "Hromadné vytvoření knih, kde některé projdou a některé selžou (např. duplicitní ISBN), vrátí 207 Multi-Status."
+        },
+        {
+          "name": "bulk_create_books_missing_api_key_401",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Pokus o hromadné vytvoření knih bez API key vrátí 401 Unauthorized."
+        }
+      ]
+    }
+  ]
+}
