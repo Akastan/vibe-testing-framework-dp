@@ -18,7 +18,7 @@ import re
 import textwrap
 import time
 
-from prompts.prompt_templates import PromptBuilder
+from pipeline.prompt_templates import PromptBuilder
 
 MAX_INDIVIDUAL_REPAIRS = 10
 
@@ -588,20 +588,17 @@ def validate_test_count(code: str, expected: int, llm=None,
               f"({len(code)} znaků) — pravděpodobně stále broken")
         return code
 
-    if actual == expected:
+    # ZMĚNA: Propustíme vše, co splňuje nebo překračuje limit
+    if actual >= expected:
+        print(f"    [Validace] ✅ Detekováno {actual} testů. Nechávám všechny.")
         return code
 
-    if actual > expected:
-        excess = actual - expected
-        print(f"    [Validace] {actual} testů → ořezávám na {expected} (-{excess})")
-        return _remove_last_n_tests(code, excess)
-
     if not llm or not prompt_builder:
-        print(f"    [Validace] ⚠️ {actual} testů (očekáváno {expected}), LLM nedostupný")
+        print(f"    [Validace] ⚠️ {actual} testů (očekáváno minimálně {expected}), LLM nedostupný")
         return code
 
     missing = expected - actual
-    print(f"    [Validace] {actual} testů → doplňuji {missing}...")
+    print(f"    [Validace] {actual} testů → doplňuji alespoň {missing}...")
 
     helpers = _extract_helpers_code(code)
     existing_names = _get_test_function_names(code)
@@ -637,12 +634,9 @@ def validate_test_count(code: str, expected: int, llm=None,
         return code
 
     new_actual = count_test_functions(new_code)
-    if new_actual > expected:
-        excess = new_actual - expected
-        new_code = _remove_last_n_tests(new_code, excess)
-        new_actual = count_test_functions(new_code)
 
-    print(f"    [Validace] ✅ {new_actual} testů (cíl {expected})")
+    # ZMĚNA: Odstraněno ořezávání pokud jich doplnil moc.
+    print(f"    [Validace] ✅ Po doplnění máme {new_actual} testů (cíl byl {expected})")
     return new_code
 
 

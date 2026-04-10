@@ -75,7 +75,7 @@ API KONTEXT:
 {self._knowledge_block()}
 =========================================
 CRITICAL INSTRUCTIONS FOR OUTPUT:
-Na základě API kontextu výše vytvoř testovací plán s PŘESNĚ {test_count} testy.
+Na základě API kontextu výše vytvoř testovací plán s alespoň {test_count} testy (může jich být i více).
 
 PRAVIDLA PRO TESTY:
 - type = "happy_path" | "edge_case" | "error"
@@ -83,7 +83,7 @@ PRAVIDLA PRO TESTY:
 - endpoint musí být přesná cesta z API specifikace (s path parametry jako {{book_id}})
 - method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 - Jeden endpoint (method+path) = jeden objekt v poli, s více test_cases uvnitř
-- PŘESNĚ {test_count} testů celkem, ani více ani méně
+- Cílový počet je okolo {test_count} testů celkem. Neomezuj se, pokud vidíš další důležité scénáře.
 - NEGENERUJ test na reset databáze ani /reset endpoint
 
 POŽADOVANÁ JSON STRUKTURA:
@@ -105,7 +105,7 @@ POŽADOVANÁ JSON STRUKTURA:
 }}
 
 Rozhodni sám, které endpointy a scénáře jsou nejdůležitější pro otestování.
-PLAN EXACTLY {test_count} TESTS.
+PLAN AROUND {test_count} TESTS (OR MORE).
 YOU MUST RESPOND WITH ONLY VALID JSON. 
 NO MARKDOWN, NO PROSE, NO EXPLANATIONS.
 Start your response with {{ and end with }}.
@@ -114,21 +114,17 @@ Start your response with {{ and end with }}.
     def planning_fill_prompt(self, current_plan_json: str, actual: int, target: int) -> str:
         missing = target - actual
         return (
-            f"Tento testovací plán má {actual} testů, ale potřebuji PŘESNĚ {target}.\n\n"
+            f"Tento testovací plán má {actual} testů, ale potřebuji jich alespoň {target}.\n\n"
             f"AKTUÁLNÍ PLÁN:\n{current_plan_json}\n\n"
             f"=========================================\n"
             f"CRITICAL INSTRUCTIONS FOR OUTPUT:\n"
-            f"Přidej {missing} nových testů. Zaměř se na endpointy a scénáře které ještě "
+            f"Přidej minimálně {missing} nových testů. Zaměř se na endpointy a scénáře které ještě "
             f"nejsou dostatečně pokryté (edge cases, error handling, validace).\n"
             f"Vrať CELÝ plán (starý + nový).\n\n"
             f"YOU MUST RESPOND WITH ONLY VALID JSON.\n"
             f"NO MARKDOWN, NO PROSE, NO EXPLANATIONS.\n"
             f"Start your response with {{ and end with }}."
         )
-
-    # ══════════════════════════════════════════════════
-    #  FÁZE 3: Generování kódu
-    # ══════════════════════════════════════════════════
 
     def generation_prompt(self, plan_json: str, context: str, base_url: str) -> str:
         return f"""Budeš psát pytest testy v Pythonu (requests knihovna) pro toto REST API.
@@ -156,7 +152,7 @@ CRITICAL CODING INSTRUCTIONS:
    - Pokud to neuděláš, zablokuješ API a všechny další testy spadnou na 503.
 4. NEGENERUJ test na reset databáze ani /reset endpoint
 
-STRIKTNĚ SE DRŽ PLÁNU A VYGENERUJ PŘESNĚ DANÝ POČET TESTŮ.
+STRIKTNĚ SE DRŽ PLÁNU A VYGENERUJ VŠECHNY NAPLÁNOVANÉ TESTY.
 YOU MUST RESPOND WITH ONLY VALID PYTHON CODE.
 NO MARKDOWN BLOCKS (do not use ```python), NO PROSE, NO EXPLANATIONS.
 """
