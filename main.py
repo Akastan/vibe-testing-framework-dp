@@ -269,11 +269,28 @@ def run_pipeline(
     token_summary = tracker.summary()
     token_slim = tracker.summary_slim()
 
+    # ── NOVÁ METRIKA: Token Efficiency (Cost-Effectiveness) ───
+    passed_tests = tv.get("tests_passed", 0)
+    assertion_depth_val = ad.get("assertion_depth", 0.0)
+    cost_usd = token_slim.get("cost_total_usd", 0.0)
+
+    # Ochrana proti dělení nulou (např. lokální modely s cenou 0)
+    safe_cost = max(cost_usd, 0.000001)
+    efficiency_score = round((passed_tests * assertion_depth_val) / safe_cost, 2)
+
+    metrics["token_efficiency"] = {
+        "score": efficiency_score,
+        "cost_usd": cost_usd,
+        "formula": "(tests_passed * assertion_depth) / cost_usd"
+    }
+    # ──────────────────────────────────────────────────────────
+
     print(f"\n  {'─' * 50}")
     print(f"  Validity:   {tv['validity_rate_pct']}% ({tv['tests_passed']}/{tv['total_executed']})")
     print(f"  Endpoint:   {ec['endpoint_coverage_pct']}% ({ec['covered_endpoints']}/{ec['total_api_endpoints']})")
     print(f"  Assert:     {ad['assertion_depth']} avg ({ad['total_assertions']} total)")
-    print(f"  Body check: {rv['response_validation_pct']}% ({rv['tests_with_body_check']}/{rv['total_test_functions']})")
+    print(
+        f"  Body check: {rv['response_validation_pct']}% ({rv['tests_with_body_check']}/{rv['total_test_functions']})")
     print(f"  Status codes: {metrics['status_code_diversity']['diversity_count']} unique")
     print(f"  Empty tests: {et['empty_count']}")
     print(f"  Stale tests: {st['stale_count']}")
@@ -287,6 +304,7 @@ def run_pipeline(
         print(f"  Cena input:  ${token_slim['cost_input_usd']:.4f}")
         print(f"  Cena output: ${token_slim['cost_output_usd']:.4f}")
         print(f"  Cena celkem: ${token_slim['cost_total_usd']:.4f}")
+        print(f"  Efektivita:  {efficiency_score:,.2f} test-asserts/USD")  # <--- Nový print
     else:
         print(f"  Cena:       N/A (model '{tracker.model}' není v pricing tabulce)")
 

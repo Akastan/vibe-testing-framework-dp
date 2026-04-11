@@ -260,6 +260,20 @@ class RepairTracker:
         first_failing = set(self._iterations[0].get("failing_tests", []))
         last_failing = set(self._iterations[-1].get("failing_tests", []))
 
+        fixed = sorted(first_failing - last_failing)
+        never_fixed = sorted(first_failing & last_failing)
+
+        # ─── NOVÉ METRIKY: First-Shot & Self-Correction ────────
+        first_iter = self._iterations[0]
+        first_passed = first_iter.get("passed", 0)
+        first_failed = first_iter.get("failed", 0)
+        first_total = first_passed + first_failed
+        fspr = round((first_passed / first_total) * 100, 2) if first_total > 0 else 0.0
+
+        initial_fails = len(first_failing)
+        self_correction_rate = round((len(fixed) / initial_fails) * 100, 2) if initial_fails > 0 else 0.0
+        # ───────────────────────────────────────────────────────
+
         # Failure categories z první iterace
         all_categories = {}
         first = self._iterations[0].get("failure_details", {})
@@ -282,8 +296,10 @@ class RepairTracker:
         return {
             "iterations": slim_iters,
             "convergence_iteration": convergence + 1,
-            "never_fixed_tests": sorted(first_failing & last_failing),
-            "fixed_tests": sorted(first_failing - last_failing),
+            "first_shot_pass_rate_pct": fspr,  # <--- Nové
+            "self_correction_rate_pct": self_correction_rate,  # <--- Nové
+            "never_fixed_tests": never_fixed,
+            "fixed_tests": fixed,
             "failure_categories": all_categories,
         }
 
@@ -564,3 +580,4 @@ def collect_all_diagnostics(
         diag["repair_trajectory"] = repair_tracker.get_trajectory()
 
     return diag
+
