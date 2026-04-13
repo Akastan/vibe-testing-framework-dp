@@ -8,7 +8,7 @@ Změny oproti v1:
 import json
 import re
 
-from prompts.prompt_templates import PromptBuilder
+from pipeline.prompt_templates import PromptBuilder
 
 
 def _count_plan_tests(plan: dict) -> int:

@@ -18,7 +18,7 @@ import re
 import textwrap
 import time
 
-from prompts.prompt_templates import PromptBuilder
+from pipeline.prompt_templates import PromptBuilder
 
 MAX_INDIVIDUAL_REPAIRS = 10
 
@@ -171,7 +171,7 @@ def _extract_error_for_test(pytest_log: str, test_name: str) -> str:
     )
     match = re.search(pattern, pytest_log, re.DOTALL)
     if match:
-        return match.group(1).strip()[:1500]
+        return match.group(1).strip()[-2000:]
     return ""
 
 
@@ -203,7 +203,7 @@ def _normalize_error(error: str) -> str:
     error = re.sub(r'\d+', 'N', error)
     error = re.sub(r'["\'].*?["\']', 'STR', error)
     error = re.sub(r'0x[0-9a-fA-F]+', 'ADDR', error)
-    return error.strip()[:500]
+    return error.strip()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -237,7 +237,8 @@ class StaleTracker:
 
     def update(self, repair_type: str, pytest_log: str,
                failing_names: list[str],
-               attempted_names: list[str]):
+               attempted_names: list[str],
+               code_changed: bool = False):
         attempted_set = set(attempted_names)
         is_helper = repair_type in ("helper_root_cause", "helper_fallback")
 
@@ -257,17 +258,24 @@ class StaleTracker:
             self._entries.pop(name, None)
             self._stale.discard(name)
 
+        # ÚPLNĚ ODSTRANĚNO: if code_changed: return ...
+        # Díky refresh_with_current_errors můžeme vyhodnocovat limity okamžitě.
+
         for name, entry in self._entries.items():
-            if not entry.isolated_errors or not entry.helper_errors:
-                continue
-            last_isolated = entry.isolated_errors[-1]
-            last_helper = entry.helper_errors[-1]
-            if last_isolated == last_helper:
-                if name not in self._stale:
-                    print(f"      🔒 {name} je stale "
-                          f"(isolated {len(entry.isolated_errors)}× + "
-                          f"helper {len(entry.helper_errors)}×, stejná chyba)")
-                self._stale.add(name)
+            iso_count = len(entry.isolated_errors)
+            help_count = len(entry.helper_errors)
+
+            # Striktní limit: přesně max 2x isolated a max 2x helper
+            if iso_count >= 2 and help_count >= 2:
+                last_isolated = entry.isolated_errors[-1]
+                last_helper = entry.helper_errors[-1]
+
+                # Pokud po 4 pokusech obě strategie končí na stejné chybě, je to definitivně stale
+                if last_isolated == last_helper:
+                    if name not in self._stale:
+                        print(f"      🔒 {name} je stale "
+                              f"(dosažen limit: isolated {iso_count}× + helper {help_count}× se stejnou chybou)")
+                    self._stale.add(name)
 
     def refresh_with_current_errors(self, pytest_log: str,
                                      failing_names: list[str]) -> list[str]:
@@ -684,7 +692,7 @@ def _repair_helpers(master_code, pytest_log, helpers, failing_names, llm,
     for name in failing_names[:3]:
         err = _extract_error_for_test(pytest_log, name)
         if err:
-            sample_errors.append(f"Test {name}:\n{err[:500]}")
+            sample_errors.append(f"Test {name}:\n{err}")
 
     prompt = prompt_builder.repair_helpers_prompt(
         helpers, sample_errors, len(failing_names), context, base_url
@@ -736,43 +744,13 @@ def _repair_helpers(master_code, pytest_log, helpers, failing_names, llm,
 
 
 def _merge_helpers(old_helpers: str, new_helpers: str) -> str | None:
-    """Pokusí se mergovat staré a nové helpery — zachová staré importy,
-    použije nové funkce."""
-    try:
-        # Extrahuj importy z obou
-        old_lines = old_helpers.split('\n')
-        new_lines = new_helpers.split('\n')
-
-        # Najdi import řádky ze starých helperů
-        old_import_lines = []
-        old_rest_lines = []
-        for line in old_lines:
-            stripped = line.strip()
-            if (stripped.startswith("import ") or stripped.startswith("from ")
-                    or stripped == "" and not old_rest_lines):
-                old_import_lines.append(line)
-            else:
-                old_rest_lines.append(line)
-
-        # Najdi ne-import řádky z nových helperů (opravené funkce)
-        new_func_lines = []
-        in_imports = True
-        for line in new_lines:
-            stripped = line.strip()
-            if in_imports and (stripped.startswith("import ") or stripped.startswith("from ")
-                               or stripped == ""):
-                continue  # Přeskočíme importy z nových — použijeme staré
-            else:
-                in_imports = False
-                new_func_lines.append(line)
-
-        merged = '\n'.join(old_import_lines) + '\n\n' + '\n'.join(new_func_lines)
-
-        # Ověř syntax
-        ast.parse(merged)
-        return merged.strip()
-    except SyntaxError:
-        return None
+    """
+    Pokus o textový merge starých importů a nových (nekompletních) helperů
+    je nebezpečný a vedl by ke smazání funkcí, na které LLM zapomnělo.
+    Jelikož předchozí validace selhala, vracíme None a bezpečně tuto
+    vadnou opravu zahazujeme.
+    """
+    return None
 
 
 def _do_isolated_repairs(master_code, pytest_log, repairable, helpers, llm,
@@ -929,6 +907,7 @@ def repair_failing_tests(master_code: str, pytest_log: str,
         "stale_skipped": 0,
         "regression_rollback": False,
         "errors_changed": False,
+        "code_changed": False,
     }
 
     failing = _parse_failing_test_names(pytest_log)
@@ -974,8 +953,12 @@ def repair_failing_tests(master_code: str, pytest_log: str,
     )
 
     if previous_repair_type is None:
-        # První iterace → isolated
-        use_helper = False
+        # První iterace → standardně isolated, ale pokud je 10+ failů, jdi rovnou na helper
+        if len(repairable) >= 10:
+            print(f"    [Repair] 🚨 Detekováno {len(repairable)} selhání! Vynucuji helper repair v 1. iteraci.")
+            use_helper = True
+        else:
+            use_helper = False
     elif previous_repair_type == "isolated":
         # Po isolated → helper
         use_helper = True
@@ -1000,10 +983,12 @@ def repair_failing_tests(master_code: str, pytest_log: str,
         repair_info["repair_type"] = repair_type
         repair_info["repaired_count"] = len(repairable)
 
+        code_changed = (master_code != backup)
         if stale_tracker:
             stale_tracker.update(
                 repair_type, pytest_log, failing,
                 attempted_names=repairable,
+                code_changed=code_changed,
             )
 
     else:
@@ -1015,10 +1000,12 @@ def repair_failing_tests(master_code: str, pytest_log: str,
         repair_info["repair_type"] = "isolated"
         repair_info["repaired_count"] = repaired
 
+        code_changed = (master_code != backup)
         if stale_tracker:
             stale_tracker.update(
                 "isolated", pytest_log, failing,
                 attempted_names=attempted,
+                code_changed=code_changed,
             )
 
     # ── Bezpečnostní kontrola: počet testů se nesmí změnit ──
@@ -1028,5 +1015,7 @@ def repair_failing_tests(master_code: str, pytest_log: str,
         print(f"    [Repair] ⚠️ Počet testů se změnil ({before} → {after}), revertuji")
         master_code = backup
         repair_info["regression_rollback"] = True
+
+    repair_info["code_changed"] = (master_code != backup)
 
     return master_code, repair_info
