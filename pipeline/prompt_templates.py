@@ -230,7 +230,7 @@ CRITICAL CODING INSTRUCTIONS:
 - Vrať KOMPLETNÍ blok: všechny importy + všechny helper funkce.
 - NEVYNECHEJ žádný import ani helper, který je v AKTUÁLNÍ verzi výše.
 - Zachovej signatury helperů kompatibilní s existujícími testy.
-- Zajisti unikátní názvy pomocí unique funkce.
+- Zajisti unikátní názvy a data pomocí unique funkce: def unique(prefix="test"): return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
 - Analyzuj CHYBY a oprav ROOT CAUSE v helperech:
   - POZOR NA DÉLKU STRINGŮ: Počítej znaky unique funkce a prefix znaky. Může se stát že součet bude přesahovat limit.
   - Pokud helpery posílají špatný formát dat → oprav dle API kontextu.
