@@ -265,16 +265,16 @@ class StaleTracker:
             iso_count = len(entry.isolated_errors)
             help_count = len(entry.helper_errors)
 
-            # Striktní limit: přesně max 2x isolated a max 2x helper
-            if iso_count >= 2 and help_count >= 2:
+            # Nový striktní limit: stačí 1x isolated a 1x helper
+            if iso_count >= 1 and help_count >= 1:
                 last_isolated = entry.isolated_errors[-1]
                 last_helper = entry.helper_errors[-1]
 
-                # Pokud po 4 pokusech obě strategie končí na stejné chybě, je to definitivně stale
+                # Pokud obě strategie skončily na naprosto stejné chybě -> STALE
                 if last_isolated == last_helper:
                     if name not in self._stale:
                         print(f"      🔒 {name} je stale "
-                              f"(dosažen limit: isolated {iso_count}× + helper {help_count}× se stejnou chybou)")
+                              f"(isolated i helper selhaly na identické chybě)")
                     self._stale.add(name)
 
     def refresh_with_current_errors(self, pytest_log: str,

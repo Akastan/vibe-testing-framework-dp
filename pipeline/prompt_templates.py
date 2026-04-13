@@ -212,8 +212,8 @@ NO MARKDOWN BLOCKS, NO PROSE, NO IMPORTS, NO HELPERS, NO EXPLANATIONS.
 """
 
     def repair_helpers_prompt(
-        self, helpers: str, sample_errors: list[str],
-        failing_count: int, context: str, base_url: str,
+            self, helpers: str, sample_errors: list[str],
+            failing_count: int, context: str, base_url: str,
     ) -> str:
         errors_text = "\n".join(sample_errors)
         return f"""Většina testů padá kvůli bugu v helper funkcích. Oprav helpery.
@@ -228,17 +228,19 @@ UKÁZKY CHYB ({failing_count} testů celkem padá):
 =========================================
 CRITICAL CODING INSTRUCTIONS:
 - Vrať KOMPLETNÍ blok: všechny importy + všechny helper funkce.
-- NEVYNECHEJ žádný import ani helper který je v AKTUÁLNÍ verzi výše.
+- NEVYNECHEJ žádný import ani helper, který je v AKTUÁLNÍ verzi výše.
 - Zachovej signatury helperů kompatibilní s existujícími testy.
-- Zajisti unikátní názvy přes uuid4 (unique() helper).
+- Zajisti unikátní názvy pomocí unique funkce.
 - Analyzuj CHYBY a oprav ROOT CAUSE v helperech:
-  - Pokud helpery posílají špatný formát dat → oprav dle API kontextu
-  - Pokud helpery neposílají povinné hlavičky (API key, ETag) → přidej je
-  - Pokud helpery mají špatnou URL/metodu → oprav dle API kontextu
+  - POZOR NA DÉLKU STRINGŮ: Počítej znaky unique funkce a prefix znaky. Může se stát že součet bude přesahovat limit.
+  - Pokud helpery posílají špatný formát dat → oprav dle API kontextu.
+  - Pokud helpery neposílají povinné hlavičky (API key, ETag) → přidej je.
 
-YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (all imports + all helpers).
-NO MARKDOWN BLOCKS, NO PROSE, NO EXPLANATIONS.
-The code MUST start with import statements.
+OUTPUT FORMAT REQUIREMENTS:
+- YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (all imports + all helpers).
+- NO MARKDOWN BLOCKS (` ```python `) AROUND THE CODE!
+- NO PROSE OUTSIDE OF COMMENTS.
+- VAROVÁNÍ: Před samotným kódem MUSÍŠ napsat 1-2 řádky jako Python komentář (#), kde analyzuješ hlavní chybu z logu a napíšeš, jak ji fixneš.
 """
 
     def fill_tests_prompt(
