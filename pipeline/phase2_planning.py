@@ -8,7 +8,7 @@ Změny oproti v1:
 import json
 import re
 
-from pipeline.prompt_templates import PromptBuilder
+from prompts.prompt_templates import PromptBuilder
 
 
 def _count_plan_tests(plan: dict) -> int:
@@ -121,8 +121,7 @@ def generate_test_plan(context_data: str, llm,
         plan = _filter_reset_tests(plan)
         actual = _count_plan_tests(plan)
 
-        # ZMĚNA: Ukončíme, pokud máme ALESPOŇ požadovaný počet
-        if actual >= test_count:
+        if actual == test_count:
             break
 
         if actual == 0:
@@ -133,7 +132,7 @@ def generate_test_plan(context_data: str, llm,
 
         elif actual < test_count:
             missing = test_count - actual
-            print(f"  [Plán] {actual} testů, doplňuji minimálně {missing}...")
+            print(f"  [Plán] {actual} testů, doplňuji {missing}...")
             fill_prompt = prompt_builder.planning_fill_prompt(
                 json.dumps(plan, indent=2, ensure_ascii=False),
                 actual, test_count,
@@ -149,10 +148,12 @@ def generate_test_plan(context_data: str, llm,
     plan = _filter_reset_tests(plan)  # Finální filtrování
     actual = _count_plan_tests(plan)
 
-    # ZMĚNA: Žádné ořezávání (trimming) přebytečných testů
-    if actual >= test_count:
-        print(f"  [Plán] ✅ Vygenerováno {actual} testů (cíl byl alespoň {test_count})")
-    else:
+    if actual > test_count:
+        print(f"  [Plán] {actual} testů → ořezávám na {test_count}")
+        plan = _trim_plan(plan, test_count)
+    elif actual < test_count:
         print(f"  [Plán] ⚠️ {actual} testů (cíl {test_count}) po {MAX_ATTEMPTS} pokusech")
+    else:
+        print(f"  [Plán] ✅ Přesně {test_count} testů")
 
     return plan

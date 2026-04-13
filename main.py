@@ -19,16 +19,16 @@ from dotenv import load_dotenv
 from llm_provider import create_llm
 from token_tracker import TokenTracker
 from context_compressor import compress_context, print_compression_report
-from pipeline.prompt_templates import PromptBuilder
-from pipeline.phase1_context import analyze_context
-from pipeline.phase2_planning import generate_test_plan
-from pipeline.phase3_generation import (
+from prompts.prompt_templates import PromptBuilder
+from prompts.phase1_context import analyze_context
+from prompts.phase2_planning import generate_test_plan
+from prompts.phase3_generation import (
     generate_test_code, repair_failing_tests, validate_test_count,
     count_test_functions, StaleTracker,
 )
-from pipeline.phase4_validation import run_tests_and_validate, stop_managed_server
-from pipeline.phase5_metrics import calculate_all_metrics, parse_test_validity_rate
-from pipeline.phase6_diagnostics import (
+from prompts.phase4_validation import run_tests_and_validate, stop_managed_server
+from prompts.phase5_metrics import calculate_all_metrics, parse_test_validity_rate
+from prompts.phase6_diagnostics import (
     collect_all_diagnostics, RepairTracker as DiagRepairTracker,
 )
 
