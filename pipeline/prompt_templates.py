@@ -135,7 +135,7 @@ TEST PLAN:
 =========================================
 CRITICAL CODING INSTRUCTIONS:
 1. UNIQUE NAMES (mandatory, otherwise tests will collide):
-   - For unique names, use the uuid4 suffix: def unique(prefix="test"): return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
+   - For unique names and ISBN, use the uuid4 suffix: uuid.uuid4().hex[:8]"
    - This function adds 9 characters (_ + 8 unique chars). Important for length-restricted names.
    - Generate unique names in EVERY helper call.
 2. ASSERTION QUALITY: Do NOT check ONLY the status code. Each test should also verify the response:
@@ -222,7 +222,7 @@ CRITICAL CODING INSTRUCTIONS:
 - Return the COMPLETE block: all imports + all helper functions.
 - DO NOT OMIT any import or helper present in the CURRENT version above.
 - Keep helper signatures compatible with existing tests.
-- Ensure unique names and data using the unique function: def unique(prefix="test"): return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
+- Ensure unique names and ISBN using the unique function uuid.uuid4().hex[:8]"
 - Analyze the ERRORS and fix the ROOT CAUSE in the helpers:
   - BEWARE OF STRING LENGTHS: Count the characters of the unique function and prefix. The sum might exceed the limit.
   - If helpers send data in the wrong format → fix it according to the API context.
