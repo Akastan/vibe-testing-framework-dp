@@ -1,16 +1,8 @@
-"""
-Unified Prompt Framework – v7 (context-aware repair + safe helpers).
-
-Změny oproti v6:
-  - repair_batch_prompt: přidán kontext API → LLM ví CO opravuje
-  - repair_helpers_prompt: přidán kontext + explicitní instrukce zachovat importy
-  - Oba repair prompty obsahují _knowledge_block() pro L1+
-"""
 from __future__ import annotations
 
 
 class PromptBuilder:
-    """Sestavuje prompty z experiment.yaml konfigurace pro dané API + level."""
+    """Builds prompts from experiment.yaml config for a given API + level."""
 
     _KNOWLEDGE_LEVELS = ("L1", "L2", "L3", "L4")
 
@@ -26,21 +18,21 @@ class PromptBuilder:
             self.api_knowledge = []
 
     # ──────────────────────────────────────────────────
-    #  Interní bloky
+    #  Internal blocks
     # ──────────────────────────────────────────────────
 
     def _framework_block(self) -> str:
         if not self.framework_rules:
             return ""
         lines = "\n".join(f"- {r}" for r in self.framework_rules)
-        return f"\nTECHNICKÉ POŽADAVKY FRAMEWORKU:\n{lines}\n"
+        return f"\nTECHNICAL FRAMEWORK REQUIREMENTS:\n{lines}\n"
 
     def _knowledge_block(self) -> str:
         if not self.api_knowledge:
             return ""
         lines = "\n".join(f"- {r}" for r in self.api_knowledge)
         return (
-            f"\nZNÁMÉ CHOVÁNÍ TOHOTO API (použij při psaní helperů a assertů):\n"
+            f"\nKNOWN BEHAVIOR OF THIS API (use when writing helpers and assertions):\n"
             f"{lines}\n"
         )
 
@@ -49,63 +41,63 @@ class PromptBuilder:
             return ""
         names = ", ".join(stale_tests)
         return (
-            f"\nZAMRZLÉ TESTY (neopravuj, jsou principiálně neopravitelné):\n"
+            f"\nSTALE TESTS (do not fix, they are fundamentally unfixable):\n"
             f"{names}\n"
-            f"Soustřeď se POUZE na ostatní failing testy.\n"
+            f"Focus ONLY on the other failing tests.\n"
         )
 
     def _context_block(self, context: str, max_chars: int = 4000) -> str:
-        """Zkrácený kontext API pro repair prompty."""
+        """Truncated API context for repair prompts."""
         if not context:
             return ""
         trimmed = context[:max_chars]
         if len(context) > max_chars:
-            trimmed += "\n... (zkráceno)"
-        return f"\nAPI KONTEXT (pro pochopení očekávaného chování):\n{trimmed}\n"
+            trimmed += "\n... (truncated)"
+        return f"\nAPI CONTEXT (to understand expected behavior):\n{trimmed}\n"
 
     # ══════════════════════════════════════════════════
-    #  FÁZE 2: Plánování
+    #  PHASE 2: Planning
     # ══════════════════════════════════════════════════
 
     def planning_prompt(self, context: str, test_count: int) -> str:
-        return f"""Analyzuj toto API a připrav se na vytvoření testovacího plánu.
+        return f"""Analyze this API and prepare to create a test plan.
 
-API KONTEXT:
+API CONTEXT:
 {context}
 {self._knowledge_block()}
 =========================================
 CRITICAL INSTRUCTIONS FOR OUTPUT:
-Na základě API kontextu výše vytvoř testovací plán s PŘESNĚ {test_count} testy.
+Based on the API context above, create a test plan with EXACTLY {test_count} tests.
 
-PRAVIDLA PRO TESTY:
+TEST RULES:
 - type = "happy_path" | "edge_case" | "error"
-- name = snake_case bez diakritiky, unikátní napříč celým plánem
-- endpoint musí být přesná cesta z API specifikace (s path parametry jako {{book_id}})
+- name = snake_case without diacritics, unique across the entire plan
+- endpoint must be the exact path from the API specification (with path parameters like {{book_id}})
 - method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
-- Jeden endpoint (method+path) = jeden objekt v poli, s více test_cases uvnitř
-- PŘESNĚ {test_count} testů celkem, ani více ani méně
-- NEGENERUJ test na reset databáze ani /reset endpoint
+- One endpoint (method+path) = one object in the array, with multiple test_cases inside
+- EXACTLY {test_count} tests in total, no more, no less
+- DO NOT GENERATE tests for database reset or the /reset endpoint
 
-POŽADOVANÁ JSON STRUKTURA:
+REQUIRED JSON STRUCTURE:
 {{
   "test_plan": [
     {{
-      "endpoint": "/cesta",
+      "endpoint": "/path",
       "method": "GET",
       "test_cases": [
         {{
-          "name": "nazev_testu",
+          "name": "test_name",
           "type": "happy_path",
           "expected_status": 200,
-          "description": "Popis co test ověřuje"
+          "description": "Description of what the test verifies"
         }}
       ]
     }}
   ]
 }}
 
-Rozhodni sám, které endpointy a scénáře jsou nejdůležitější pro otestování.
 PLAN EXACTLY {test_count} TESTS.
+YOU DECIDE WHICH ENDPOINTS ARE WORTH TESTING.
 YOU MUST RESPOND WITH ONLY VALID JSON. 
 NO MARKDOWN, NO PROSE, NO EXPLANATIONS.
 Start your response with {{ and end with }}.
@@ -114,55 +106,55 @@ Start your response with {{ and end with }}.
     def planning_fill_prompt(self, current_plan_json: str, actual: int, target: int) -> str:
         missing = target - actual
         return (
-            f"Tento testovací plán má {actual} testů, ale potřebuji PŘESNĚ {target}.\n\n"
-            f"AKTUÁLNÍ PLÁN:\n{current_plan_json}\n\n"
+            f"This test plan has {actual} tests, but I need EXACTLY {target}.\n\n"
+            f"CURRENT PLAN:\n{current_plan_json}\n\n"
             f"=========================================\n"
             f"CRITICAL INSTRUCTIONS FOR OUTPUT:\n"
-            f"Přidej {missing} nových testů. Zaměř se na endpointy a scénáře které ještě "
-            f"nejsou dostatečně pokryté (edge cases, error handling, validace).\n"
-            f"Vrať CELÝ plán (starý + nový).\n\n"
+            f"Add {missing} new tests. Focus on endpoints and scenarios that are not yet "
+            f"sufficiently covered (edge cases, error handling, validation).\n"
+            f"Return the ENTIRE plan (old + new).\n\n"
             f"YOU MUST RESPOND WITH ONLY VALID JSON.\n"
             f"NO MARKDOWN, NO PROSE, NO EXPLANATIONS.\n"
             f"Start your response with {{ and end with }}."
         )
 
     # ══════════════════════════════════════════════════
-    #  FÁZE 3: Generování kódu
+    #  PHASE 3: Code Generation
     # ══════════════════════════════════════════════════
 
     def generation_prompt(self, plan_json: str, context: str, base_url: str) -> str:
-        return f"""Budeš psát pytest testy v Pythonu (requests knihovna) pro toto REST API.
+        return f"""You will write pytest tests in Python (using the requests library) for this REST API.
 BASE_URL = "{base_url}"
 
-KONTEXT API:
+API CONTEXT:
 {context}
 
-PLÁN TESTŮ:
+TEST PLAN:
 {plan_json}
 {self._knowledge_block()}{self._framework_block()}
 =========================================
 CRITICAL CODING INSTRUCTIONS:
-1. UNIKÁTNÍ NÁZVY (povinné, jinak testy kolidují):
-   - Pro unikátní názvy použij uuid4 suffix: def unique(prefix="test"): return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
-   - Tato funkce přidá 9 znaků (_ + 8 unique znaků). Důležité pro názvy omezené na počet znaků
-   - V KAŽDÉM helper volání generuj unikátní názvy.
-2. KVALITA ASERCÍ: Nekontroluj POUZE status kód. Každý test by měl ověřit i odpověď:
-   - Happy path (201/200): ověř klíče v response body (assert "id" in data)
-   - Error: ověř detail (assert "detail" in r.json())
-   - GET seznam: ověř strukturu (assert "items" in data nebo assert isinstance(data, list))
-   - Side effects: po vytvoření ověř snížení skladu, po smazání ověř 404 na GET
-3. UKLÍZENÍ GLOBÁLNÍHO STAVU (TEARDOWN):
-   - Pokud test mění globální stav API (např. zapíná maintenance mode, mění globální nastavení), MUSÍŠ tento stav v tom samém testu na konci vrátit zpět do výchozího stavu (vypnout ho)! 
-   - Pokud to neuděláš, zablokuješ API a všechny další testy spadnou na 503.
-4. NEGENERUJ test na reset databáze ani /reset endpoint
+1. UNIQUE NAMES (mandatory, otherwise tests will collide):
+   - For unique names, use the uuid4 suffix: def unique(prefix="test"): return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
+   - This function adds 9 characters (_ + 8 unique chars). Important for length-restricted names.
+   - Generate unique names in EVERY helper call.
+2. ASSERTION QUALITY: Do NOT check ONLY the status code. Each test should also verify the response:
+   - Happy path (201/200): verify keys in the response body (assert "id" in data)
+   - Error: verify detail (assert "detail" in r.json())
+   - GET list: verify structure (assert "items" in data or assert isinstance(data, list))
+   - Side effects: after creation, verify stock reduction; after deletion, verify 404 on GET
+3. GLOBAL STATE CLEANUP (TEARDOWN):
+   - If a test changes the global API state (e.g., enabling maintenance mode, changing global settings), you MUST revert this state back to the default (disable it) at the end of the same test! 
+   - If you don't do this, you will block the API and all subsequent tests will fail with 503.
+4. DO NOT GENERATE tests for database reset or the /reset endpoint.
 
-STRIKTNĚ SE DRŽ PLÁNU A VYGENERUJ PŘESNĚ DANÝ POČET TESTŮ.
+STRICTLY FOLLOW THE PLAN AND GENERATE EXACTLY THE SPECIFIED NUMBER OF TESTS.
 YOU MUST RESPOND WITH ONLY VALID PYTHON CODE.
 NO MARKDOWN BLOCKS (do not use ```python), NO PROSE, NO EXPLANATIONS.
 """
 
     # ══════════════════════════════════════════════════
-    #  FÁZE 3: Opravy
+    #  PHASE 3: Repairs
     # ══════════════════════════════════════════════════
 
     def repair_batch_prompt(
@@ -173,14 +165,14 @@ NO MARKDOWN BLOCKS (do not use ```python), NO PROSE, NO EXPLANATIONS.
         base_url: str,
         stale_tests: list[str] | None = None,
     ) -> str:
-        """Hromadná oprava více failing testů v jednom promptu.
+        """Batch repair of multiple failing tests in a single prompt.
 
         Args:
             test_entries: [(test_name, test_code, error_msg), ...]
-            helpers: kód helper funkcí
-            context: API kontext (zkrácený)
-            base_url: base URL API
-            stale_tests: seznam stale testů (pro info)
+            helpers: helper functions code
+            context: API context (truncated)
+            base_url: API base URL
+            stale_tests: list of stale tests (for info)
         """
         tests_block = ""
         for i, (name, code, error) in enumerate(test_entries, 1):
@@ -188,24 +180,24 @@ NO MARKDOWN BLOCKS (do not use ```python), NO PROSE, NO EXPLANATIONS.
             tests_block += f"CODE:\n{code}\n"
             tests_block += f"ERROR:\n{error}\n"
 
-        return f"""Oprav tyto selhávající testovací funkce. Každý test má svůj kód a chybu.
+        return f"""Fix these failing test functions. Each test has its code and error.
 BASE_URL = "{base_url}"
 {self._context_block(context)}
-DOSTUPNÉ HELPERY (NEMĚŇ JE, pouze je používej):
+AVAILABLE HELPERS (DO NOT MODIFY THEM, only use them):
 {helpers}
 
-SELHÁVAJÍCÍ TESTY ({len(test_entries)}):
+FAILING TESTS ({len(test_entries)}):
 {tests_block}
 {self._knowledge_block()}{self._stale_block(stale_tests)}{self._framework_block()}
 =========================================
 CRITICAL CODING INSTRUCTIONS:
-- Oprav KAŽDOU funkci výše. Zachovej přesné názvy funkcí.
-- Používej existující helper funkce, nevymýšlej nové.
-- Analyzuj CHYBU u každého testu a oprav PŘÍČINU, ne jen symptom:
-  - Pokud assert selže na špatném status kódu → zkontroluj jestli test posílá správná data dle API kontextu
-  - Pokud assert selže na hodnotě v response → zkontroluj jestli test ověřuje správné pole/hodnotu
-  - Pokud test padne na setup (helper) → zkontroluj jestli test správně vytváří prerekvizity
-- Vrať POUZE opravené funkce (def test_...), žádné helpery ani importy.
+- Fix EVERY function above. Keep the exact function names.
+- Use existing helper functions, do not invent new ones.
+- Analyze the ERROR for each test and fix the ROOT CAUSE, not just the symptom:
+  - If an assert fails on a wrong status code → check if the test sends correct data according to the API context.
+  - If an assert fails on a response value → check if the test verifies the correct field/value.
+  - If a test fails during setup (helper) → check if the test correctly creates prerequisites.
+- Return ONLY the fixed functions (def test_...), no helpers or imports.
 
 YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (all {len(test_entries)} fixed functions).
 NO MARKDOWN BLOCKS, NO PROSE, NO IMPORTS, NO HELPERS, NO EXPLANATIONS.
@@ -216,31 +208,31 @@ NO MARKDOWN BLOCKS, NO PROSE, NO IMPORTS, NO HELPERS, NO EXPLANATIONS.
             failing_count: int, context: str, base_url: str,
     ) -> str:
         errors_text = "\n".join(sample_errors)
-        return f"""Většina testů padá kvůli bugu v helper funkcích. Oprav helpery.
+        return f"""Most tests are failing due to bugs in helper functions. Fix the helpers.
 BASE_URL = "{base_url}"
 {self._context_block(context)}
-AKTUÁLNÍ HELPERY (vrať KOMPLETNÍ opravenou verzi VČETNĚ VŠECH importů):
+CURRENT HELPERS (return the COMPLETE fixed version INCLUDING ALL imports):
 {helpers}
 
-UKÁZKY CHYB ({failing_count} testů celkem padá):
+ERROR SAMPLES ({failing_count} tests failing in total):
 {errors_text}
 {self._knowledge_block()}{self._framework_block()}
 =========================================
 CRITICAL CODING INSTRUCTIONS:
-- Vrať KOMPLETNÍ blok: všechny importy + všechny helper funkce.
-- NEVYNECHEJ žádný import ani helper, který je v AKTUÁLNÍ verzi výše.
-- Zachovej signatury helperů kompatibilní s existujícími testy.
-- Zajisti unikátní názvy a data pomocí unique funkce: def unique(prefix="test"): return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
-- Analyzuj CHYBY a oprav ROOT CAUSE v helperech:
-  - POZOR NA DÉLKU STRINGŮ: Počítej znaky unique funkce a prefix znaky. Může se stát že součet bude přesahovat limit.
-  - Pokud helpery posílají špatný formát dat → oprav dle API kontextu.
-  - Pokud helpery neposílají povinné hlavičky (API key, ETag) → přidej je.
+- Return the COMPLETE block: all imports + all helper functions.
+- DO NOT OMIT any import or helper present in the CURRENT version above.
+- Keep helper signatures compatible with existing tests.
+- Ensure unique names and data using the unique function: def unique(prefix="test"): return f"{{prefix}}_{{uuid.uuid4().hex[:8]}}"
+- Analyze the ERRORS and fix the ROOT CAUSE in the helpers:
+  - BEWARE OF STRING LENGTHS: Count the characters of the unique function and prefix. The sum might exceed the limit.
+  - If helpers send data in the wrong format → fix it according to the API context.
+  - If helpers are missing required headers (API key, ETag) → add them.
 
 OUTPUT FORMAT REQUIREMENTS:
 - YOU MUST RESPOND WITH ONLY VALID PYTHON CODE (all imports + all helpers).
 - NO MARKDOWN BLOCKS (` ```python `) AROUND THE CODE!
 - NO PROSE OUTSIDE OF COMMENTS.
-- VAROVÁNÍ: Před samotným kódem MUSÍŠ napsat 1-2 řádky jako Python komentář (#), kde analyzuješ hlavní chybu z logu a napíšeš, jak ji fixneš.
+- WARNING: Before the code itself, you MUST write 1-2 lines as a Python comment (#) where you analyze the main error from the log and state how you will fix it.
 """
 
     def fill_tests_prompt(
@@ -248,24 +240,24 @@ OUTPUT FORMAT REQUIREMENTS:
         context: str, base_url: str,
     ) -> str:
         names_str = ", ".join(existing_names)
-        return f"""Vygeneruj nové pytest testy pro toto REST API.
+        return f"""Generate new pytest tests for this REST API.
 BASE_URL = "{base_url}"
 
-KONTEXT API:
+API CONTEXT:
 {context[:3000]}
 
-DOSTUPNÉ HELPERY (použij je, nevymýšlej nové):
+AVAILABLE HELPERS (use them, do not invent new ones):
 {helpers}
 
-EXISTUJÍCÍ TESTY (tyto názvy NEPOUŽÍVEJ):
+EXISTING TESTS (DO NOT USE these names):
 {names_str}
 {self._knowledge_block()}{self._framework_block()}
 =========================================
 CRITICAL CODING INSTRUCTIONS:
-- Vygeneruj PŘESNĚ {missing} nových test funkcí (def test_...(): ...).
-- Každý test musí být self-contained.
-- Zaměř se na scénáře které existující testy nepokrývají.
-- Nekontroluj jen status kód — ověřuj i response body.
+- Generate EXACTLY {missing} new test functions (def test_...(): ...).
+- Each test must be self-contained.
+- Focus on scenarios not covered by existing tests.
+- Do not just check the status code — verify the response body as well.
 
 YOU MUST RESPOND WITH ONLY VALID PYTHON CODE ({missing} new functions).
 NO MARKDOWN BLOCKS, NO IMPORTS, NO HELPERS, NO PROSE, NO EXPLANATIONS.
