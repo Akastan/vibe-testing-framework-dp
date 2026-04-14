@@ -11,10 +11,10 @@
 
 experiment:
   name: "diplomka_v11"
-  levels: ["L0", "L1", "L2", "L3", "L4"]
-  #levels: ["L0"]
-  max_iterations: 5
-  runs_per_combination: 5
+  #levels: ["L0", "L1", "L2", "L3", "L4"]
+  levels: ["L4"]
+  max_iterations: 7
+  runs_per_combination: 1
   test_count: 30
   temperatures: [0.4]
 
@@ -25,15 +25,15 @@ llms:
   #  model: "gemini-3.1-flash-lite-preview"
   #  api_key_env: "GEMINI_API_KEY"
 
-  #- name: "mistral-large-2411"
-  #  provider: "mistral"
-  #  model: "mistral-large-2411"
-  #  api_key_env: "MISTRAL_API_KEY"
+  - name: "mistral-large-2512"
+    provider: "mistral"
+    model: "mistral-large-2512"
+    api_key_env: "MISTRAL_API_KEY"
 
-  - name: "deepseek-chat"
-    provider: "deepseek"
-    model: "deepseek-chat"
-    api_key_env: "DEEPSEEK_API_KEY"
+  #- name: "deepseek-chat"
+  #  provider: "deepseek"
+  #  model: "deepseek-chat"
+  #  api_key_env: "DEEPSEEK_API_KEY"
 
 # ── Testovaná API ────────────────────────────────────────
 apis:

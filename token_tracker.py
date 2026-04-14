@@ -40,13 +40,13 @@ DEFAULT_PRICING: dict[str, dict[str, float | None]] = {
     # Zdroj: api-docs.deepseek.com/quick_start/pricing
     # deepseek-chat i deepseek-reasoner = V3.2 (128K context)
     # Cache hit = 90% sleva (automatický prefix caching)
-    "deepseek-chat": {                          # V3.2 / V4
+    "deepseek-chat": {                          # V3.2
         "input": 0.28,  "output": 0.42,  "cached_input": 0.028,
     },
     # ═══ Mistral (USD per 1M tokenů) ═══
     # Zdroj: docs.mistral.ai/deployment/ai-studio/pricing
-    "mistral-large-latest": {                   # Large 3
-        "input": 2.00,  "output": 6.00,  "cached_input": None,
+    "mistral-large-2512": {                   # Large 3
+        "input": 0.5,  "output": 1.50,  "cached_input": None,
     },
 }
 

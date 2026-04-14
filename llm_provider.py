@@ -35,6 +35,7 @@ class RetryMixin:
     def _retry_call(self, func, retryable_codes=(
             "503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED",
             "high demand", "rate_limit", "Too Many Requests", "rate_limit_error",
+            "timed out", "timeout"
     )):
         if self.call_delay > 0:
             time.sleep(self.call_delay)
@@ -118,7 +119,8 @@ class MistralProvider(LLMProvider, RetryMixin):
                  temperature: float | None = None,
                  max_retries: int = 8, base_delay: float = 30.0,
                  max_tokens: int = 8192):
-        from mistralai import Mistral
+        from mistralai.client import Mistral
+
         self.client = Mistral(api_key=api_key)
         self.model = model_name
         self.model_name = model_name
@@ -134,6 +136,7 @@ class MistralProvider(LLMProvider, RetryMixin):
                 messages=[{"role": "user", "content": prompt}],
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
+                timeout_ms=300000,
             )
             text = response.choices[0].message.content or ""
             usage = extract_usage_mistral(response)
