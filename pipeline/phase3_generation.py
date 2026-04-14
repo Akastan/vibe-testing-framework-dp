@@ -541,6 +541,45 @@ def _salvage_truncated_code(code: str) -> str:
     return code
 
 # ═══════════════════════════════════════════════════════════
+#  LLM Response Cleanup
+# ═══════════════════════════════════════════════════════════
+
+def _clean_llm_response(raw: str) -> str:
+    """Odstraní prose, markdown bloky a další obal kolem Python kódu.
+
+    Mistral (a jiné modely) často ignorují instrukci 'NO MARKDOWN, NO PROSE'
+    a odpověď obalí do prose textu + ```python bloků. Naivní startswith()
+    to nechytí pokud je prose PŘED markdown blokem.
+    """
+    clean = raw.strip()
+
+    # 1) Najdi ```python blok a vezmi jen jeho obsah
+    match = re.search(r'```python\s*\n(.*?)(?:```|$)', clean, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+
+    # 2) Obecný ``` blok
+    match = re.search(r'```\s*\n(.*?)(?:```|$)', clean, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+
+    # 3) Prose před kódem — najdi první import/def/komentář
+    first_code = re.search(r'^(import |from |def |#)', clean, re.MULTILINE)
+    if first_code and first_code.start() > 0:
+        clean = clean[first_code.start():]
+
+    # 4) Fallback: stávající strip (pro případ že ``` je na začátku)
+    if clean.startswith("```python"):
+        clean = clean[9:]
+    elif clean.startswith("```"):
+        clean = clean[3:]
+    if clean.endswith("```"):
+        clean = clean[:-3]
+
+    return clean.strip()
+
+
+# ═══════════════════════════════════════════════════════════
 #  Počáteční generování
 # ═══════════════════════════════════════════════════════════
 
@@ -552,25 +591,28 @@ def generate_test_code(test_plan: dict, context_data: str, llm,
 
     raw = llm.generate_text(prompt)
 
-    clean = raw.strip()
-    if clean.startswith("```python"):
-        clean = clean[9:]
-    elif clean.startswith("```"):
-        clean = clean[3:]
-    if clean.endswith("```"):
-        clean = clean[:-3]
-    clean = clean.strip()
-
+    # ── Robustní cleanup (prose + markdown) ──────────
+    clean = _clean_llm_response(raw)
     clean = _fix_imports(clean)
 
-
-    # ── NOVÉ: Truncation detection ───────────────────────
+    # ── Truncation detection ─────────────────────────
     if _is_truncated(clean):
         print(f"    ⚠️ TRUNCATION DETECTED — kód je syntakticky nevalidní (pravděpodobně max_tokens limit)")
         original_lines = len(clean.split('\n'))
         clean = _salvage_truncated_code(clean)
         salvaged_lines = len(clean.split('\n'))
         print(f"    [Salvage] {original_lines} → {salvaged_lines} řádků")
+
+    # ── Okamžitý trim pokud model přestřelil ────────
+    expected = sum(
+        len(ep.get("test_cases", []))
+        for ep in test_plan.get("test_plan", [])
+    )
+    actual = count_test_functions(clean)
+    if actual > expected:
+        excess = actual - expected
+        print(f"    [Gen] ⚠️ Model vygeneroval {actual} testů místo {expected} — ořezávám {excess}")
+        clean = _remove_last_n_tests(clean, excess)
 
     return clean
 
@@ -624,14 +666,7 @@ def validate_test_count(code: str, expected: int, llm=None,
         print(f"    [Validace] ⚠️ LLM chyba: {e}")
         return code
 
-    clean = raw.strip()
-    if clean.startswith("```python"):
-        clean = clean[9:]
-    elif clean.startswith("```"):
-        clean = clean[3:]
-    if clean.endswith("```"):
-        clean = clean[:-3]
-    clean = clean.strip()
+    clean = _clean_llm_response(raw)
 
     if not clean:
         return code
@@ -704,14 +739,7 @@ def _repair_helpers(master_code, pytest_log, helpers, failing_names, llm,
         print(f"    [Repair] ⚠️ LLM chyba při opravě helperů: {e}")
         return master_code
 
-    clean = raw.strip()
-    if clean.startswith("```python"):
-        clean = clean[9:]
-    elif clean.startswith("```"):
-        clean = clean[3:]
-    if clean.endswith("```"):
-        clean = clean[:-3]
-    clean = clean.strip()
+    clean = _clean_llm_response(raw)
 
     if not clean:
         return master_code
@@ -808,14 +836,7 @@ def _do_isolated_repairs(master_code, pytest_log, repairable, helpers, llm,
 
 
 def _parse_batch_repair_response(raw: str) -> dict[str, str]:
-    clean = raw.strip()
-    if clean.startswith("```python"):
-        clean = clean[9:]
-    elif clean.startswith("```"):
-        clean = clean[3:]
-    if clean.endswith("```"):
-        clean = clean[:-3]
-    clean = clean.strip()
+    clean = _clean_llm_response(raw)
 
     if not clean:
         return {}
