@@ -51,18 +51,19 @@ apis:
       existing_tests: "inputs/api1_bookstore/existing_tests.py"
 
     framework_rules:
-      - "Timeout=30 na každém HTTP volání."
+      - "Timeout=30 on every HTTP call."
       - >-
-        Unikátní stringy přes uuid4:
+        Generate unique strings via uuid4:
         unique(prefix) → f'{prefix}_{uuid.uuid4().hex[:8]}'
-      - "Nepoužívej fixtures, conftest, setup_module."
-      - "Nevolej /reset endpoint — framework resetuje DB automaticky."
-      - "Každý test musí být self-contained (vytvoří si data přes helpery)."
-      - "Na DELETE s 204 nevolej .json() — tělo je prázdné."
+      - "Do not use fixtures, conftest, or setup_module."
+      - "Do not call the /reset endpoint — the framework resets the DB automatically."
+      - "Each test must be self-contained (create its own data using helpers)."
+      - "Never use hardcoded static identifiers; always generate them dynamically using `uuid.uuid4().hex[:8]` to prevent database conflicts during repeated executions."
+      - "Do not call .json() on DELETE requests returning a 204 status — the response body is empty."
       - >-
-        V helper funkcích (create_book, create_author...)
-        NEPOUŽÍVEJ raise_for_status().
-        Místo toho: assert response.status_code in (200, 201),
+        In helper functions (create_book, create_author...), 
+        DO NOT use raise_for_status(). 
+        Instead, use: assert response.status_code in (200, 201), 
         f"Helper failed {response.status_code}: {response.text[:200]}"
 
     api_knowledge: []

@@ -401,6 +401,9 @@ _AUTO_IMPORTS = {
     "string.ascii":       "import string",
     "math.ceil":          "import math",
     "math.floor":         "import math",
+    "pytest":             "import pytest",
+    "@pytest":            "import pytest",
+    "pytest.":            "import pytest"
 }
 
 
