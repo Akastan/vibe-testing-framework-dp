@@ -1,0 +1,262 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_with_all_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify creating an author with all fields (name, bio, born_year) returns 201 and correct response."
+        },
+        {
+          "name": "create_author_missing_optional_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify creating an author with only required field (name) returns 201."
+        },
+        {
+          "name": "create_author_invalid_name_length",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verify creating an author with name exceeding 100 characters returns 422."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_with_default_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify listing authors with default pagination (skip=0, limit=100) returns 200."
+        },
+        {
+          "name": "list_authors_with_custom_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify listing authors with custom skip and limit returns 200."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_existing_author",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify fetching an existing author returns 200 and correct data."
+        },
+        {
+          "name": "get_nonexistent_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verify fetching a non-existent author returns 404."
+        },
+        {
+          "name": "get_author_with_etag_not_modified",
+          "type": "edge_case",
+          "expected_status": 304,
+          "description": "Verify conditional GET with If-None-Match and matching ETag returns 304."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify updating an author with valid data returns 200."
+        },
+        {
+          "name": "update_author_with_etag_mismatch",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Verify updating an author with If-Match and mismatched ETag returns 412."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Verify deleting an author with no associated books returns 204."
+        },
+        {
+          "name": "delete_author_with_books",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verify deleting an author with associated books returns 409."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_with_all_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify creating a book with all fields returns 201 and correct response."
+        },
+        {
+          "name": "create_book_with_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verify creating a book with duplicate ISBN returns 409."
+        },
+        {
+          "name": "create_book_with_invalid_isbn_length",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verify creating a book with ISBN shorter than 10 characters returns 422."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_filters",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify listing books with filters (author_id, category_id, min_price) returns 200."
+        },
+        {
+          "name": "list_books_with_search_query",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify listing books with search query returns 200 and filtered results."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_existing_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify fetching an existing book returns 200 and correct data."
+        },
+        {
+          "name": "get_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verify fetching a soft-deleted book returns 410."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_book_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify updating a book with valid data returns 200."
+        },
+        {
+          "name": "update_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verify updating a soft-deleted book returns 410."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_eligible_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify applying a discount to a book older than 1 year returns 200."
+        },
+        {
+          "name": "apply_discount_to_new_book",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify applying a discount to a book published in the current year returns 400."
+        },
+        {
+          "name": "apply_discount_exceeding_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Verify applying a discount more than 5 times in 10 seconds returns 429."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_with_valid_quantity",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify updating stock with a valid quantity returns 200."
+        },
+        {
+          "name": "update_stock_resulting_in_negative_value",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify updating stock resulting in negative value returns 400."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_valid_cover_image",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify uploading a valid JPEG/PNG cover image returns 200."
+        },
+        {
+          "name": "upload_unsupported_file_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Verify uploading a file with unsupported type returns 415."
+        },
+        {
+          "name": "upload_oversized_cover_image",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Verify uploading a cover image larger than 2MB returns 413."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_for_existing_book",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify creating a review for an existing book returns 201."
+        }
+      ]
+    }
+  ]
+}

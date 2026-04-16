@@ -1,0 +1,255 @@
+# Log pro: test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py
+# Čas spuštění: 2026-04-15T21:49:38.107500
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 1 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_all_fields PASSED [  3%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_minimal_fields PASSED [  6%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_duplicate_name FAILED [ 10%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_empty_name PASSED [ 13%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_existing_author PASSED [ 16%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_nonexistent_author PASSED [ 20%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_author_with_etag_match PASSED [ 23%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_author_with_valid_data PASSED [ 26%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_author_with_etag_mismatch PASSED [ 30%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_delete_author_without_books PASSED [ 33%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_delete_author_with_books PASSED [ 36%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_all_fields PASSED [ 40%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_duplicate_isbn FAILED [ 43%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_invalid_author PASSED [ 46%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_list_books_with_pagination PASSED [ 50%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_list_books_with_filters PASSED [ 53%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_existing_book PASSED [ 56%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_soft_deleted_book PASSED [ 60%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_book_with_valid_data PASSED [ 63%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_soft_deleted_book PASSED [ 66%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_restore_soft_deleted_book FAILED [ 70%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_restore_non_deleted_book PASSED [ 73%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_to_eligible_book FAILED [ 76%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_to_new_book PASSED [ 80%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_exceeding_rate_limit FAILED [ 83%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_stock_with_valid_quantity PASSED [ 86%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_stock_with_insufficient_quantity PASSED [ 90%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_upload_valid_cover_image PASSED [ 93%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_upload_unsupported_file_type PASSED [ 96%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_upload_oversized_file PASSED [100%]
+
+================================== FAILURES ===================================
+___________________ test_create_author_with_duplicate_name ____________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:89: in test_create_author_with_duplicate_name
+    assert r2.status_code == 409
+E   assert 201 == 409
+E    +  where 201 = <Response [201]>.status_code
+____________________ test_create_book_with_duplicate_isbn _____________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:189: in test_create_book_with_duplicate_isbn
+    book2 = create_book(isbn=book1["isbn"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:48: in create_book
+    assert r.status_code in (200, 201), f"Helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Helper failed 409: {"detail":"Book with ISBN '978754f254f24' already exists"}
+E   assert 409 in (200, 201)
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_restore_soft_deleted_book ________________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:289: in test_restore_soft_deleted_book
+    assert data["is_deleted"] is False
+           ^^^^^^^^^^^^^^^^^^
+E   KeyError: 'is_deleted'
+____________________ test_apply_discount_to_eligible_book _____________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:304: in test_apply_discount_to_eligible_book
+    assert data["discounted_price"] == book["price"] * 0.9
+E   assert 17.99 == (19.99 * 0.9)
+__________________ test_apply_discount_exceeding_rate_limit ___________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:320: in test_apply_discount_exceeding_rate_limit
+    assert r.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = <Response [429]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_duplicate_name
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_duplicate_isbn
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_restore_soft_deleted_book
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_to_eligible_book
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_exceeding_rate_limit
+======================== 5 failed, 25 passed in 4.68s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 2 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_all_fields PASSED [  3%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_minimal_fields PASSED [  6%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_duplicate_name FAILED [ 10%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_empty_name PASSED [ 13%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_existing_author PASSED [ 16%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_nonexistent_author PASSED [ 20%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_author_with_etag_match PASSED [ 23%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_author_with_valid_data PASSED [ 26%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_author_with_etag_mismatch PASSED [ 30%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_delete_author_without_books PASSED [ 33%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_delete_author_with_books PASSED [ 36%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_all_fields PASSED [ 40%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_duplicate_isbn FAILED [ 43%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_invalid_author PASSED [ 46%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_list_books_with_pagination PASSED [ 50%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_list_books_with_filters PASSED [ 53%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_existing_book PASSED [ 56%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_soft_deleted_book PASSED [ 60%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_book_with_valid_data PASSED [ 63%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_soft_deleted_book PASSED [ 66%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_restore_soft_deleted_book FAILED [ 70%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_restore_non_deleted_book PASSED [ 73%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_to_eligible_book FAILED [ 76%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_to_new_book PASSED [ 80%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_exceeding_rate_limit FAILED [ 83%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_stock_with_valid_quantity PASSED [ 86%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_stock_with_insufficient_quantity PASSED [ 90%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_upload_valid_cover_image PASSED [ 93%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_upload_unsupported_file_type PASSED [ 96%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_upload_oversized_file PASSED [100%]
+
+================================== FAILURES ===================================
+___________________ test_create_author_with_duplicate_name ____________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:89: in test_create_author_with_duplicate_name
+    assert r2.status_code == 409
+E   assert 201 == 409
+E    +  where 201 = <Response [201]>.status_code
+____________________ test_create_book_with_duplicate_isbn _____________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:189: in test_create_book_with_duplicate_isbn
+    book2 = create_book(isbn=book1["isbn"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:48: in create_book
+    assert r.status_code in (200, 201), f"Helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Helper failed 409: {"detail":"Book with ISBN '978f2f1f191a8' already exists"}
+E   assert 409 in (200, 201)
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_restore_soft_deleted_book ________________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:289: in test_restore_soft_deleted_book
+    assert data["is_deleted"] is False
+           ^^^^^^^^^^^^^^^^^^
+E   KeyError: 'is_deleted'
+____________________ test_apply_discount_to_eligible_book _____________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:304: in test_apply_discount_to_eligible_book
+    assert data["discounted_price"] == book["price"] * 0.9
+E   assert 17.99 == (19.99 * 0.9)
+__________________ test_apply_discount_exceeding_rate_limit ___________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:320: in test_apply_discount_exceeding_rate_limit
+    assert r.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = <Response [429]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_duplicate_name
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_duplicate_isbn
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_restore_soft_deleted_book
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_to_eligible_book
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_exceeding_rate_limit
+======================== 5 failed, 25 passed in 4.50s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 3 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_all_fields PASSED [  3%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_minimal_fields PASSED [  6%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_duplicate_name FAILED [ 10%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_empty_name PASSED [ 13%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_existing_author PASSED [ 16%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_nonexistent_author PASSED [ 20%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_author_with_etag_match PASSED [ 23%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_author_with_valid_data PASSED [ 26%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_author_with_etag_mismatch PASSED [ 30%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_delete_author_without_books PASSED [ 33%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_delete_author_with_books PASSED [ 36%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_all_fields PASSED [ 40%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_duplicate_isbn FAILED [ 43%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_invalid_author PASSED [ 46%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_list_books_with_pagination PASSED [ 50%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_list_books_with_filters PASSED [ 53%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_existing_book PASSED [ 56%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_get_soft_deleted_book PASSED [ 60%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_book_with_valid_data PASSED [ 63%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_soft_deleted_book PASSED [ 66%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_restore_soft_deleted_book FAILED [ 70%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_restore_non_deleted_book PASSED [ 73%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_to_eligible_book FAILED [ 76%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_to_new_book PASSED [ 80%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_exceeding_rate_limit FAILED [ 83%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_stock_with_valid_quantity PASSED [ 86%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_update_stock_with_insufficient_quantity PASSED [ 90%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_upload_valid_cover_image PASSED [ 93%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_upload_unsupported_file_type PASSED [ 96%]
+outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_upload_oversized_file PASSED [100%]
+
+================================== FAILURES ===================================
+___________________ test_create_author_with_duplicate_name ____________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:107: in test_create_author_with_duplicate_name
+    assert r2.status_code == 409
+E   assert 201 == 409
+E    +  where 201 = <Response [201]>.status_code
+____________________ test_create_book_with_duplicate_isbn _____________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:207: in test_create_book_with_duplicate_isbn
+    book2 = create_book(isbn=book1["isbn"])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:61: in create_book
+    assert r.status_code in (200, 201, 422), f"Helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Helper failed 409: {"detail":"Book with ISBN '97858a2a96a71' already exists"}
+E   assert 409 in (200, 201, 422)
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_restore_soft_deleted_book ________________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:307: in test_restore_soft_deleted_book
+    assert data["is_deleted"] is False
+           ^^^^^^^^^^^^^^^^^^
+E   KeyError: 'is_deleted'
+____________________ test_apply_discount_to_eligible_book _____________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:322: in test_apply_discount_to_eligible_book
+    assert data["discounted_price"] == book["price"] * 0.9
+E   assert 17.99 == (19.99 * 0.9)
+__________________ test_apply_discount_exceeding_rate_limit ___________________
+outputs\test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py:338: in test_apply_discount_exceeding_rate_limit
+    assert r.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = <Response [429]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_author_with_duplicate_name
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_create_book_with_duplicate_isbn
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_restore_soft_deleted_book
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_to_eligible_book
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L3__run5__t0_4.py::test_apply_discount_exceeding_rate_limit
+======================== 5 failed, 25 passed in 4.50s =========================
+
+

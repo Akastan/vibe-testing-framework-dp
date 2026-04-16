@@ -1,0 +1,322 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "test_health_check_returns_ok",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify health endpoint returns status ok"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_create_author_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create author with required name field"
+        },
+        {
+          "name": "test_create_author_missing_name_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to create author without required name field"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "test_delete_author_with_books_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to delete author with associated books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_create_category_duplicate_name_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create category with duplicate name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_create_book_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create book with all required fields"
+        },
+        {
+          "name": "test_create_book_duplicate_isbn_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create book with duplicate ISBN"
+        },
+        {
+          "name": "test_create_book_nonexistent_author_404",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Attempt to create book with non-existent author_id"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "test_get_soft_deleted_book_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to get book that has been soft deleted"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_restore_soft_deleted_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a previously soft deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_apply_discount_to_old_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply discount to book published more than 1 year ago"
+        },
+        {
+          "name": "test_apply_discount_to_new_book_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to apply discount to book published less than 1 year ago"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "test_update_stock_negative_quantity_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to decrease stock below zero"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_upload_cover_wrong_content_type_415",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Attempt to upload cover with unsupported file type"
+        },
+        {
+          "name": "test_upload_cover_exceeds_size_limit_413",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Attempt to upload cover larger than 2MB"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_create_review_with_valid_rating",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create review with valid rating 1-5"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_create_tag_duplicate_name_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create tag with duplicate name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_add_tags_to_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Add multiple tags to a book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_create_order_with_insufficient_stock_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to create order with quantity exceeding available stock"
+        },
+        {
+          "name": "test_create_order_duplicate_book_id_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to create order with duplicate book_id in items"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "test_update_order_status_invalid_transition_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt invalid status transition (e.g., pending to shipped)"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/invoice",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "test_get_invoice_pending_order_403",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Attempt to get invoice for order in pending state"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/items",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_add_item_to_non_pending_order_403",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Attempt to add item to order not in pending state"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_bulk_create_books_partial_success_207",
+          "type": "edge_case",
+          "expected_status": 207,
+          "description": "Bulk create books with some successful and some failed items"
+        },
+        {
+          "name": "test_bulk_create_books_without_api_key_401",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Attempt bulk create without API key authentication"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/clone",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_clone_book_duplicate_isbn_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to clone book with duplicate ISBN for new copy"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_create_export_without_api_key_401",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Attempt to create export job without API key"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/{job_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "test_get_export_job_processing_202",
+          "type": "edge_case",
+          "expected_status": 202,
+          "description": "Get export job that is still processing"
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/maintenance",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "test_toggle_maintenance_without_api_key_401",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Attempt to toggle maintenance mode without API key"
+        }
+      ]
+    },
+    {
+      "endpoint": "/statistics/summary",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "test_get_statistics_without_api_key_401",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Attempt to get statistics without API key"
+        }
+      ]
+    }
+  ]
+}

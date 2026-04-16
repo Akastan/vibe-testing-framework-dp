@@ -1,0 +1,251 @@
+# Log pro: test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py
+# Čas spuštění: 2026-04-15T22:01:29.837242
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 1 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_author_valid_data FAILED [  3%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_author_missing_required_field PASSED [  6%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_existing_author PASSED [ 10%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_nonexistent_author PASSED [ 13%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_author_with_etag_not_modified PASSED [ 16%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_author_with_valid_data PASSED [ 20%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_author_with_etag_mismatch PASSED [ 23%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_delete_author_without_books PASSED [ 26%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_delete_author_with_books PASSED [ 30%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_category_valid_data FAILED [ 33%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_duplicate_category PASSED [ 36%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_valid_data FAILED [ 40%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_duplicate_isbn PASSED [ 43%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_invalid_author_id PASSED [ 46%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_existing_book PASSED [ 50%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_soft_deleted_book PASSED [ 53%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_book_valid_data PASSED [ 56%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_soft_delete_book PASSED [ 60%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_restore_soft_deleted_book FAILED [ 63%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_restore_non_deleted_book PASSED [ 66%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_to_old_book PASSED [ 70%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_to_new_book PASSED [ 73%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_rate_limit_exceeded FAILED [ 76%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_stock_valid_quantity PASSED [ 80%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_stock_insufficient_quantity PASSED [ 83%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_upload_valid_cover_image PASSED [ 86%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_upload_unsupported_file_type PASSED [ 90%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_upload_oversized_file PASSED [ 93%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_review_valid_data PASSED [ 96%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_review_on_soft_deleted_book PASSED [100%]
+
+================================== FAILURES ===================================
+________________________ test_create_author_valid_data ________________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:65: in test_create_author_valid_data
+    assert data["name"] == "George Orwell_bio_English novelist"
+E   AssertionError: assert 'George Orwell_0c089e6b' == 'George Orwel...lish novelist'
+E     
+E     - George Orwell_bio_English novelist
+E     + George Orwell_0c089e6b
+_______________________ test_create_category_valid_data _______________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:142: in test_create_category_valid_data
+    assert data["name"] == "Science Fiction"
+E   AssertionError: assert 'Science Fiction_84bcf383' == 'Science Fiction'
+E     
+E     - Science Fiction
+E     + Science Fiction_84bcf383
+E     ?                +++++++++
+_________________________ test_create_book_valid_data _________________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:158: in test_create_book_valid_data
+    assert book["title"] == "Test Book"
+E   AssertionError: assert 'Test Book_4f7c76de' == 'Test Book'
+E     
+E     - Test Book
+E     + Test Book_4f7c76de
+_______________________ test_restore_soft_deleted_book ________________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:245: in test_restore_soft_deleted_book
+    assert data["is_deleted"] is False
+           ^^^^^^^^^^^^^^^^^^
+E   KeyError: 'is_deleted'
+___________________ test_apply_discount_rate_limit_exceeded ___________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:291: in test_apply_discount_rate_limit_exceeded
+    assert r.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = <Response [429]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_author_valid_data
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_category_valid_data
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_valid_data
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_restore_soft_deleted_book
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_rate_limit_exceeded
+======================== 5 failed, 25 passed in 2.55s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 2 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_author_valid_data PASSED [  3%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_author_missing_required_field PASSED [  6%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_existing_author PASSED [ 10%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_nonexistent_author PASSED [ 13%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_author_with_etag_not_modified PASSED [ 16%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_author_with_valid_data PASSED [ 20%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_author_with_etag_mismatch PASSED [ 23%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_delete_author_without_books PASSED [ 26%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_delete_author_with_books PASSED [ 30%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_category_valid_data FAILED [ 33%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_duplicate_category PASSED [ 36%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_valid_data FAILED [ 40%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_duplicate_isbn PASSED [ 43%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_invalid_author_id PASSED [ 46%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_existing_book PASSED [ 50%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_soft_deleted_book PASSED [ 53%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_book_valid_data PASSED [ 56%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_soft_delete_book PASSED [ 60%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_restore_soft_deleted_book FAILED [ 63%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_restore_non_deleted_book PASSED [ 66%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_to_old_book PASSED [ 70%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_to_new_book PASSED [ 73%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_rate_limit_exceeded FAILED [ 76%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_stock_valid_quantity PASSED [ 80%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_stock_insufficient_quantity PASSED [ 83%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_upload_valid_cover_image PASSED [ 86%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_upload_unsupported_file_type PASSED [ 90%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_upload_oversized_file PASSED [ 93%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_review_valid_data PASSED [ 96%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_review_on_soft_deleted_book PASSED [100%]
+
+================================== FAILURES ===================================
+_______________________ test_create_category_valid_data _______________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:143: in test_create_category_valid_data
+    assert data["name"] == "Science Fiction"
+E   AssertionError: assert 'Science Fiction_8dfa8a5c' == 'Science Fiction'
+E     
+E     - Science Fiction
+E     + Science Fiction_8dfa8a5c
+E     ?                +++++++++
+_________________________ test_create_book_valid_data _________________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:159: in test_create_book_valid_data
+    assert book["title"] == "Test Book"
+E   AssertionError: assert 'Test Book_2839e388' == 'Test Book'
+E     
+E     - Test Book
+E     + Test Book_2839e388
+_______________________ test_restore_soft_deleted_book ________________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:246: in test_restore_soft_deleted_book
+    assert data["is_deleted"] is False
+           ^^^^^^^^^^^^^^^^^^
+E   KeyError: 'is_deleted'
+___________________ test_apply_discount_rate_limit_exceeded ___________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:292: in test_apply_discount_rate_limit_exceeded
+    assert r.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = <Response [429]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_category_valid_data
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_valid_data
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_restore_soft_deleted_book
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_rate_limit_exceeded
+======================== 4 failed, 26 passed in 2.40s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 3 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_author_valid_data PASSED [  3%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_author_missing_required_field PASSED [  6%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_existing_author PASSED [ 10%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_nonexistent_author PASSED [ 13%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_author_with_etag_not_modified PASSED [ 16%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_author_with_valid_data PASSED [ 20%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_author_with_etag_mismatch PASSED [ 23%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_delete_author_without_books PASSED [ 26%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_delete_author_with_books PASSED [ 30%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_category_valid_data FAILED [ 33%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_duplicate_category PASSED [ 36%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_valid_data FAILED [ 40%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_duplicate_isbn PASSED [ 43%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_invalid_author_id PASSED [ 46%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_existing_book PASSED [ 50%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_get_soft_deleted_book PASSED [ 53%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_book_valid_data PASSED [ 56%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_soft_delete_book PASSED [ 60%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_restore_soft_deleted_book FAILED [ 63%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_restore_non_deleted_book PASSED [ 66%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_to_old_book PASSED [ 70%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_to_new_book PASSED [ 73%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_rate_limit_exceeded FAILED [ 76%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_stock_valid_quantity PASSED [ 80%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_update_stock_insufficient_quantity PASSED [ 83%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_upload_valid_cover_image PASSED [ 86%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_upload_unsupported_file_type PASSED [ 90%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_upload_oversized_file PASSED [ 93%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_review_valid_data PASSED [ 96%]
+outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_review_on_soft_deleted_book PASSED [100%]
+
+================================== FAILURES ===================================
+_______________________ test_create_category_valid_data _______________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:151: in test_create_category_valid_data
+    assert data["name"] == "Science Fiction"
+E   AssertionError: assert 'Science Fiction_429b5d44' == 'Science Fiction'
+E     
+E     - Science Fiction
+E     + Science Fiction_429b5d44
+E     ?                +++++++++
+_________________________ test_create_book_valid_data _________________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:167: in test_create_book_valid_data
+    assert book["title"] == "Test Book"
+E   AssertionError: assert 'Test Book_03afe732' == 'Test Book'
+E     
+E     - Test Book
+E     + Test Book_03afe732
+_______________________ test_restore_soft_deleted_book ________________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:254: in test_restore_soft_deleted_book
+    assert data["is_deleted"] is False
+           ^^^^^^^^^^^^^^^^^^
+E   KeyError: 'is_deleted'
+___________________ test_apply_discount_rate_limit_exceeded ___________________
+outputs\test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py:300: in test_apply_discount_rate_limit_exceeded
+    assert r.status_code == 200
+E   assert 429 == 200
+E    +  where 429 = <Response [429]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_category_valid_data
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_create_book_valid_data
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_restore_soft_deleted_book
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L4__run4__t0_4.py::test_apply_discount_rate_limit_exceeded
+======================== 4 failed, 26 passed in 2.28s =========================
+
+

@@ -1,0 +1,292 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify successful creation of a new author"
+        },
+        {
+          "name": "create_author_invalid_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verify error when author name is empty"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_with_books_conflict",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verify conflict when deleting author with existing books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_duplicate_category",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verify conflict when creating category with existing name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify successful creation of a new book"
+        },
+        {
+          "name": "create_book_invalid_isbn",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verify error for ISBN shorter than 10 characters"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_soft_deleted_book",
+          "type": "edge_case",
+          "expected_status": 410,
+          "description": "Verify 410 status for soft-deleted book"
+        },
+        {
+          "name": "get_nonexistent_book",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verify 404 status for non-existent book ID"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_active_book_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error when restoring a book that is not deleted"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify discount calculation for old book"
+        },
+        {
+          "name": "apply_discount_new_book_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error for applying discount to new book"
+        },
+        {
+          "name": "apply_discount_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Verify rate limiting on discount endpoint"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_insufficient",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error when resulting stock is negative"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_invalid_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Verify 415 error for unsupported file format"
+        },
+        {
+          "name": "upload_cover_too_large",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Verify 413 error for file exceeding 2MB"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify successful review creation"
+        },
+        {
+          "name": "create_review_empty_content",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verify error when review content is empty"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Verify 401 error without API key"
+        },
+        {
+          "name": "bulk_create_partial_success",
+          "type": "edge_case",
+          "expected_status": 207,
+          "description": "Verify 207 status for partial success"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify successful order creation"
+        },
+        {
+          "name": "create_order_duplicate_items",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error for duplicate book_id in order"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_status_invalid_transition",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error for invalid status transition"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/invoice",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_invoice_forbidden_pending",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Verify 403 error for invoice on pending order"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "start_export_success",
+          "type": "happy_path",
+          "expected_status": 202,
+          "description": "Verify successful initiation of async export"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/{job_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_export_status_processing",
+          "type": "edge_case",
+          "expected_status": 202,
+          "description": "Verify 202 status while export is processing"
+        },
+        {
+          "name": "get_export_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verify 404 for non-existent export job"
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/maintenance",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "toggle_maintenance_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify successful toggle of maintenance mode"
+        },
+        {
+          "name": "toggle_maintenance_unauthorized",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Verify 403 error for non-admin user"
+        }
+      ]
+    },
+    {
+      "endpoint": "/statistics/summary",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_statistics_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Verify 401 error for stats without API key"
+        },
+        {
+          "name": "get_statistics_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify successful retrieval of statistics"
+        }
+      ]
+    }
+  ]
+}

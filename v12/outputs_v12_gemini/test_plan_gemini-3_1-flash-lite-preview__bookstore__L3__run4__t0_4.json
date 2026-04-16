@@ -1,0 +1,298 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify successful creation of a valid author"
+        },
+        {
+          "name": "create_author_invalid_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verify error when name is empty"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_with_books_conflict",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verify conflict error when deleting author with existing books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify successful creation of a book"
+        },
+        {
+          "name": "create_book_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verify conflict error for duplicate ISBN"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verify 410 Gone for soft-deleted book"
+        },
+        {
+          "name": "get_nonexistent_book",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verify 404 for non-existent book ID"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_active_book_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error when restoring a book that is not deleted"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify valid discount application"
+        },
+        {
+          "name": "apply_discount_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Verify rate limiting on discount endpoint"
+        },
+        {
+          "name": "apply_discount_new_book_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error for book published less than 1 year ago"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify successful stock update"
+        },
+        {
+          "name": "update_stock_insufficient_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error when resulting stock is negative"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_invalid_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Verify 415 error for unsupported file type"
+        },
+        {
+          "name": "upload_cover_too_large",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Verify 413 error for file exceeding 2MB"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify successful review creation"
+        },
+        {
+          "name": "create_review_invalid_rating",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verify 422 for rating out of range"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verify successful order creation"
+        },
+        {
+          "name": "create_order_duplicate_items",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error for duplicate book IDs in order"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_invalid_transition",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error for invalid state transition"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/invoice",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_invoice_pending_forbidden",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Verify 403 error for invoice on pending order"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Verify 401 error without API key"
+        },
+        {
+          "name": "bulk_create_limit_exceeded",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Verify rate limit on bulk endpoint"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "start_export_success",
+          "type": "happy_path",
+          "expected_status": 202,
+          "description": "Verify successful initiation of async export"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/{job_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_export_status_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verify 404 for non-existent export job"
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/maintenance",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "toggle_maintenance_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify successful maintenance toggle"
+        }
+      ]
+    },
+    {
+      "endpoint": "/statistics/summary",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_statistics_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Verify 401 error for stats without API key"
+        }
+      ]
+    },
+    {
+      "endpoint": "/catalog",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "catalog_redirect_permanent",
+          "type": "happy_path",
+          "expected_status": 301,
+          "description": "Verify 301 redirect to /books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_duplicate_error",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verify 409 error for duplicate tag name"
+        },
+        {
+          "name": "create_tag_empty_string",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verify 400 error for empty tag string input"
+        }
+      ]
+    }
+  ]
+}

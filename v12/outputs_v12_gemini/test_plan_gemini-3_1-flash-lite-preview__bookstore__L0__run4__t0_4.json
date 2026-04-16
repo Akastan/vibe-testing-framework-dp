@@ -1,0 +1,274 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify API health check returns 200"
+        },
+        {
+          "name": "health_check_invalid_method",
+          "type": "error",
+          "expected_status": 405,
+          "description": "Verify POST on health check returns 405"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new author with valid data"
+        },
+        {
+          "name": "create_author_invalid_data",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create author with missing name field"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve existing author details"
+        },
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Retrieve non-existent author"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new book successfully"
+        },
+        {
+          "name": "create_book_invalid_price",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create book with negative price"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve existing book"
+        },
+        {
+          "name": "get_book_gone",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Retrieve soft-deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_book_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Perform soft delete on book"
+        },
+        {
+          "name": "delete_book_already_gone",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Delete already deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore soft-deleted book"
+        },
+        {
+          "name": "restore_book_not_deleted",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Restore active book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply valid discount"
+        },
+        {
+          "name": "apply_discount_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Exceed rate limit for discounts"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Upload valid JPEG cover"
+        },
+        {
+          "name": "upload_cover_too_large",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Upload file exceeding 2MB"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Bulk create books successfully"
+        },
+        {
+          "name": "bulk_create_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Bulk create without API key"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create order with valid items"
+        },
+        {
+          "name": "create_order_empty_items",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create order with no items"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update order status to shipped"
+        },
+        {
+          "name": "update_order_status_invalid",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Update status to invalid enum value"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_export_success",
+          "type": "happy_path",
+          "expected_status": 202,
+          "description": "Start async book export"
+        },
+        {
+          "name": "create_export_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Export without API key"
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/maintenance",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "toggle_maintenance_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Toggle maintenance mode"
+        },
+        {
+          "name": "toggle_maintenance_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Toggle without API key"
+        }
+      ]
+    },
+    {
+      "endpoint": "/statistics/summary",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_stats_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve system statistics"
+        },
+        {
+          "name": "get_stats_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Get stats without API key"
+        }
+      ]
+    }
+  ]
+}

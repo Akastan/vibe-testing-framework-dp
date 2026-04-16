@@ -1,0 +1,304 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify the health endpoint returns a successful response."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new author with all required fields."
+        },
+        {
+          "name": "create_author_missing_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to create an author without the required name field."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_with_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List authors using default skip and limit parameters."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an existing author by their ID."
+        },
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Attempt to retrieve an author with a non-existent ID."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_etag_mismatch",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Attempt to update an author with an incorrect If-Match header (ETag mismatch)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new book with all required fields."
+        },
+        {
+          "name": "create_book_invalid_isbn_length",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to create a book with an ISBN that is too short."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_filters",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books using search, author_id, and price filters."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_by_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an existing book by its ID."
+        },
+        {
+          "name": "get_book_soft_deleted",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to retrieve a book that has been soft-deleted."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Perform a soft delete on an existing book."
+        },
+        {
+          "name": "delete_book_already_deleted",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to delete a book that is already soft-deleted."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a previously soft-deleted book."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_for_book",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Add a review to an existing book."
+        },
+        {
+          "name": "create_review_for_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to add a review to a soft-deleted book."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_within_limit",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply a valid discount percentage to a book."
+        },
+        {
+          "name": "apply_discount_exceed_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Exceed the rate limit (5 req/10s) for the discount endpoint."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_valid_file",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Upload a valid JPEG/PNG cover image for a book."
+        },
+        {
+          "name": "upload_cover_file_too_large",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Attempt to upload a cover image exceeding the 2 MB size limit."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_books_without_api_key",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Attempt to use the bulk create endpoint without providing the required X-API-Key header."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_with_items",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new order with customer details and at least one item."
+        },
+        {
+          "name": "create_order_empty_items",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to create an order with an empty items array."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_valid",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update an order's status to a valid value (e.g., 'shipped')."
+        },
+        {
+          "name": "update_order_status_invalid",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to update an order's status with an invalid value not matching the pattern."
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "start_book_export_without_api_key",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Attempt to start a book export job without providing the required X-API-Key header."
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/{job_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_export_job_processing",
+          "type": "happy_path",
+          "expected_status": 202,
+          "description": "Check the status of an export job that is still processing."
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/maintenance",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "toggle_maintenance_without_api_key",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Attempt to toggle maintenance mode without providing the required X-API-Key header."
+        }
+      ]
+    },
+    {
+      "endpoint": "/statistics/summary",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_statistics_without_api_key",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Attempt to retrieve statistics without providing the required X-API-Key header."
+        }
+      ]
+    }
+  ]
+}

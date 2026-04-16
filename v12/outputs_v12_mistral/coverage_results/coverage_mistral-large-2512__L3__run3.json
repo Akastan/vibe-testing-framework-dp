@@ -1,0 +1,542 @@
+{
+  "meta": {
+    "timestamp": "2026-04-15T23:28:01.098552",
+    "version": "7.13.4"
+  },
+  "files": {
+    "app\\__init__.py": {
+      "covered_lines": 0,
+      "num_statements": 0,
+      "percent_covered": 100.0
+    },
+    "app\\crud.py": {
+      "covered_lines": 142,
+      "num_statements": 387,
+      "percent_covered": 36.69,
+      "functions": {
+        "generate_etag": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "create_author": {
+          "covered": 5,
+          "total": 5,
+          "pct": 100.0
+        },
+        "get_author": {
+          "covered": 4,
+          "total": 4,
+          "pct": 100.0
+        },
+        "get_authors": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "update_author": {
+          "covered": 7,
+          "total": 7,
+          "pct": 100.0
+        },
+        "delete_author": {
+          "covered": 5,
+          "total": 6,
+          "pct": 83.3
+        },
+        "create_category": {
+          "covered": 6,
+          "total": 7,
+          "pct": 85.7
+        },
+        "get_category": {
+          "covered": 3,
+          "total": 4,
+          "pct": 75.0
+        },
+        "get_categories": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "update_category": {
+          "covered": 0,
+          "total": 12,
+          "pct": 0.0
+        },
+        "delete_category": {
+          "covered": 0,
+          "total": 6,
+          "pct": 0.0
+        },
+        "get_book": {
+          "covered": 5,
+          "total": 6,
+          "pct": 83.3
+        },
+        "get_book_include_deleted": {
+          "covered": 0,
+          "total": 4,
+          "pct": 0.0
+        },
+        "create_book": {
+          "covered": 9,
+          "total": 9,
+          "pct": 100.0
+        },
+        "get_books": {
+          "covered": 13,
+          "total": 15,
+          "pct": 86.7
+        },
+        "update_book": {
+          "covered": 0,
+          "total": 16,
+          "pct": 0.0
+        },
+        "delete_book": {
+          "covered": 5,
+          "total": 5,
+          "pct": 100.0
+        },
+        "restore_book": {
+          "covered": 0,
+          "total": 9,
+          "pct": 0.0
+        },
+        "create_review": {
+          "covered": 6,
+          "total": 6,
+          "pct": 100.0
+        },
+        "get_reviews": {
+          "covered": 0,
+          "total": 2,
+          "pct": 0.0
+        },
+        "get_book_average_rating": {
+          "covered": 0,
+          "total": 6,
+          "pct": 0.0
+        },
+        "apply_discount": {
+          "covered": 6,
+          "total": 6,
+          "pct": 100.0
+        },
+        "update_stock": {
+          "covered": 9,
+          "total": 9,
+          "pct": 100.0
+        },
+        "create_tag": {
+          "covered": 0,
+          "total": 7,
+          "pct": 0.0
+        },
+        "get_tag": {
+          "covered": 0,
+          "total": 4,
+          "pct": 0.0
+        },
+        "get_tags": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "update_tag": {
+          "covered": 0,
+          "total": 12,
+          "pct": 0.0
+        },
+        "delete_tag": {
+          "covered": 0,
+          "total": 5,
+          "pct": 0.0
+        },
+        "add_tags_to_book": {
+          "covered": 0,
+          "total": 8,
+          "pct": 0.0
+        },
+        "remove_tags_from_book": {
+          "covered": 0,
+          "total": 8,
+          "pct": 0.0
+        },
+        "create_order": {
+          "covered": 0,
+          "total": 19,
+          "pct": 0.0
+        },
+        "get_order": {
+          "covered": 0,
+          "total": 4,
+          "pct": 0.0
+        },
+        "get_orders": {
+          "covered": 0,
+          "total": 13,
+          "pct": 0.0
+        },
+        "update_order_status": {
+          "covered": 0,
+          "total": 14,
+          "pct": 0.0
+        },
+        "delete_order": {
+          "covered": 0,
+          "total": 10,
+          "pct": 0.0
+        },
+        "get_order_response": {
+          "covered": 0,
+          "total": 2,
+          "pct": 0.0
+        },
+        "get_author_books": {
+          "covered": 0,
+          "total": 6,
+          "pct": 0.0
+        },
+        "bulk_create_books": {
+          "covered": 0,
+          "total": 26,
+          "pct": 0.0
+        },
+        "clone_book": {
+          "covered": 8,
+          "total": 8,
+          "pct": 100.0
+        },
+        "generate_invoice": {
+          "covered": 0,
+          "total": 11,
+          "pct": 0.0
+        },
+        "add_item_to_order": {
+          "covered": 0,
+          "total": 16,
+          "pct": 0.0
+        },
+        "get_statistics": {
+          "covered": 0,
+          "total": 16,
+          "pct": 0.0
+        }
+      }
+    },
+    "app\\database.py": {
+      "covered_lines": 17,
+      "num_statements": 17,
+      "percent_covered": 100.0
+    },
+    "app\\main.py": {
+      "covered_lines": 204,
+      "num_statements": 294,
+      "percent_covered": 69.39,
+      "functions": {
+        "require_api_key": {
+          "covered": 0,
+          "total": 3,
+          "pct": 0.0
+        },
+        "_get_rate_limit_key": {
+          "covered": 4,
+          "total": 5,
+          "pct": 80.0
+        },
+        "rate_limit_middleware": {
+          "covered": 10,
+          "total": 13,
+          "pct": 76.9
+        },
+        "maintenance_middleware": {
+          "covered": 2,
+          "total": 3,
+          "pct": 66.7
+        },
+        "_check_etag_get": {
+          "covered": 6,
+          "total": 6,
+          "pct": 100.0
+        },
+        "_check_etag_put": {
+          "covered": 5,
+          "total": 5,
+          "pct": 100.0
+        },
+        "health_check": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "create_author": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "list_authors": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "get_author": {
+          "covered": 5,
+          "total": 5,
+          "pct": 100.0
+        },
+        "update_author": {
+          "covered": 3,
+          "total": 3,
+          "pct": 100.0
+        },
+        "delete_author": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "list_author_books": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "create_category": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "list_categories": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "get_category": {
+          "covered": 0,
+          "total": 5,
+          "pct": 0.0
+        },
+        "update_category": {
+          "covered": 0,
+          "total": 3,
+          "pct": 0.0
+        },
+        "delete_category": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "create_book": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "list_books": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "get_book": {
+          "covered": 4,
+          "total": 5,
+          "pct": 80.0
+        },
+        "update_book": {
+          "covered": 0,
+          "total": 3,
+          "pct": 0.0
+        },
+        "delete_book": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "restore_book": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "create_review": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "list_reviews": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "get_book_rating": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "apply_discount": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "update_stock": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "upload_cover": {
+          "covered": 8,
+          "total": 8,
+          "pct": 100.0
+        },
+        "get_cover": {
+          "covered": 0,
+          "total": 5,
+          "pct": 0.0
+        },
+        "delete_cover": {
+          "covered": 0,
+          "total": 4,
+          "pct": 0.0
+        },
+        "create_tag": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "list_tags": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "get_tag": {
+          "covered": 0,
+          "total": 5,
+          "pct": 0.0
+        },
+        "update_tag": {
+          "covered": 0,
+          "total": 3,
+          "pct": 0.0
+        },
+        "delete_tag": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "add_tags_to_book": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "remove_tags_from_book": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "create_order": {
+          "covered": 0,
+          "total": 2,
+          "pct": 0.0
+        },
+        "list_orders": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "get_order": {
+          "covered": 0,
+          "total": 2,
+          "pct": 0.0
+        },
+        "update_order_status": {
+          "covered": 0,
+          "total": 2,
+          "pct": 0.0
+        },
+        "delete_order": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "get_invoice": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "add_item_to_order": {
+          "covered": 0,
+          "total": 2,
+          "pct": 0.0
+        },
+        "bulk_create_books": {
+          "covered": 0,
+          "total": 6,
+          "pct": 0.0
+        },
+        "clone_book": {
+          "covered": 1,
+          "total": 1,
+          "pct": 100.0
+        },
+        "create_book_export": {
+          "covered": 0,
+          "total": 6,
+          "pct": 0.0
+        },
+        "create_order_export": {
+          "covered": 0,
+          "total": 6,
+          "pct": 0.0
+        },
+        "get_export_job": {
+          "covered": 0,
+          "total": 6,
+          "pct": 0.0
+        },
+        "toggle_maintenance": {
+          "covered": 0,
+          "total": 3,
+          "pct": 0.0
+        },
+        "get_maintenance_status": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "get_statistics": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "deprecated_catalog": {
+          "covered": 0,
+          "total": 1,
+          "pct": 0.0
+        },
+        "reset_database": {
+          "covered": 14,
+          "total": 14,
+          "pct": 100.0
+        }
+      }
+    },
+    "app\\models.py": {
+      "covered_lines": 76,
+      "num_statements": 76,
+      "percent_covered": 100.0
+    },
+    "app\\schemas.py": {
+      "covered_lines": 235,
+      "num_statements": 235,
+      "percent_covered": 100.0
+    }
+  },
+  "totals": {
+    "covered_lines": 674,
+    "num_statements": 1009,
+    "percent_covered": 66.798810703667,
+    "percent_covered_display": "67",
+    "missing_lines": 335,
+    "excluded_lines": 0,
+    "percent_statements_covered": 66.798810703667,
+    "percent_statements_covered_display": "67"
+  }
+}

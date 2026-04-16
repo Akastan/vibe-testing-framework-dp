@@ -1,0 +1,192 @@
+# Log pro: test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py
+# Čas spuštění: 2026-04-15T21:07:38.649384
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 1 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_health_check_returns_200 PASSED [  3%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_health_check_with_unsupported_method_returns_405 PASSED [  6%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_author_with_valid_data_returns_201 PASSED [ 10%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_author_with_missing_required_field_returns_422 PASSED [ 13%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_author_with_invalid_born_year_returns_422 PASSED [ 16%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_authors_with_default_pagination_returns_200 PASSED [ 20%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_authors_with_custom_pagination_returns_200 PASSED [ 23%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_existing_author_returns_200 PASSED [ 26%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_nonexistent_author_returns_404 PASSED [ 30%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_author_with_if_none_match_returns_304 PASSED [ 33%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_author_with_valid_data_returns_200 PASSED [ 36%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_author_with_if_match_etag_mismatch_returns_412 PASSED [ 40%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_delete_existing_author_returns_204 PASSED [ 43%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_book_with_valid_data_returns_201 PASSED [ 46%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_book_with_invalid_isbn_returns_422 PASSED [ 50%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_default_pagination_returns_200 PASSED [ 53%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_search_filter_returns_200 PASSED [ 56%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_invalid_price_range_returns_422 FAILED [ 60%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_existing_book_returns_200 PASSED [ 63%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_soft_deleted_book_returns_410 PASSED [ 66%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_book_with_valid_data_returns_200 PASSED [ 70%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_soft_deleted_book_returns_410 PASSED [ 73%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_soft_delete_existing_book_returns_204 PASSED [ 76%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_delete_already_deleted_book_returns_410 PASSED [ 80%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_restore_soft_deleted_book_returns_200 PASSED [ 83%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_restore_non_deleted_book_returns_400 PASSED [ 86%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_apply_discount_to_book_returns_200 PASSED [ 90%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_apply_discount_exceeding_rate_limit_returns_429 PASSED [ 93%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_upload_valid_cover_image_returns_200 PASSED [ 96%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_upload_unsupported_file_type_returns_415 FAILED [100%]
+
+================================== FAILURES ===================================
+____________ test_list_books_with_invalid_price_range_returns_422 _____________
+outputs\test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py:195: in test_list_books_with_invalid_price_range_returns_422
+    assert response.status_code == 422
+E   assert 200 == 422
+E    +  where 200 = <Response [200]>.status_code
+________________ test_upload_unsupported_file_type_returns_415 ________________
+outputs\test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py:275: in test_upload_unsupported_file_type_returns_415
+    with open("test_file.txt", "rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'test_file.txt'
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_invalid_price_range_returns_422
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_upload_unsupported_file_type_returns_415
+======================== 2 failed, 28 passed in 1.65s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 2 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_health_check_returns_200 PASSED [  3%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_health_check_with_unsupported_method_returns_405 PASSED [  6%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_author_with_valid_data_returns_201 PASSED [ 10%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_author_with_missing_required_field_returns_422 PASSED [ 13%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_author_with_invalid_born_year_returns_422 PASSED [ 16%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_authors_with_default_pagination_returns_200 PASSED [ 20%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_authors_with_custom_pagination_returns_200 PASSED [ 23%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_existing_author_returns_200 PASSED [ 26%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_nonexistent_author_returns_404 PASSED [ 30%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_author_with_if_none_match_returns_304 PASSED [ 33%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_author_with_valid_data_returns_200 PASSED [ 36%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_author_with_if_match_etag_mismatch_returns_412 PASSED [ 40%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_delete_existing_author_returns_204 PASSED [ 43%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_book_with_valid_data_returns_201 PASSED [ 46%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_book_with_invalid_isbn_returns_422 PASSED [ 50%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_default_pagination_returns_200 PASSED [ 53%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_search_filter_returns_200 PASSED [ 56%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_invalid_price_range_returns_422 FAILED [ 60%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_existing_book_returns_200 PASSED [ 63%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_soft_deleted_book_returns_410 PASSED [ 66%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_book_with_valid_data_returns_200 PASSED [ 70%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_soft_deleted_book_returns_410 PASSED [ 73%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_soft_delete_existing_book_returns_204 PASSED [ 76%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_delete_already_deleted_book_returns_410 PASSED [ 80%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_restore_soft_deleted_book_returns_200 PASSED [ 83%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_restore_non_deleted_book_returns_400 PASSED [ 86%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_apply_discount_to_book_returns_200 PASSED [ 90%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_apply_discount_exceeding_rate_limit_returns_429 PASSED [ 93%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_upload_valid_cover_image_returns_200 PASSED [ 96%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_upload_unsupported_file_type_returns_415 FAILED [100%]
+
+================================== FAILURES ===================================
+____________ test_list_books_with_invalid_price_range_returns_422 _____________
+outputs\test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py:195: in test_list_books_with_invalid_price_range_returns_422
+    assert response.status_code == 422
+E   assert 200 == 422
+E    +  where 200 = <Response [200]>.status_code
+________________ test_upload_unsupported_file_type_returns_415 ________________
+outputs\test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py:276: in test_upload_unsupported_file_type_returns_415
+    with open("test_file.txt", "rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'test_file.txt'
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_invalid_price_range_returns_422
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_upload_unsupported_file_type_returns_415
+======================== 2 failed, 28 passed in 1.59s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 3 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_health_check_returns_200 PASSED [  3%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_health_check_with_unsupported_method_returns_405 PASSED [  6%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_author_with_valid_data_returns_201 PASSED [ 10%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_author_with_missing_required_field_returns_422 PASSED [ 13%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_author_with_invalid_born_year_returns_422 PASSED [ 16%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_authors_with_default_pagination_returns_200 PASSED [ 20%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_authors_with_custom_pagination_returns_200 PASSED [ 23%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_existing_author_returns_200 PASSED [ 26%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_nonexistent_author_returns_404 PASSED [ 30%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_author_with_if_none_match_returns_304 PASSED [ 33%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_author_with_valid_data_returns_200 PASSED [ 36%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_author_with_if_match_etag_mismatch_returns_412 PASSED [ 40%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_delete_existing_author_returns_204 PASSED [ 43%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_book_with_valid_data_returns_201 PASSED [ 46%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_create_book_with_invalid_isbn_returns_422 PASSED [ 50%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_default_pagination_returns_200 PASSED [ 53%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_search_filter_returns_200 PASSED [ 56%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_invalid_price_range_returns_422 FAILED [ 60%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_existing_book_returns_200 PASSED [ 63%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_get_soft_deleted_book_returns_410 PASSED [ 66%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_book_with_valid_data_returns_200 PASSED [ 70%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_update_soft_deleted_book_returns_410 PASSED [ 73%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_soft_delete_existing_book_returns_204 PASSED [ 76%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_delete_already_deleted_book_returns_410 PASSED [ 80%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_restore_soft_deleted_book_returns_200 PASSED [ 83%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_restore_non_deleted_book_returns_400 PASSED [ 86%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_apply_discount_to_book_returns_200 PASSED [ 90%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_apply_discount_exceeding_rate_limit_returns_429 PASSED [ 93%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_upload_valid_cover_image_returns_200 PASSED [ 96%]
+outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_upload_unsupported_file_type_returns_415 FAILED [100%]
+
+================================== FAILURES ===================================
+____________ test_list_books_with_invalid_price_range_returns_422 _____________
+outputs\test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py:207: in test_list_books_with_invalid_price_range_returns_422
+    assert response.status_code == 422
+E   assert 200 == 422
+E    +  where 200 = <Response [200]>.status_code
+________________ test_upload_unsupported_file_type_returns_415 ________________
+outputs\test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py:288: in test_upload_unsupported_file_type_returns_415
+    with open("test_file.txt", "rb") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: 'test_file.txt'
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_list_books_with_invalid_price_range_returns_422
+FAILED outputs/test_generated_mistral-large-2512__bookstore__L0__run4__t0_4.py::test_upload_unsupported_file_type_returns_415
+======================== 2 failed, 28 passed in 1.70s =========================
+
+

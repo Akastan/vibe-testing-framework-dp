@@ -1,0 +1,262 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_with_all_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies that an author can be created with all fields (name, bio, born_year)"
+        },
+        {
+          "name": "create_author_missing_optional_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies that an author can be created with only required fields (name)"
+        },
+        {
+          "name": "create_author_with_invalid_name_length",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verifies that creating an author with name length outside 1-100 characters returns validation error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_with_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that authors can be listed with pagination parameters (skip, limit)"
+        },
+        {
+          "name": "list_authors_empty_database",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Verifies that an empty list is returned when no authors exist"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that an existing author can be retrieved by ID"
+        },
+        {
+          "name": "get_author_with_if_none_match_etag_match",
+          "type": "happy_path",
+          "expected_status": 304,
+          "description": "Verifies that 304 Not Modified is returned when If-None-Match ETag matches"
+        },
+        {
+          "name": "get_nonexistent_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verifies that 404 is returned when trying to get a non-existent author"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that an author can be updated with valid data"
+        },
+        {
+          "name": "update_author_with_if_match_etag_mismatch",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Verifies that 412 Precondition Failed is returned when If-Match ETag doesn't match"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Verifies that an author without associated books can be deleted"
+        },
+        {
+          "name": "delete_author_with_associated_books",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verifies that 409 Conflict is returned when trying to delete an author with associated books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_with_unique_name",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies that a category can be created with a unique name"
+        },
+        {
+          "name": "create_category_with_duplicate_name",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verifies that 409 Conflict is returned when trying to create a category with a duplicate name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies that a book can be created with all required fields and valid data"
+        },
+        {
+          "name": "create_book_with_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verifies that 409 Conflict is returned when trying to create a book with a duplicate ISBN"
+        },
+        {
+          "name": "create_book_with_invalid_isbn_length",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verifies that 422 is returned when trying to create a book with ISBN length outside 10-13 characters"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_pagination_and_filters",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that books can be listed with pagination and filters (search, author_id, category_id, min_price, max_price)"
+        },
+        {
+          "name": "list_books_with_invalid_page_size",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verifies that 422 is returned when page_size is outside 1-100 range"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_by_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that an existing book can be retrieved by ID"
+        },
+        {
+          "name": "get_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verifies that 410 Gone is returned when trying to get a soft-deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_eligible_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that discount can be applied to a book published more than 1 year ago"
+        },
+        {
+          "name": "apply_discount_to_new_book",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies that 400 Bad Request is returned when trying to apply discount to a book published less than 1 year ago"
+        },
+        {
+          "name": "apply_discount_exceeding_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Verifies that 429 Too Many Requests is returned when exceeding the rate limit (5 requests/10 seconds)"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_book_stock_with_valid_quantity",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that book stock can be updated with a valid quantity"
+        },
+        {
+          "name": "update_book_stock_resulting_in_negative_stock",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies that 400 Bad Request is returned when trying to update stock resulting in negative stock"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_valid_cover_image",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that a valid cover image (JPEG/PNG, <2MB) can be uploaded"
+        },
+        {
+          "name": "upload_unsupported_cover_image_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Verifies that 415 Unsupported Media Type is returned when uploading an unsupported file type"
+        },
+        {
+          "name": "upload_oversized_cover_image",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Verifies that 413 Content Too Large is returned when uploading a file larger than 2MB"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_for_book",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies that a review can be created for a book with valid data"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,280 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_ok",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify the health endpoint returns a successful status."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new author with valid data."
+        },
+        {
+          "name": "create_author_missing_name_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to create an author without the required name field."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_existing_author",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve details of an existing author."
+        },
+        {
+          "name": "get_nonexistent_author_404",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Attempt to retrieve an author with a non-existent ID."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Delete an author who has no associated books."
+        },
+        {
+          "name": "delete_author_with_books_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to delete an author who has associated books, expecting a conflict."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new book with valid data, referencing existing author and category."
+        },
+        {
+          "name": "create_book_duplicate_isbn_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create a book with an ISBN that already exists."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_existing_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve details of an existing, non-deleted book."
+        },
+        {
+          "name": "get_soft_deleted_book_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to retrieve a book that has been soft-deleted."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Perform a soft delete on an existing book."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a previously soft-deleted book."
+        },
+        {
+          "name": "restore_not_deleted_book_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to restore a book that is not deleted."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_valid_discount",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply a discount to a book published more than one year ago."
+        },
+        {
+          "name": "apply_discount_new_book_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to apply a discount to a book published in the current year."
+        },
+        {
+          "name": "apply_discount_rate_limit_429",
+          "type": "edge_case",
+          "expected_status": 429,
+          "description": "Exceed the rate limit for the discount endpoint (5 req/10s)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "increase_stock_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Increase the stock quantity of a book."
+        },
+        {
+          "name": "decrease_stock_below_zero_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to decrease stock below zero, expecting insufficient stock error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_for_book",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Add a review to an existing, non-deleted book."
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new tag with a unique name."
+        },
+        {
+          "name": "create_duplicate_tag_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create a tag with a name that already exists."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_to_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Associate multiple existing tags with a book."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_sufficient_stock",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create an order with items that have sufficient stock."
+        },
+        {
+          "name": "create_order_insufficient_stock_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to create an order for a book with insufficient stock."
+        },
+        {
+          "name": "create_order_duplicate_book_id_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to create an order with duplicate book_id in the items list."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_valid_transition",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update an order status through a valid state transition (e.g., pending -> confirmed)."
+        },
+        {
+          "name": "update_order_status_invalid_transition_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt an invalid status transition (e.g., pending -> delivered)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/invoice",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_invoice_for_confirmed_order",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an invoice for an order in a confirmed/shipped/delivered state."
+        },
+        {
+          "name": "get_invoice_for_pending_order_403",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Attempt to get an invoice for an order in pending state."
+        }
+      ]
+    }
+  ]
+}

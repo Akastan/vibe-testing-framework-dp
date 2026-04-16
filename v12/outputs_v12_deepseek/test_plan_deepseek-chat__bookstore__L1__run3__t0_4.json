@@ -1,0 +1,304 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify the health endpoint returns a successful response."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new author with valid data."
+        },
+        {
+          "name": "create_author_missing_name_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to create an author without the required name field."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an existing author by ID."
+        },
+        {
+          "name": "get_author_not_found_404",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Attempt to retrieve a non-existent author."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books_204",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Delete an author who has no associated books."
+        },
+        {
+          "name": "delete_author_with_books_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to delete an author who has associated books."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new book with valid data and existing author/category."
+        },
+        {
+          "name": "create_book_duplicate_isbn_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create a book with an ISBN that already exists."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_filters",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books with pagination and filter parameters (author_id, min_price)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an existing, non-deleted book by ID."
+        },
+        {
+          "name": "get_soft_deleted_book_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to retrieve a book that has been soft-deleted."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book_204",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Perform a soft delete on an existing book."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a previously soft-deleted book."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_old_book_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply a valid discount to a book published more than one year ago."
+        },
+        {
+          "name": "apply_discount_to_new_book_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to apply a discount to a book published in the current year."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "increase_book_stock_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Increase the stock quantity of a book using a positive delta."
+        },
+        {
+          "name": "decrease_stock_below_zero_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to decrease stock by a quantity larger than current stock."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_for_book_201",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Add a review with a valid rating to a book."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_to_book_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Add multiple existing tags to a book."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_success_201",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create an order with valid customer data and items in stock."
+        },
+        {
+          "name": "create_order_insufficient_stock_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to create an order for a book with insufficient stock."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_valid_transition_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update an order status through a valid state transition (e.g., pending to confirmed)."
+        },
+        {
+          "name": "update_order_status_invalid_transition_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt an invalid status transition (e.g., shipped back to confirmed)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/invoice",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_invoice_for_confirmed_order_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an invoice for an order in a confirmed state."
+        },
+        {
+          "name": "get_invoice_for_pending_order_403",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Attempt to get an invoice for an order in pending state."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_books_partial_success_207",
+          "type": "edge_case",
+          "expected_status": 207,
+          "description": "Bulk create books where some succeed and some fail (e.g., duplicate ISBN)."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/clone",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "clone_book_with_new_isbn_201",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Clone an existing book, providing a new unique ISBN."
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "start_book_export_with_api_key_202",
+          "type": "happy_path",
+          "expected_status": 202,
+          "description": "Start an asynchronous book export job with a valid API key."
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/maintenance",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "enable_maintenance_mode_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Enable maintenance mode using a valid API key."
+        }
+      ]
+    }
+  ]
+}

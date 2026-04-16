@@ -1,0 +1,280 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies the health endpoint returns a successful response."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_successfully",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies creating a new author with valid data returns the created author."
+        },
+        {
+          "name": "create_author_missing_name_returns_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verifies creating an author without the required name field returns a validation error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_existing_author",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies retrieving an existing author by ID returns the author details."
+        },
+        {
+          "name": "get_nonexistent_author_returns_404",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verifies retrieving a non-existent author ID returns a 404 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Verifies deleting an author with no associated books succeeds."
+        },
+        {
+          "name": "delete_author_with_books_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verifies deleting an author who has associated books returns a conflict error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_successfully",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies creating a new book with valid data returns the created book."
+        },
+        {
+          "name": "create_book_duplicate_isbn_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verifies creating a book with a duplicate ISBN returns a conflict error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_existing_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies retrieving an existing book by ID returns the book details."
+        },
+        {
+          "name": "get_soft_deleted_book_returns_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verifies retrieving a soft-deleted book returns a 410 Gone error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Verifies soft-deleting a book succeeds."
+        },
+        {
+          "name": "delete_already_deleted_book_returns_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verifies deleting a book that is already soft-deleted returns a 410 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies restoring a soft-deleted book returns the restored book."
+        },
+        {
+          "name": "restore_not_deleted_book_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies restoring a book that is not deleted returns a 400 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_old_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies applying a valid discount to a book published over a year ago returns the discounted price."
+        },
+        {
+          "name": "apply_discount_to_new_book_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies applying a discount to a book published less than a year ago returns a 400 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "increase_book_stock",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies increasing a book's stock quantity via delta returns the updated book."
+        },
+        {
+          "name": "decrease_stock_below_zero_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies decreasing stock by a delta that would result in negative stock returns a 400 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_review_to_book",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies adding a review to a book returns the created review."
+        },
+        {
+          "name": "add_review_to_deleted_book_returns_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verifies adding a review to a soft-deleted book returns a 410 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_with_sufficient_stock",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies creating an order with items that have sufficient stock succeeds and reduces stock."
+        },
+        {
+          "name": "create_order_insufficient_stock_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies creating an order for a book with insufficient stock returns a 400 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_valid_transition",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies updating an order status through a valid state transition succeeds."
+        },
+        {
+          "name": "update_order_status_invalid_transition_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies attempting an invalid state transition (e.g., pending to delivered) returns a 400 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/invoice",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_invoice_for_confirmed_order",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies retrieving an invoice for an order in a confirmed/shipped/delivered state succeeds."
+        },
+        {
+          "name": "get_invoice_for_pending_order_returns_403",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Verifies retrieving an invoice for a pending order returns a 403 Forbidden error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_books_partial_success_returns_207",
+          "type": "edge_case",
+          "expected_status": 207,
+          "description": "Verifies bulk creation where some books succeed and some fail returns a 207 Multi-Status response."
+        },
+        {
+          "name": "bulk_create_books_without_api_key_returns_401",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Verifies bulk creation without the required API key returns a 401 Unauthorized error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/maintenance",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "enable_maintenance_mode_with_api_key",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies enabling maintenance mode with a valid API key succeeds."
+        }
+      ]
+    }
+  ]
+}

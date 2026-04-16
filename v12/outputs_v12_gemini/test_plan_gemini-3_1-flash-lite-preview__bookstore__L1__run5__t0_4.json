@@ -1,0 +1,322 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Successfully create a new author with valid data"
+        },
+        {
+          "name": "create_author_invalid_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Fail to create author with empty name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_with_books_conflict",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Fail to delete author who has active books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Successfully create a new book"
+        },
+        {
+          "name": "create_book_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Fail to create book with existing ISBN"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verify soft-deleted book returns 410"
+        },
+        {
+          "name": "get_book_etag_not_modified",
+          "type": "happy_path",
+          "expected_status": 304,
+          "description": "Verify 304 response with correct If-None-Match header"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_active_book_fail",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to restore a book that is not deleted"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply 10 percent discount to old book"
+        },
+        {
+          "name": "apply_discount_new_book_fail",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to apply discount to book published this year"
+        },
+        {
+          "name": "apply_discount_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Verify rate limiting on discount endpoint"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_insufficient",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to reduce stock below zero"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_unsupported_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Fail to upload non-image file"
+        },
+        {
+          "name": "upload_cover_too_large",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Fail to upload file larger than 2MB"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_invalid_rating",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Fail to create review with rating 6"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Fail to bulk create without API key"
+        },
+        {
+          "name": "bulk_create_partial_success",
+          "type": "happy_path",
+          "expected_status": 207,
+          "description": "Verify partial success status code"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_insufficient_stock",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to create order for out of stock book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_status_invalid_transition",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to transition from pending to delivered directly"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/invoice",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_invoice_forbidden_state",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Fail to get invoice for pending order"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "start_export_success",
+          "type": "happy_path",
+          "expected_status": 202,
+          "description": "Successfully initiate async export"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/{job_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_nonexistent_export",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verify 404 for invalid job ID"
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/maintenance",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "toggle_maintenance_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Successfully enable maintenance mode"
+        }
+      ]
+    },
+    {
+      "endpoint": "/statistics/summary",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_statistics_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Fail to get stats without API key"
+        }
+      ]
+    },
+    {
+      "endpoint": "/catalog",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "deprecated_catalog_redirect",
+          "type": "happy_path",
+          "expected_status": 301,
+          "description": "Verify redirect to /books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_duplicate_tag",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Fail to create tag with existing name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/clone",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "clone_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Successfully clone a book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verify 404 when author ID does not exist"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_reviews_pagination_limit",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify pagination limit works for reviews"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_orders_invalid_filter",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to list orders with malformed filter parameters"
+        }
+      ]
+    }
+  ]
+}

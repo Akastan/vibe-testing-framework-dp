@@ -1,0 +1,298 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Successfully create a new author with valid data"
+        },
+        {
+          "name": "create_author_invalid_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Fail to create author with empty name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Return 404 for non-existent author ID"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Successfully create a book with valid fields"
+        },
+        {
+          "name": "create_book_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Fail to create book with existing ISBN"
+        },
+        {
+          "name": "create_book_invalid_price",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Fail to create book with negative price"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify pagination parameters work correctly"
+        },
+        {
+          "name": "list_books_invalid_filter",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to list books with malformed filter parameters"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Perform soft delete on an existing book"
+        },
+        {
+          "name": "delete_already_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Return 410 when deleting an already soft-deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_deleted_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a soft-deleted book"
+        },
+        {
+          "name": "restore_active_book_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to restore a book that is not deleted"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply valid discount to old book"
+        },
+        {
+          "name": "apply_discount_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Verify rate limiting on discount endpoint"
+        },
+        {
+          "name": "apply_discount_new_book_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to apply discount to a book published this year"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Successfully update stock via query param"
+        },
+        {
+          "name": "update_stock_insufficient",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to update stock if result is negative"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_invalid_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Fail to upload non-image file"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Successfully add a review to a book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a valid order and reduce stock"
+        },
+        {
+          "name": "create_order_insufficient_stock",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to create order when stock is too low"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_invalid_transition",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Fail to perform illegal status transition"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/invoice",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_invoice_forbidden_state",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Fail to get invoice for pending order"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/bulk",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "bulk_create_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Fail bulk create without API key"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "start_export_success",
+          "type": "happy_path",
+          "expected_status": 202,
+          "description": "Start async export successfully"
+        }
+      ]
+    },
+    {
+      "endpoint": "/exports/{job_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_export_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Return 404 for invalid export job ID"
+        }
+      ]
+    },
+    {
+      "endpoint": "/admin/maintenance",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "toggle_maintenance_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Toggle maintenance mode with valid API key"
+        }
+      ]
+    },
+    {
+      "endpoint": "/statistics/summary",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_stats_unauthorized",
+          "type": "error",
+          "expected_status": 401,
+          "description": "Fail to get stats without API key"
+        },
+        {
+          "name": "get_stats_large_payload",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify handling of large dataset statistics"
+        }
+      ]
+    },
+    {
+      "endpoint": "/catalog",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "deprecated_catalog_redirect",
+          "type": "happy_path",
+          "expected_status": 301,
+          "description": "Verify redirect from catalog to books"
+        }
+      ]
+    }
+  ]
+}

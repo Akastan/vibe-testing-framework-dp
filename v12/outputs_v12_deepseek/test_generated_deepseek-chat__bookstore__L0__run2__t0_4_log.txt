@@ -1,0 +1,256 @@
+# Log pro: test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py
+# Čas spuštění: 2026-04-15T13:28:36.027194
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 1 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_health_check_success PASSED [  3%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_author_valid_data PASSED [  6%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_author_missing_name PASSED [ 10%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_list_authors_with_pagination PASSED [ 13%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_author_by_id PASSED [ 16%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_author_not_found PASSED [ 20%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_author_with_etag_mismatch PASSED [ 23%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_book_valid_data PASSED [ 26%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_book_invalid_isbn_length PASSED [ 30%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_list_books_with_filters PASSED [ 33%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_book_by_id PASSED [ 36%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_book_soft_deleted PASSED [ 40%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_soft_delete_book PASSED [ 43%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_delete_book_already_deleted PASSED [ 46%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_restore_soft_deleted_book PASSED [ 50%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_review_for_book PASSED [ 53%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_review_for_deleted_book PASSED [ 56%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_apply_discount_within_limit PASSED [ 60%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_apply_discount_rate_limit_exceeded PASSED [ 63%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_upload_book_cover_valid_file PASSED [ 66%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_upload_cover_file_too_large PASSED [ 70%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_bulk_create_books_with_api_key FAILED [ 73%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_bulk_create_books_missing_api_key PASSED [ 76%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_order_with_items PASSED [ 80%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_order_empty_items PASSED [ 83%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_order_status_valid FAILED [ 86%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_order_status_invalid PASSED [ 90%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_start_book_export_job FAILED [ 93%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_export_job_status_processing FAILED [ 96%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_enable_maintenance_mode FAILED [100%]
+
+================================== FAILURES ===================================
+_____________________ test_bulk_create_books_with_api_key _____________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:266: in test_bulk_create_books_with_api_key
+    assert response.status_code == 201
+E   assert 401 == 201
+E    +  where 401 = <Response [401]>.status_code
+_______________________ test_update_order_status_valid ________________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:314: in test_update_order_status_valid
+    assert response.status_code == 200
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_________________________ test_start_book_export_job __________________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:329: in test_start_book_export_job
+    assert response.status_code == 202
+E   assert 401 == 202
+E    +  where 401 = <Response [401]>.status_code
+____________________ test_get_export_job_status_processing ____________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:337: in test_get_export_job_status_processing
+    assert export_response.status_code == 202
+E   assert 401 == 202
+E    +  where 401 = <Response [401]>.status_code
+________________________ test_enable_maintenance_mode _________________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:346: in test_enable_maintenance_mode
+    assert response.status_code == 200
+E   assert 401 == 200
+E    +  where 401 = <Response [401]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_bulk_create_books_with_api_key
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_order_status_valid
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_start_book_export_job
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_export_job_status_processing
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_enable_maintenance_mode
+======================== 5 failed, 25 passed in 2.24s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 2 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_health_check_success PASSED [  3%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_author_valid_data PASSED [  6%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_author_missing_name PASSED [ 10%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_list_authors_with_pagination PASSED [ 13%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_author_by_id PASSED [ 16%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_author_not_found PASSED [ 20%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_author_with_etag_mismatch PASSED [ 23%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_book_valid_data PASSED [ 26%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_book_invalid_isbn_length PASSED [ 30%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_list_books_with_filters PASSED [ 33%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_book_by_id PASSED [ 36%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_book_soft_deleted PASSED [ 40%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_soft_delete_book PASSED [ 43%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_delete_book_already_deleted PASSED [ 46%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_restore_soft_deleted_book PASSED [ 50%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_review_for_book PASSED [ 53%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_review_for_deleted_book PASSED [ 56%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_apply_discount_within_limit PASSED [ 60%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_apply_discount_rate_limit_exceeded PASSED [ 63%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_upload_book_cover_valid_file PASSED [ 66%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_upload_cover_file_too_large PASSED [ 70%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_bulk_create_books_with_api_key FAILED [ 73%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_bulk_create_books_missing_api_key PASSED [ 76%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_order_with_items PASSED [ 80%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_order_empty_items PASSED [ 83%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_order_status_valid FAILED [ 86%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_order_status_invalid PASSED [ 90%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_start_book_export_job FAILED [ 93%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_export_job_status_processing FAILED [ 96%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_enable_maintenance_mode FAILED [100%]
+
+================================== FAILURES ===================================
+_____________________ test_bulk_create_books_with_api_key _____________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:266: in test_bulk_create_books_with_api_key
+    assert response.status_code == 201, f"Expected 201, got {response.status_code}: {response.text[:200]}"
+E   AssertionError: Expected 201, got 401: {"detail":"Invalid or missing API key"}
+E   assert 401 == 201
+E    +  where 401 = <Response [401]>.status_code
+_______________________ test_update_order_status_valid ________________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:315: in test_update_order_status_valid
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text[:200]}"
+E   AssertionError: Expected 200, got 400: {"detail":"Cannot transition from 'pending' to 'shipped'. Allowed transitions: ['confirmed', 'cancelled']"}
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_________________________ test_start_book_export_job __________________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:330: in test_start_book_export_job
+    assert response.status_code == 202, f"Expected 202, got {response.status_code}: {response.text[:200]}"
+E   AssertionError: Expected 202, got 401: {"detail":"Invalid or missing API key"}
+E   assert 401 == 202
+E    +  where 401 = <Response [401]>.status_code
+____________________ test_get_export_job_status_processing ____________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:338: in test_get_export_job_status_processing
+    assert export_response.status_code == 202, f"Expected 202, got {export_response.status_code}: {export_response.text[:200]}"
+E   AssertionError: Expected 202, got 401: {"detail":"Invalid or missing API key"}
+E   assert 401 == 202
+E    +  where 401 = <Response [401]>.status_code
+________________________ test_enable_maintenance_mode _________________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:347: in test_enable_maintenance_mode
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text[:200]}"
+E   AssertionError: Expected 200, got 401: {"detail":"Invalid or missing API key"}
+E   assert 401 == 200
+E    +  where 401 = <Response [401]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_bulk_create_books_with_api_key
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_order_status_valid
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_start_book_export_job
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_export_job_status_processing
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_enable_maintenance_mode
+======================== 5 failed, 25 passed in 2.13s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 3 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_health_check_success PASSED [  3%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_author_valid_data PASSED [  6%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_author_missing_name PASSED [ 10%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_list_authors_with_pagination PASSED [ 13%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_author_by_id PASSED [ 16%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_author_not_found PASSED [ 20%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_author_with_etag_mismatch PASSED [ 23%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_book_valid_data PASSED [ 26%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_book_invalid_isbn_length PASSED [ 30%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_list_books_with_filters PASSED [ 33%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_book_by_id PASSED [ 36%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_book_soft_deleted PASSED [ 40%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_soft_delete_book PASSED [ 43%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_delete_book_already_deleted PASSED [ 46%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_restore_soft_deleted_book PASSED [ 50%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_review_for_book PASSED [ 53%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_review_for_deleted_book PASSED [ 56%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_apply_discount_within_limit PASSED [ 60%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_apply_discount_rate_limit_exceeded PASSED [ 63%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_upload_book_cover_valid_file PASSED [ 66%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_upload_cover_file_too_large PASSED [ 70%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_bulk_create_books_with_api_key FAILED [ 73%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_bulk_create_books_missing_api_key PASSED [ 76%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_order_with_items PASSED [ 80%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_create_order_empty_items PASSED [ 83%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_order_status_valid FAILED [ 86%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_order_status_invalid PASSED [ 90%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_start_book_export_job FAILED [ 93%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_export_job_status_processing FAILED [ 96%]
+outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_enable_maintenance_mode FAILED [100%]
+
+================================== FAILURES ===================================
+_____________________ test_bulk_create_books_with_api_key _____________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:268: in test_bulk_create_books_with_api_key
+    assert response.status_code == 201, f"Expected 201, got {response.status_code}: {response.text[:200]}"
+E   AssertionError: Expected 201, got 401: {"detail":"Invalid or missing API key"}
+E   assert 401 == 201
+E    +  where 401 = <Response [401]>.status_code
+_______________________ test_update_order_status_valid ________________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:317: in test_update_order_status_valid
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text[:200]}"
+E   AssertionError: Expected 200, got 400: {"detail":"Cannot transition from 'pending' to 'shipped'. Allowed transitions: ['confirmed', 'cancelled']"}
+E   assert 400 == 200
+E    +  where 400 = <Response [400]>.status_code
+_________________________ test_start_book_export_job __________________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:332: in test_start_book_export_job
+    assert response.status_code == 202, f"Expected 202, got {response.status_code}: {response.text[:200]}"
+E   AssertionError: Expected 202, got 401: {"detail":"Invalid or missing API key"}
+E   assert 401 == 202
+E    +  where 401 = <Response [401]>.status_code
+____________________ test_get_export_job_status_processing ____________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:340: in test_get_export_job_status_processing
+    assert export_response.status_code == 202, f"Expected 202, got {export_response.status_code}: {export_response.text[:200]}"
+E   AssertionError: Expected 202, got 401: {"detail":"Invalid or missing API key"}
+E   assert 401 == 202
+E    +  where 401 = <Response [401]>.status_code
+________________________ test_enable_maintenance_mode _________________________
+outputs\test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py:349: in test_enable_maintenance_mode
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text[:200]}"
+E   AssertionError: Expected 200, got 401: {"detail":"Invalid or missing API key"}
+E   assert 401 == 200
+E    +  where 401 = <Response [401]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_bulk_create_books_with_api_key
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_update_order_status_valid
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_start_book_export_job
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_get_export_job_status_processing
+FAILED outputs/test_generated_deepseek-chat__bookstore__L0__run2__t0_4.py::test_enable_maintenance_mode
+======================== 5 failed, 25 passed in 1.78s =========================
+
+

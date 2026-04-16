@@ -1,0 +1,934 @@
+# Log pro: test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py
+# Čas spuštění: 2026-04-16T07:28:12.243304
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 1 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_author_valid PASSED [  3%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_author_invalid_data PASSED [  6%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_author_not_found PASSED [ 10%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_valid FAILED [ 13%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_duplicate_isbn FAILED [ 16%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_list_books_pagination PASSED [ 20%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_soft_deleted_book FAILED [ 23%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_book_etag_mismatch FAILED [ 26%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_restore_active_book_fails FAILED [ 30%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_new_book FAILED [ 33%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_rate_limit PASSED [ 36%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_stock_negative_result FAILED [ 40%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_unsupported_type FAILED [ 43%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_too_large FAILED [ 46%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_review_invalid_rating FAILED [ 50%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_duplicate_tag PASSED [ 53%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_add_nonexistent_tag_to_book FAILED [ 56%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_insufficient_stock FAILED [ 60%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_duplicate_book FAILED [ 63%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_invalid_status_transition FAILED [ 66%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_invoice_pending_order FAILED [ 70%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_unauthorized PASSED [ 73%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_partial_success FAILED [ 76%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_start_export_authorized PASSED [ 80%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_poll_export_processing PASSED [ 83%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_nonexistent_export PASSED [ 86%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_toggle_maintenance_mode PASSED [ 90%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_statistics_unauthorized PASSED [ 93%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_deprecated_catalog_redirect PASSED [ 96%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_health_check_invalid_method PASSED [100%]
+
+================================== FAILURES ===================================
+___________________________ test_create_book_valid ____________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:57: in test_create_book_valid
+    assert r.status_code == 201
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+_______________________ test_create_book_duplicate_isbn _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:72: in test_create_book_duplicate_isbn
+    assert r.status_code == 409
+E   assert 422 == 409
+E    +  where 422 = <Response [422]>.status_code
+_________________________ test_get_soft_deleted_book __________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:82: in test_get_soft_deleted_book
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"938c0454","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+_______________________ test_update_book_etag_mismatch ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:90: in test_update_book_etag_mismatch
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"f23f9875","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+_______________________ test_restore_active_book_fails ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:97: in test_restore_active_book_fails
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"6bfc0ce0","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+________________________ test_apply_discount_new_book _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:104: in test_apply_discount_new_book
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"284dc77c","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+______________________ test_update_stock_negative_result ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:120: in test_update_stock_negative_result
+    b = create_book(a["id"], c["id"], stock=5)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"6ad1663e","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+_____________________ test_upload_cover_unsupported_type ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:127: in test_upload_cover_unsupported_type
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"ca68db39","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+_________________________ test_upload_cover_too_large _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:134: in test_upload_cover_too_large
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"731c8041","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+______________________ test_create_review_invalid_rating ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:141: in test_create_review_invalid_rating
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"5e7e93e7","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+______________________ test_add_nonexistent_tag_to_book _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:154: in test_add_nonexistent_tag_to_book
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"b242d79d","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+____________________ test_create_order_insufficient_stock _____________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:161: in test_create_order_insufficient_stock
+    b = create_book(a["id"], c["id"], stock=1)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"a07e8a03","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+______________________ test_create_order_duplicate_book _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:168: in test_create_order_duplicate_book
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"cf9b5768","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+_______________________ test_invalid_status_transition ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:175: in test_invalid_status_transition
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"e1774e8c","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+_______________________ test_get_invoice_pending_order ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:183: in test_get_invoice_pending_order
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:31: in create_book
+    assert r.status_code == 201, f"Book helper failed: {r.text}"
+E   AssertionError: Book helper failed: {"detail":[{"type":"string_too_short","loc":["body","isbn"],"msg":"String should have at least 10 characters","input":"aaedb6c4","ctx":{"min_length":10}}]}
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+______________________ test_bulk_create_partial_success _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:199: in test_bulk_create_partial_success
+    assert r.status_code == 207
+E   assert 422 == 207
+E    +  where 422 = <Response [422]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_valid
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_duplicate_isbn
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_soft_deleted_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_book_etag_mismatch
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_restore_active_book_fails
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_new_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_stock_negative_result
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_unsupported_type
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_too_large
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_review_invalid_rating
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_add_nonexistent_tag_to_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_insufficient_stock
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_duplicate_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_invalid_status_transition
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_invoice_pending_order
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_partial_success
+======================== 16 failed, 14 passed in 1.56s ========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 2 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_author_valid PASSED [  3%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_author_invalid_data PASSED [  6%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_author_not_found PASSED [ 10%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_valid FAILED [ 13%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_duplicate_isbn FAILED [ 16%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_list_books_pagination PASSED [ 20%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_soft_deleted_book PASSED [ 23%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_book_etag_mismatch FAILED [ 26%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_restore_active_book_fails FAILED [ 30%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_new_book FAILED [ 33%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_rate_limit PASSED [ 36%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_stock_negative_result FAILED [ 40%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_unsupported_type FAILED [ 43%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_too_large FAILED [ 46%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_review_invalid_rating FAILED [ 50%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_duplicate_tag PASSED [ 53%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_add_nonexistent_tag_to_book FAILED [ 56%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_insufficient_stock FAILED [ 60%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_duplicate_book FAILED [ 63%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_invalid_status_transition FAILED [ 66%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_invoice_pending_order FAILED [ 70%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_unauthorized PASSED [ 73%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_partial_success FAILED [ 76%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_start_export_authorized PASSED [ 80%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_poll_export_processing PASSED [ 83%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_nonexistent_export PASSED [ 86%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_toggle_maintenance_mode PASSED [ 90%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_statistics_unauthorized PASSED [ 93%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_deprecated_catalog_redirect PASSED [ 96%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_health_check_invalid_method PASSED [100%]
+
+================================== FAILURES ===================================
+___________________________ test_create_book_valid ____________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:66: in test_create_book_valid
+    assert r.status_code == 201
+E   assert 422 == 201
+E    +  where 422 = <Response [422]>.status_code
+_______________________ test_create_book_duplicate_isbn _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:81: in test_create_book_duplicate_isbn
+    assert r.status_code == 409
+E   assert 422 == 409
+E    +  where 422 = <Response [422]>.status_code
+_______________________ test_update_book_etag_mismatch ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:99: in test_update_book_etag_mismatch
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_restore_active_book_fails ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:106: in test_restore_active_book_fails
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+________________________ test_apply_discount_new_book _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:113: in test_apply_discount_new_book
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_update_stock_negative_result ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:129: in test_update_stock_negative_result
+    b = create_book(a["id"], c["id"], stock=5)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_____________________ test_upload_cover_unsupported_type ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:136: in test_upload_cover_unsupported_type
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_________________________ test_upload_cover_too_large _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:143: in test_upload_cover_too_large
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_create_review_invalid_rating ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:150: in test_create_review_invalid_rating
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_add_nonexistent_tag_to_book _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:163: in test_add_nonexistent_tag_to_book
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+____________________ test_create_order_insufficient_stock _____________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:170: in test_create_order_insufficient_stock
+    b = create_book(a["id"], c["id"], stock=1)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_create_order_duplicate_book _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:177: in test_create_order_duplicate_book
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_invalid_status_transition ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:184: in test_invalid_status_transition
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_get_invoice_pending_order ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:192: in test_get_invoice_pending_order
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_bulk_create_partial_success _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:208: in test_bulk_create_partial_success
+    assert r.status_code == 207
+E   assert 422 == 207
+E    +  where 422 = <Response [422]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_valid
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_duplicate_isbn
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_book_etag_mismatch
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_restore_active_book_fails
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_new_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_stock_negative_result
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_unsupported_type
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_too_large
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_review_invalid_rating
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_add_nonexistent_tag_to_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_insufficient_stock
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_duplicate_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_invalid_status_transition
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_invoice_pending_order
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_partial_success
+======================== 15 failed, 15 passed in 1.70s ========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 3 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_author_valid PASSED [  3%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_author_invalid_data PASSED [  6%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_author_not_found PASSED [ 10%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_valid PASSED [ 13%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_duplicate_isbn FAILED [ 16%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_list_books_pagination PASSED [ 20%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_soft_deleted_book PASSED [ 23%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_book_etag_mismatch FAILED [ 26%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_restore_active_book_fails FAILED [ 30%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_new_book FAILED [ 33%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_rate_limit PASSED [ 36%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_stock_negative_result FAILED [ 40%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_unsupported_type FAILED [ 43%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_too_large FAILED [ 46%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_review_invalid_rating FAILED [ 50%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_duplicate_tag PASSED [ 53%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_add_nonexistent_tag_to_book FAILED [ 56%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_insufficient_stock FAILED [ 60%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_duplicate_book FAILED [ 63%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_invalid_status_transition FAILED [ 66%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_invoice_pending_order FAILED [ 70%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_unauthorized PASSED [ 73%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_partial_success FAILED [ 76%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_start_export_authorized PASSED [ 80%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_poll_export_processing PASSED [ 83%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_nonexistent_export PASSED [ 86%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_toggle_maintenance_mode PASSED [ 90%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_statistics_unauthorized PASSED [ 93%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_deprecated_catalog_redirect PASSED [ 96%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_health_check_invalid_method PASSED [100%]
+
+================================== FAILURES ===================================
+_______________________ test_create_book_duplicate_isbn _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:81: in test_create_book_duplicate_isbn
+    assert r.status_code == 422
+E   assert 409 == 422
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_update_book_etag_mismatch ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:99: in test_update_book_etag_mismatch
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_restore_active_book_fails ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:106: in test_restore_active_book_fails
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+________________________ test_apply_discount_new_book _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:113: in test_apply_discount_new_book
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_update_stock_negative_result ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:129: in test_update_stock_negative_result
+    b = create_book(a["id"], c["id"], stock=5)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_____________________ test_upload_cover_unsupported_type ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:136: in test_upload_cover_unsupported_type
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_________________________ test_upload_cover_too_large _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:143: in test_upload_cover_too_large
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_create_review_invalid_rating ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:150: in test_create_review_invalid_rating
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_add_nonexistent_tag_to_book _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:163: in test_add_nonexistent_tag_to_book
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+____________________ test_create_order_insufficient_stock _____________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:170: in test_create_order_insufficient_stock
+    b = create_book(a["id"], c["id"], stock=1)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_create_order_duplicate_book _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:177: in test_create_order_duplicate_book
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_invalid_status_transition ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:184: in test_invalid_status_transition
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_get_invoice_pending_order ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:192: in test_get_invoice_pending_order
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789101' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_bulk_create_partial_success _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:208: in test_bulk_create_partial_success
+    assert r.status_code == 207
+E   assert 422 == 207
+E    +  where 422 = <Response [422]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_duplicate_isbn
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_book_etag_mismatch
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_restore_active_book_fails
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_new_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_stock_negative_result
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_unsupported_type
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_too_large
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_review_invalid_rating
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_add_nonexistent_tag_to_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_insufficient_stock
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_duplicate_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_invalid_status_transition
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_invoice_pending_order
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_partial_success
+======================== 14 failed, 16 passed in 1.65s ========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 4 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_author_valid PASSED [  3%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_author_invalid_data PASSED [  6%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_author_not_found PASSED [ 10%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_valid PASSED [ 13%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_duplicate_isbn FAILED [ 16%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_list_books_pagination PASSED [ 20%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_soft_deleted_book PASSED [ 23%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_book_etag_mismatch FAILED [ 26%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_restore_active_book_fails FAILED [ 30%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_new_book FAILED [ 33%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_rate_limit PASSED [ 36%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_stock_negative_result FAILED [ 40%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_unsupported_type FAILED [ 43%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_too_large FAILED [ 46%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_review_invalid_rating FAILED [ 50%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_duplicate_tag PASSED [ 53%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_add_nonexistent_tag_to_book FAILED [ 56%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_insufficient_stock FAILED [ 60%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_duplicate_book FAILED [ 63%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_invalid_status_transition FAILED [ 66%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_invoice_pending_order FAILED [ 70%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_unauthorized PASSED [ 73%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_partial_success FAILED [ 76%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_start_export_authorized PASSED [ 80%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_poll_export_processing PASSED [ 83%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_nonexistent_export PASSED [ 86%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_toggle_maintenance_mode PASSED [ 90%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_statistics_unauthorized PASSED [ 93%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_deprecated_catalog_redirect PASSED [ 96%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_health_check_invalid_method PASSED [100%]
+
+================================== FAILURES ===================================
+_______________________ test_create_book_duplicate_isbn _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:81: in test_create_book_duplicate_isbn
+    assert r.status_code == 422
+E   assert 409 == 422
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_update_book_etag_mismatch ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:99: in test_update_book_etag_mismatch
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_restore_active_book_fails ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:106: in test_restore_active_book_fails
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+________________________ test_apply_discount_new_book _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:113: in test_apply_discount_new_book
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_update_stock_negative_result ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:129: in test_update_stock_negative_result
+    b = create_book(a["id"], c["id"], stock=5)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_____________________ test_upload_cover_unsupported_type ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:136: in test_upload_cover_unsupported_type
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_________________________ test_upload_cover_too_large _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:143: in test_upload_cover_too_large
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_create_review_invalid_rating ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:150: in test_create_review_invalid_rating
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_add_nonexistent_tag_to_book _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:163: in test_add_nonexistent_tag_to_book
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+____________________ test_create_order_insufficient_stock _____________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:170: in test_create_order_insufficient_stock
+    b = create_book(a["id"], c["id"], stock=1)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_create_order_duplicate_book _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:177: in test_create_order_duplicate_book
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_invalid_status_transition ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:184: in test_invalid_status_transition
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_get_invoice_pending_order ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:192: in test_get_invoice_pending_order
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_bulk_create_partial_success _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:208: in test_bulk_create_partial_success
+    assert r.status_code == 207
+E   assert 422 == 207
+E    +  where 422 = <Response [422]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_duplicate_isbn
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_book_etag_mismatch
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_restore_active_book_fails
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_new_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_stock_negative_result
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_unsupported_type
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_too_large
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_review_invalid_rating
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_add_nonexistent_tag_to_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_insufficient_stock
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_duplicate_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_invalid_status_transition
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_invoice_pending_order
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_partial_success
+======================== 14 failed, 16 passed in 1.75s ========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 5 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_author_valid PASSED [  3%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_author_invalid_data PASSED [  6%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_author_not_found PASSED [ 10%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_valid PASSED [ 13%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_duplicate_isbn FAILED [ 16%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_list_books_pagination PASSED [ 20%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_soft_deleted_book PASSED [ 23%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_book_etag_mismatch FAILED [ 26%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_restore_active_book_fails FAILED [ 30%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_new_book FAILED [ 33%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_rate_limit PASSED [ 36%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_stock_negative_result FAILED [ 40%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_unsupported_type FAILED [ 43%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_too_large FAILED [ 46%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_review_invalid_rating FAILED [ 50%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_duplicate_tag PASSED [ 53%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_add_nonexistent_tag_to_book FAILED [ 56%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_insufficient_stock FAILED [ 60%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_duplicate_book FAILED [ 63%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_invalid_status_transition FAILED [ 66%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_invoice_pending_order FAILED [ 70%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_unauthorized PASSED [ 73%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_bulk_create_partial_success PASSED [ 76%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_start_export_authorized PASSED [ 80%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_poll_export_processing PASSED [ 83%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_nonexistent_export PASSED [ 86%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_toggle_maintenance_mode PASSED [ 90%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_statistics_unauthorized PASSED [ 93%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_deprecated_catalog_redirect PASSED [ 96%]
+outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_health_check_invalid_method PASSED [100%]
+
+================================== FAILURES ===================================
+_______________________ test_create_book_duplicate_isbn _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:81: in test_create_book_duplicate_isbn
+    assert r.status_code == 422
+E   assert 409 == 422
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_update_book_etag_mismatch ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:99: in test_update_book_etag_mismatch
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_restore_active_book_fails ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:106: in test_restore_active_book_fails
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+________________________ test_apply_discount_new_book _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:113: in test_apply_discount_new_book
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_update_stock_negative_result ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:129: in test_update_stock_negative_result
+    b = create_book(a["id"], c["id"], stock=5)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_____________________ test_upload_cover_unsupported_type ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:136: in test_upload_cover_unsupported_type
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_________________________ test_upload_cover_too_large _________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:143: in test_upload_cover_too_large
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_create_review_invalid_rating ______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:150: in test_create_review_invalid_rating
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_add_nonexistent_tag_to_book _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:163: in test_add_nonexistent_tag_to_book
+    b = create_book(a["id"], c["id"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+____________________ test_create_order_insufficient_stock _____________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:170: in test_create_order_insufficient_stock
+    b = create_book(a["id"], c["id"], stock=1)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+______________________ test_create_order_duplicate_book _______________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:177: in test_create_order_duplicate_book
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_invalid_status_transition ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:184: in test_invalid_status_transition
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+_______________________ test_get_invoice_pending_order ________________________
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:192: in test_get_invoice_pending_order
+    b = create_book(a["id"], c["id"], stock=10)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+outputs\test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py:39: in create_book
+    assert r.status_code == 201, f"Book helper failed {r.status_code}: {r.text[:200]}"
+E   AssertionError: Book helper failed 409: {"detail":"Book with ISBN '0123456789012' already exists"}
+E   assert 409 == 201
+E    +  where 409 = <Response [409]>.status_code
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_book_duplicate_isbn
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_book_etag_mismatch
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_restore_active_book_fails
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_apply_discount_new_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_update_stock_negative_result
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_unsupported_type
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_upload_cover_too_large
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_review_invalid_rating
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_add_nonexistent_tag_to_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_insufficient_stock
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_create_order_duplicate_book
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_invalid_status_transition
+FAILED outputs/test_generated_gemini-3_1-flash-lite-preview__bookstore__L4__run3__t0_4.py::test_get_invoice_pending_order
+======================== 13 failed, 17 passed in 1.76s ========================
+
+

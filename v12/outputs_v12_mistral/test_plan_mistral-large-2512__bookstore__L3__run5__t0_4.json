@@ -1,0 +1,256 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_with_all_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies that an author can be created with all fields (name, bio, born_year)"
+        },
+        {
+          "name": "create_author_with_minimal_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies that an author can be created with only required fields (name)"
+        },
+        {
+          "name": "create_author_with_duplicate_name",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verifies that creating an author with a duplicate name returns a conflict error"
+        },
+        {
+          "name": "create_author_with_empty_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verifies that creating an author with an empty name returns a validation error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_existing_author",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that an existing author can be retrieved"
+        },
+        {
+          "name": "get_nonexistent_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verifies that retrieving a nonexistent author returns a 404 error"
+        },
+        {
+          "name": "get_author_with_etag_match",
+          "type": "edge_case",
+          "expected_status": 304,
+          "description": "Verifies that a 304 Not Modified is returned when the ETag matches"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that an author can be updated with valid data"
+        },
+        {
+          "name": "update_author_with_etag_mismatch",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Verifies that a 412 Precondition Failed is returned when the ETag does not match"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Verifies that an author without associated books can be deleted"
+        },
+        {
+          "name": "delete_author_with_books",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verifies that deleting an author with associated books returns a conflict error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_with_all_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies that a book can be created with all fields"
+        },
+        {
+          "name": "create_book_with_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verifies that creating a book with a duplicate ISBN returns a conflict error"
+        },
+        {
+          "name": "create_book_with_invalid_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verifies that creating a book with a nonexistent author returns a 404 error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that books can be listed with pagination"
+        },
+        {
+          "name": "list_books_with_filters",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that books can be filtered by author_id, category_id, and price range"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_existing_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that an existing book can be retrieved"
+        },
+        {
+          "name": "get_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verifies that retrieving a soft-deleted book returns a 410 Gone error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_book_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that a book can be updated with valid data"
+        },
+        {
+          "name": "update_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verifies that updating a soft-deleted book returns a 410 Gone error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that a soft-deleted book can be restored"
+        },
+        {
+          "name": "restore_non_deleted_book",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies that restoring a non-deleted book returns a 400 error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_eligible_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that a discount can be applied to a book published more than 1 year ago"
+        },
+        {
+          "name": "apply_discount_to_new_book",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies that applying a discount to a new book returns a 400 error"
+        },
+        {
+          "name": "apply_discount_exceeding_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Verifies that applying a discount exceeding the rate limit returns a 429 error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_with_valid_quantity",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that the stock of a book can be updated with a valid quantity"
+        },
+        {
+          "name": "update_stock_with_insufficient_quantity",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies that updating stock to a negative value returns a 400 error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_valid_cover_image",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that a valid cover image can be uploaded"
+        },
+        {
+          "name": "upload_unsupported_file_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Verifies that uploading an unsupported file type returns a 415 error"
+        },
+        {
+          "name": "upload_oversized_file",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Verifies that uploading a file exceeding the size limit returns a 413 error"
+        }
+      ]
+    }
+  ]
+}

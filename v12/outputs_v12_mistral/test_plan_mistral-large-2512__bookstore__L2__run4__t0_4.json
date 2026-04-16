@@ -1,0 +1,262 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies that a new author can be created with valid name, bio, and born_year."
+        },
+        {
+          "name": "create_author_with_missing_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verifies that creating an author with missing required field 'name' returns validation error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_existing_author_by_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that an existing author can be retrieved by ID."
+        },
+        {
+          "name": "get_non_existent_author_by_id",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Verifies that retrieving a non-existent author returns 404."
+        },
+        {
+          "name": "get_author_with_etag_not_modified",
+          "type": "edge_case",
+          "expected_status": 304,
+          "description": "Verifies that conditional GET with matching ETag returns 304 Not Modified."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that an author can be updated with valid data."
+        },
+        {
+          "name": "update_author_with_etag_mismatch",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Verifies that updating an author with mismatched ETag returns 412 Precondition Failed."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Verifies that an author without associated books can be deleted."
+        },
+        {
+          "name": "delete_author_with_books",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verifies that deleting an author with associated books returns 409 Conflict."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies that a new category can be created with valid name and description."
+        },
+        {
+          "name": "create_category_with_duplicate_name",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verifies that creating a category with a duplicate name returns 409 Conflict."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Verifies that a new book can be created with valid data including author and category."
+        },
+        {
+          "name": "create_book_with_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Verifies that creating a book with a duplicate ISBN returns 409 Conflict."
+        },
+        {
+          "name": "create_book_with_invalid_isbn_length",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Verifies that creating a book with an ISBN of invalid length returns validation error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_existing_book_by_id",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that an existing book can be retrieved by ID."
+        },
+        {
+          "name": "get_soft_deleted_book_by_id",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verifies that retrieving a soft-deleted book returns 410 Gone."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_book_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that a book can be updated with valid data."
+        },
+        {
+          "name": "update_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verifies that updating a soft-deleted book returns 410 Gone."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_existing_book",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Verifies that a book can be soft-deleted."
+        },
+        {
+          "name": "delete_already_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Verifies that deleting an already soft-deleted book returns 410 Gone."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that a soft-deleted book can be restored."
+        },
+        {
+          "name": "restore_non_deleted_book",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies that restoring a non-deleted book returns 400 Bad Request."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_eligible_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that a discount can be applied to a book published more than 1 year ago."
+        },
+        {
+          "name": "apply_discount_to_new_book",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies that applying a discount to a book published less than 1 year ago returns 400."
+        },
+        {
+          "name": "apply_discount_exceeding_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Verifies that exceeding the rate limit for discount endpoint returns 429."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_book_stock_with_valid_quantity",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that book stock can be updated with a valid quantity."
+        },
+        {
+          "name": "update_book_stock_resulting_in_negative",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Verifies that updating stock resulting in negative value returns 400 Bad Request."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_valid_cover_image",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verifies that a valid cover image can be uploaded for a book."
+        },
+        {
+          "name": "upload_unsupported_cover_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Verifies that uploading an unsupported file type returns 415 Unsupported Media Type."
+        },
+        {
+          "name": "upload_oversized_cover_image",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Verifies that uploading a file larger than 2MB returns 413 Content Too Large."
+        }
+      ]
+    }
+  ]
+}
