@@ -403,7 +403,17 @@ _AUTO_IMPORTS = {
     "math.floor":         "import math",
     "pytest":             "import pytest",
     "@pytest":            "import pytest",
-    "pytest.":            "import pytest"
+    "pytest.":            "import pytest",
+    "requests.get":       "import requests",
+    "requests.post":      "import requests",
+    "requests.put":       "import requests",
+    "requests.patch":     "import requests",
+    "requests.delete":    "import requests",
+    "requests.request":   "import requests",
+    "uuid.uuid4":         "import uuid",
+    "uuid4(":             "import uuid",
+    "time.sleep":         "import time",
+    "time.time":          "import time",
 }
 
 
@@ -697,22 +707,25 @@ def validate_test_count(code: str, expected: int, llm=None,
 # ═══════════════════════════════════════════════════════════
 
 def _validate_helpers_safe(old_helpers: str, new_helpers: str) -> tuple[bool, str]:
-    """Ověří že nové helpery neztratily importy ani funkce oproti starým.
-
-    Returns:
-        (is_safe, reason)
+    """Ověří že nové helpery neztratily funkce oproti starým.
+    (Chybějící importy už jen logujeme, protože se o ně stará Sanitizer)
     """
     old_imports = _get_import_names(old_helpers)
     new_imports = _get_import_names(new_helpers)
     missing_imports = old_imports - new_imports
     if missing_imports:
-        return False, f"Chybějící importy: {missing_imports}"
+        # Změna: Už nevracíme False! LLM pravděpodobně jen smazalo nepoužitý import.
+        # Sanitizer by ho vrátil, kdyby byl potřeba.
+        print(
+            f"    [HelperValidation] ℹ️ LLM odebralo importy: {missing_imports} (pokud jsou potřeba, Sanitizer je doplní)")
 
     old_funcs = set(_get_all_function_names(old_helpers))
     new_funcs = set(_get_all_function_names(new_helpers))
+
     # Odfiltruj test_ funkce (neměly by být v helperech)
     old_helpers_only = {f for f in old_funcs if not f.startswith("test_")}
     new_helpers_only = {f for f in new_funcs if not f.startswith("test_")}
+
     missing_funcs = old_helpers_only - new_helpers_only
     if missing_funcs:
         return False, f"Chybějící helper funkce: {missing_funcs}"
