@@ -11,19 +11,19 @@
 
 experiment:
   name: "diplomka_v12"
-  levels: ["L0", "L1", "L2", "L3", "L4"]
-  #levels: ["L4"]
+  #levels: ["L0", "L1", "L2", "L3", "L4"]
+  levels: ["L4"]
   max_iterations: 7
-  runs_per_combination: 5
+  runs_per_combination: 1
   test_count: 30
   temperatures: [0.4]
 
 # ── LLM modely ───────────────────────────────────────────
 llms:
-  - name: "gemini-3.1-flash-lite-preview"
-    provider: "gemini"
-    model: "gemini-3.1-flash-lite-preview"
-    api_key_env: "GEMINI_API_KEY"
+  #- name: "gemini-3.1-flash-lite-preview"
+  #  provider: "gemini"
+  #  model: "gemini-3.1-flash-lite-preview"
+  #  api_key_env: "GEMINI_API_KEY"
 
   #- name: "mistral-large-2512"
   #  provider: "mistral"
@@ -34,6 +34,11 @@ llms:
   #  provider: "deepseek"
   #  model: "deepseek-chat"
   #  api_key_env: "DEEPSEEK_API_KEY"
+
+  - name: "claude-haiku-4-5-20251001"
+    provider: "claude"
+    model: "claude-haiku-4-5-20251001"
+    api_key_env: "ANTHROPIC_API_KEY"
 
 # ── Testovaná API ────────────────────────────────────────
 apis:

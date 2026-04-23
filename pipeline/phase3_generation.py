@@ -153,9 +153,15 @@ def _get_import_names(code: str) -> set[str]:
 # ═══════════════════════════════════════════════════════════
 
 def _parse_failing_test_names(pytest_log: str) -> list[str]:
-    names = re.findall(r'FAILED\s+\S+::(\w+)', pytest_log)
-    return list(dict.fromkeys(names))
+    """Chytá FAILED i ERROR testy ze short summary.
 
+    Pytest summary line formáty:
+      FAILED tests.py::test_foo - AssertionError: ...
+      ERROR  tests.py::test_foo - fixture 'self' not found
+      ERROR  tests.py::test_foo::setup - ...
+    """
+    names = re.findall(r'(?:FAILED|ERROR)\s+\S+::(\w+)', pytest_log)
+    return list(dict.fromkeys(names))
 
 def _parse_passing_count(pytest_log: str) -> int:
     """Extrahuje počet passing testů z pytest výstupu."""
@@ -164,10 +170,19 @@ def _parse_passing_count(pytest_log: str) -> int:
 
 
 def _extract_error_for_test(pytest_log: str, test_name: str) -> str:
+    """Extrahuje error blok pro daný test. Funguje pro FAILED i ERROR bloky.
+
+    Pytest detailed output hlavičky:
+      _____________________ test_foo _____________________              (FAILED)
+      ___________ ERROR at setup of test_foo ___________                (ERROR)
+      ___________ ERROR at teardown of test_foo ___________             (ERROR)
+    """
     pattern = (
-        rf'_{2,}\s+{re.escape(test_name)}\s+_{2,}'
+        rf'_{2,}\s*'
+        rf'(?:ERROR\s+at\s+\w+\s+of\s+)?'       # volitelný "ERROR at setup of " prefix
+        rf'{re.escape(test_name)}\s*_{2,}'
         rf'(.*?)'
-        rf'(?=_{2,}\s+\w+\s+_{2,}|={2,}\s+short test summary|$)'
+        rf'(?=_{2,}\s|={2,}\s+short test summary|\Z)'
     )
     match = re.search(pattern, pytest_log, re.DOTALL)
     if match:

@@ -15,6 +15,7 @@ from token_tracker import (
     extract_usage_gemini,
     extract_usage_openai,
     extract_usage_mistral,
+    extract_usage_anthropic,
 )
 
 
@@ -144,6 +145,53 @@ class MistralProvider(LLMProvider, RetryMixin):
 
         return self._retry_call(_call)
 
+class ClaudeProvider(LLMProvider, RetryMixin):
+    """Anthropic Claude — oficiální SDK (pip install anthropic)."""
+    def __init__(self, api_key: str, model_name: str,
+                 temperature: float | None = None,
+                 max_retries: int = 8, base_delay: float = 30.0,
+                 max_tokens: int = 8192):
+        from anthropic import Anthropic
+
+        self.client = Anthropic(api_key=api_key, timeout=300.0)
+        self.model = model_name
+        self.model_name = model_name
+        self.temperature = temperature if temperature is not None else 0.7
+        self.max_tokens = max_tokens
+        self.max_retries = max_retries
+        self.base_delay = base_delay
+
+    def generate_text(self, prompt: str) -> tuple[str, dict | None]:
+        retryable = (
+            "429", "rate_limit_error", "rate_limit",
+            "overloaded", "overloaded_error",
+            "503", "UNAVAILABLE", "Too Many Requests",
+            "timed out", "timeout", "connection",
+        )
+
+        def _call():
+            response = self.client.messages.create(
+                model=self.model_name,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                messages=[{
+                    "role": "user",
+                    "content": [{
+                        "type": "text",
+                        "text": prompt,
+                        "cache_control": {"type": "ephemeral"},
+                    }],
+                }],
+            )
+            text = ""
+            for block in response.content:
+                if getattr(block, "type", None) == "text":
+                    text += block.text
+            usage = extract_usage_anthropic(response)
+            return text, usage
+
+        return self._retry_call(_call, retryable_codes=retryable)
+
 
 # ── Factory ──────────────────────────────────────────────
 
@@ -151,6 +199,7 @@ PROVIDERS = {
     "gemini": GeminiProvider,
     "deepseek": DeepSeekProvider,
     "mistral": MistralProvider,
+    "claude": ClaudeProvider,
 }
 
 

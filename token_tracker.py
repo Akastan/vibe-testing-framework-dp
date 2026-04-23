@@ -48,6 +48,15 @@ DEFAULT_PRICING: dict[str, dict[str, float | None]] = {
     "mistral-large-2512": {                   # Large 3
         "input": 0.5,  "output": 1.50,  "cached_input": None,
     },
+    # ═══ Anthropic Claude (USD per 1M tokenů, duben 2026) ═══
+    # Zdroj: docs.claude.com/en/docs/about-claude/pricing
+    # Cache hit = 10 % ceny inputu (automatický prompt caching)
+    "claude-3-5-haiku-20241022": {          # Haiku 3.5 (legacy, nejlevnější)
+        "input": 0.80,  "output": 4.00,  "cached_input": 0.08,
+    },
+    "claude-haiku-4-5-20251001": {          # Haiku 4.5 (pro případ, že přepneš)
+        "input": 1.00,  "output": 5.00,  "cached_input": 0.10,
+    },
 }
 
 
@@ -269,4 +278,32 @@ def extract_usage_openai(response) -> dict | None:
         "completion_tokens": getattr(usage, "completion_tokens", 0) or 0,
         "total_tokens": getattr(usage, "total_tokens", 0) or 0,
         "cached_tokens": getattr(usage, "prompt_cache_hit_tokens", 0) or 0,
+    }
+
+def extract_usage_anthropic(response) -> dict | None:
+    """
+    Anthropic SDK response.usage:
+      input_tokens, output_tokens,
+      cache_creation_input_tokens, cache_read_input_tokens  (volitelné)
+
+    Pozn.: Anthropic vrací input_tokens BEZ cached — je to separátní pole.
+    My do prompt_tokens sčítáme VŠE (input + cache_read + cache_creation),
+    aby výpočet ceny v TokenTracker.cost_usd() odpovídal
+    stejnému schématu jako u ostatních providerů.
+    """
+    usage = getattr(response, "usage", None)
+    if not usage:
+        return None
+
+    input_tokens = getattr(usage, "input_tokens", 0) or 0
+    output_tokens = getattr(usage, "output_tokens", 0) or 0
+    cache_read = getattr(usage, "cache_read_input_tokens", 0) or 0
+    cache_creation = getattr(usage, "cache_creation_input_tokens", 0) or 0
+
+    total_prompt = input_tokens + cache_read + cache_creation
+    return {
+        "prompt_tokens": total_prompt,
+        "completion_tokens": output_tokens,
+        "total_tokens": total_prompt + output_tokens,
+        "cached_tokens": cache_read,     # jen cache-read je levnější; cache-creation se počítá jako normální input
     }
