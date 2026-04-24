@@ -40,7 +40,8 @@ def _get_test_function_names(code: str) -> list[str]:
     try:
         tree = ast.parse(code)
         funcs = []
-        for node in ast.iter_child_nodes(tree):
+        # ZMĚNA: walk místo iter_child_nodes -> najde i testy ve třídách
+        for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
                 funcs.append((node.lineno, node.name))
         return [name for _, name in sorted(funcs)]
@@ -78,31 +79,56 @@ def _replace_function_code(code: str, func_name: str, new_func: str) -> str:
         return code
     start, end = rng
     lines = code.split('\n')
+
+    # ZMĚNA: Nutné zachovat původní indentaci, pokud je funkce ve třídě
+    first_line = lines[start]
+    indent_str = first_line[:len(first_line) - len(first_line.lstrip('\t '))]
+
     new_func = textwrap.dedent(new_func).strip()
-    new_lines = lines[:start] + new_func.split('\n') + lines[end + 1:]
+    new_func_lines = [indent_str + line if line else line for line in new_func.split('\n')]
+
+    new_lines = lines[:start] + new_func_lines + lines[end + 1:]
     return '\n'.join(new_lines)
 
 
+def _get_tests_start_lineno(code: str) -> int | None:
+    """NOVÉ: Bezpečně najde začátek testovací sekce (např. class Test... nebo def test_...)."""
+    try:
+        tree = ast.parse(code)
+        min_lineno = None
+        for node in ast.iter_child_nodes(tree):
+            if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
+                lineno = node.decorator_list[0].lineno if node.decorator_list else node.lineno
+                if min_lineno is None or lineno < min_lineno:
+                    min_lineno = lineno
+            elif isinstance(node, ast.ClassDef):
+                has_tests = any(
+                    isinstance(child, ast.FunctionDef) and child.name.startswith("test_")
+                    for child in ast.walk(node)
+                )
+                if has_tests:
+                    lineno = node.decorator_list[0].lineno if node.decorator_list else node.lineno
+                    if min_lineno is None or lineno < min_lineno:
+                        min_lineno = lineno
+        return min_lineno
+    except SyntaxError:
+        return None
+
+
 def _extract_helpers_code(code: str) -> str:
-    test_names = _get_test_function_names(code)
-    if not test_names:
+    start_lineno = _get_tests_start_lineno(code)
+    if start_lineno is None:
         return code
-    first_rng = _get_function_range(code, test_names[0])
-    if not first_rng:
-        return ""
     lines = code.split('\n')
-    return '\n'.join(lines[:first_rng[0]]).strip()
+    return '\n'.join(lines[:start_lineno - 1]).strip()
 
 
 def _replace_helpers(code: str, new_helpers: str) -> str:
-    test_names = _get_test_function_names(code)
-    if not test_names:
-        return code
-    first_rng = _get_function_range(code, test_names[0])
-    if not first_rng:
+    start_lineno = _get_tests_start_lineno(code)
+    if start_lineno is None:
         return code
     lines = code.split('\n')
-    tests_part = '\n'.join(lines[first_rng[0]:])
+    tests_part = '\n'.join(lines[start_lineno - 1:])
     return new_helpers.strip() + '\n\n\n' + tests_part
 
 
@@ -111,19 +137,31 @@ def _remove_last_n_tests(code: str, n: int) -> str:
     if n <= 0 or n > len(test_names):
         return code
     to_remove = test_names[-n:]
+
     for name in reversed(to_remove):
         rng = _get_function_range(code, name)
         if rng:
             start, end = rng
             lines = code.split('\n')
-            while end + 1 < len(lines) and lines[end + 1].strip() == '':
-                end += 1
-            code = '\n'.join(lines[:start] + lines[end + 1:])
+
+            # ZMĚNA: Místo hrubého smazání, které by rozbilo AST u prázdné třídy,
+            # nahradíme hlavičku vymazávané funkce příkazem `pass` (vč. odsazení)
+            first_line = lines[start]
+            indent = len(first_line) - len(first_line.lstrip('\t '))
+
+            lines[start] = (' ' * indent) + 'pass'
+            for i in range(start + 1, end + 1):
+                lines[i] = ''
+
+            code = '\n'.join(lines)
+
+    # Vyčištění přebytečných prázdných řádků
+    import re
+    code = re.sub(r'\n[ \t]*\n[ \t]*\n+', '\n\n', code)
     return code
 
 
 def _get_all_function_names(code: str) -> list[str]:
-    """Vrátí názvy VŠECH funkcí (ne jen test_) v kódu."""
     try:
         tree = ast.parse(code)
         return [n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
@@ -132,7 +170,6 @@ def _get_all_function_names(code: str) -> list[str]:
 
 
 def _get_import_names(code: str) -> set[str]:
-    """Vrátí set importovaných modulů/jmen."""
     try:
         tree = ast.parse(code)
         names = set()
@@ -389,7 +426,7 @@ class StaleTracker:
 
 # Knihovny které NEJSOU dostupné v test prostředí
 _BANNED_IMPORTS = {
-    "PIL", "pillow", "numpy", "pandas", "matplotlib",
+    "numpy", "pandas", "matplotlib",
     "scipy", "sklearn", "flask", "django", "fastapi",
     "sqlalchemy", "pydantic", "httpx", "aiohttp",
 }
@@ -448,7 +485,10 @@ def _fix_imports(code: str) -> str:
     for line in lines:
         stripped = line.strip()
 
-        # "from PIL import ..." nebo "import PIL"
+        if "# noqa: import" in line:
+            cleaned_lines.append(line)
+            continue
+
         is_banned = False
         if stripped.startswith("from "):
             module = stripped.split()[1].split(".")[0]
