@@ -85,11 +85,13 @@ class GeminiProvider(LLMProvider, RetryMixin):
 
 
 class DeepSeekProvider(LLMProvider, RetryMixin):
-    """DeepSeek — OpenAI-kompatibilní API."""
+    """DeepSeek — OpenAI-kompatibilní API s podporou toggle pro Thinking mode."""
+
     def __init__(self, api_key: str, model_name: str,
                  temperature: float | None = None,
                  max_retries: int = 8, base_delay: float = 30.0,
-                 max_tokens: int = 8192):
+                 max_tokens: int = 8192,
+                 thinking: bool = False):  # ← PŘIDÁNO: Defaultně vypnuto pro "flash" chování
         from openai import OpenAI
         self.client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
         self.model = model_name
@@ -98,14 +100,26 @@ class DeepSeekProvider(LLMProvider, RetryMixin):
         self.max_tokens = max_tokens
         self.max_retries = max_retries
         self.base_delay = base_delay
+        self.thinking = thinking
 
     def generate_text(self, prompt: str) -> tuple[str, dict | None]:
+        # Nastavení extra_body podle parametru thinking
+        thinking_type = "enabled" if self.thinking else "disabled"
+        extra_kwargs = {
+            "extra_body": {"thinking": {"type": thinking_type}}
+        }
+
+        # Pokud je thinking zapnutý, můžeme přidat i effort control, pokud by bylo potřeba
+        # if self.thinking:
+        #     extra_kwargs["reasoning_effort"] = "high"
+
         def _call():
             response = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=self.temperature,
-                max_tokens=self.max_tokens,         # ← PŘIDÁNO
+                max_tokens=self.max_tokens,
+                **extra_kwargs  # ← PŘIDÁNO: Předání extra_body
             )
             text = response.choices[0].message.content or ""
             usage = extract_usage_openai(response)
