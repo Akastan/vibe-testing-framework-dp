@@ -30,6 +30,8 @@ for d in (RQ1_DIR, RQ2_DIR, RQ3_DIR):
 COLOR_DEEPSEEK = "#4C72B0"
 COLOR_GEMINI = "#DD8452"
 COLOR_MISTRAL = "#55A467"
+COLOR_DEEPSEEK_V4 = "#8172B2"
+COLOR_CLAUDE = "#C44E52"
 COLOR_AVG = "#333333"  # tmavě šedá pro cross-model průměr
 
 LEVEL_COLORS = ["#4C72B0", "#DD8452", "#55A467", "#C44E52", "#8172B2"]
@@ -44,25 +46,29 @@ FIGSIZE_WIDE = (10, 5)
 FIGSIZE_TALL = (8, 6)
 FIGSIZE_SQUARE = (6, 6)
 
-#C:\Projects\vibe-testing-framework\v12\outputs_v12_deepseek\results
-
 FILES = {
-    "deepseek-chat": "v12/outputs_v12_deepseek/results/experiment_diplomka_v12_20260415_165515.json",
-    "gemini-3.1-flash-lite-preview": "v12/outputs_v12_gemini/results/experiment_diplomka_v12_20260416_073106.json",
+    "deepseek-chat": "v12/outputs_v12_deepseek-chat/results/experiment_diplomka_v12_20260415_165515.json",
+    #"gemini-3.1-flash-lite-preview": "v12/outputs_v12_gemini/results/experiment_diplomka_v12_20260416_073106.json",
+    "deepseek-v4-flash": "v12/outputs_v12_deepseek-V4/results/experiment_diplomka_v12_20260426_220445.json",
     "mistral-large-2512": "v12/outputs_v12_mistral/results/experiment_diplomka_v12_20260415_220449.json",
+    "claude-haiku-4-5-20251001": "v12/outputs_v12_claude/results/experiment_diplomka_v12_20260424_160040.json",
 }
 
 LEVELS = ["L0", "L1", "L2", "L3", "L4"]
 LLMS = list(FILES.keys())
 LLM_SHORT = {
-    "deepseek-chat": "DeepSeek",
-    "gemini-3.1-flash-lite-preview": "Gemini",
+    "deepseek-chat": "DeepSeek-chat",
+    #"gemini-3.1-flash-lite-preview": "Gemini",
+    "deepseek-v4-flash": "DeepSeek-V4",
     "mistral-large-2512": "Mistral",
+    "claude-haiku-4-5-20251001": "Claude Haiku"
 }
 LLM_COLORS = {
     "deepseek-chat": COLOR_DEEPSEEK,
-    "gemini-3.1-flash-lite-preview": COLOR_GEMINI,
+    #"gemini-3.1-flash-lite-preview": COLOR_GEMINI,
     "mistral-large-2512": COLOR_MISTRAL,
+    "deepseek-v4-flash": COLOR_DEEPSEEK_V4,
+    "claude-haiku-4-5-20251001": COLOR_CLAUDE,
 }
 
 # Code coverage z analytických reportů
@@ -74,19 +80,33 @@ COVERAGE = {
         "L3": {"total": 73.12, "crud": 53.75, "main": 68.64},
         "L4": {"total": 73.50, "crud": 53.18, "main": 70.68},
     },
-    "gemini-3.1-flash-lite-preview": {
-        "L0": {"total": 62.32, "crud": 28.32, "main": 65.04},
-        "L1": {"total": 68.46, "crud": 40.93, "main": 69.53},
-        "L2": {"total": 68.74, "crud": 41.40, "main": 69.87},
-        "L3": {"total": 67.89, "crud": 40.05, "main": 68.71},
-        "L4": {"total": 65.87, "crud": 35.45, "main": 67.83},
-    },
+    #"gemini-3.1-flash-lite-preview": {
+    #    "L0": {"total": 62.32, "crud": 28.32, "main": 65.04},
+    #    "L1": {"total": 68.46, "crud": 40.93, "main": 69.53},
+    #    "L2": {"total": 68.74, "crud": 41.40, "main": 69.87},
+    #    "L3": {"total": 67.89, "crud": 40.05, "main": 68.71},
+    #    "L4": {"total": 65.87, "crud": 35.45, "main": 67.83},
+    #},
     "mistral-large-2512": {
         "L0": {"total": 66.86, "crud": 36.64, "main": 69.66},
         "L1": {"total": 66.54, "crud": 37.21, "main": 67.83},
         "L2": {"total": 67.99, "crud": 39.17, "main": 70.21},
         "L3": {"total": 67.05, "crud": 37.14, "main": 69.64},
         "L4": {"total": 67.77, "crud": 39.59, "main": 68.91},
+    },
+    "deepseek-v4-flash": {
+        "L0": {"total": 70.90, "crud": 45.37, "main": 72.04},
+        "L1": {"total": 71.97, "crud": 48.84, "main": 71.16},
+        "L2": {"total": 69.61, "crud": 44.70, "main": 68.51},
+        "L3": {"total": 71.89, "crud": 49.56, "main": 69.93},
+        "L4": {"total": 68.64, "crud": 43.67, "main": 66.53},
+    },
+    "claude-haiku-4-5-20251001": {
+        "L0": {"total": 67.97, "crud": 40.72, "main": 68.10},
+        "L1": {"total": 65.63, "crud": 35.86, "main": 66.47},
+        "L2": {"total": 65.71, "crud": 35.60, "main": 67.08},
+        "L3": {"total": 66.18, "crud": 36.07, "main": 68.10},
+        "L4": {"total": 66.98, "crud": 38.04, "main": 68.23},
     },
 }
 
