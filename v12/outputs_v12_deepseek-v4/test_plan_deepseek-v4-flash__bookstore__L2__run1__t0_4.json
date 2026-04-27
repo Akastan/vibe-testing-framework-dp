@@ -1,0 +1,304 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_ok",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify that the health check endpoint returns a 200 status code."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new author with valid data and verify the response contains the author details."
+        },
+        {
+          "name": "create_author_missing_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to create an author without a required 'name' field and expect a validation error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_default_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List all authors with default skip and limit parameters."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an existing author by their ID and verify the response."
+        },
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Attempt to retrieve a non-existent author and expect a 404 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_etag_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update an existing author using a valid If-Match header and verify the update."
+        },
+        {
+          "name": "update_author_etag_mismatch",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Attempt to update an author with a mismatched ETag and expect a 412 precondition failure."
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Delete an author who has no associated books and verify a 204 response."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new category with valid data and verify the response."
+        },
+        {
+          "name": "create_duplicate_category_name",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create a category with a name that already exists and expect a 409 conflict."
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories/{category_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_category_by_id_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an existing category by its ID and verify the response."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new book with valid data, including author and category, and verify the response."
+        },
+        {
+          "name": "create_book_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create a book with an ISBN that already exists and expect a 409 conflict."
+        },
+        {
+          "name": "create_book_nonexistent_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Attempt to create a book with a non-existent author_id and expect a 404 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_filters",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books with a search filter and price range and verify the response structure."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_by_id_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an existing book by its ID and verify the response contains all expected fields."
+        },
+        {
+          "name": "get_soft_deleted_book_returns_gone",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to retrieve a soft-deleted book and expect a 410 Gone status."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Soft delete an existing book and verify a 204 response."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a previously soft-deleted book and verify the response."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_for_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a review for an existing book with valid data and verify the response."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/rating",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_rating_with_reviews",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve the average rating for a book that has reviews and verify the calculation."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_old_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply a valid discount to a book published more than a year ago and verify the discounted price."
+        },
+        {
+          "name": "apply_discount_to_new_book_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to apply a discount to a book published in the current year and expect a 400 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_increase_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Increase the stock of a book by a positive quantity and verify the updated stock value."
+        },
+        {
+          "name": "update_stock_insufficient_result",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to decrease stock below zero and expect a 400 insufficient stock error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_image_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Upload a valid JPEG image as a book cover and verify the upload response."
+        },
+        {
+          "name": "upload_cover_unsupported_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Attempt to upload a file with an unsupported MIME type and expect a 415 error."
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new tag with a valid name and verify the response."
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_to_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Add one or more tags to an existing book and verify the book response includes the tags."
+        }
+      ]
+    }
+  ]
+}

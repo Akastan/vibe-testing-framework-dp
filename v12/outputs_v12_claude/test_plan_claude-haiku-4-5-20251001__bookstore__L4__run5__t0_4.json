@@ -1,0 +1,274 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_ok",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify health check endpoint returns status ok"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_with_all_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create author with name, bio, and born_year"
+        },
+        {
+          "name": "create_author_missing_name_validation_error",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Reject author creation when name is missing"
+        },
+        {
+          "name": "create_author_born_year_out_of_range",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Reject author with born_year greater than 2026"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_returns_etag_header",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify GET author detail returns ETag header"
+        },
+        {
+          "name": "get_author_with_if_none_match_returns_304",
+          "type": "edge_case",
+          "expected_status": 304,
+          "description": "Return 304 Not Modified when ETag matches via If-None-Match header"
+        },
+        {
+          "name": "get_nonexistent_author_returns_404",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Return 404 when author does not exist"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_if_match_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update author when If-Match ETag is valid"
+        },
+        {
+          "name": "update_author_with_stale_etag_returns_412",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Return 412 Precondition Failed when If-Match ETag is stale"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_with_associated_books_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Prevent deletion of author with associated non-deleted books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_with_unique_name",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create category with unique name"
+        },
+        {
+          "name": "create_category_duplicate_name_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Reject category creation with duplicate name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_with_valid_isbn_and_price",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create book with valid ISBN (10-13 chars) and non-negative price"
+        },
+        {
+          "name": "create_book_duplicate_isbn_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Reject book creation with duplicate ISBN"
+        },
+        {
+          "name": "create_book_isbn_too_short_returns_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Reject book with ISBN shorter than 10 characters"
+        },
+        {
+          "name": "create_book_negative_price_returns_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Reject book with negative price"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_soft_deleted_book_returns_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Return 410 Gone when accessing soft-deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book_sets_is_deleted_flag",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Soft delete book by setting is_deleted flag"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a soft-deleted book"
+        },
+        {
+          "name": "restore_non_deleted_book_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Return 400 when attempting to restore non-deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_old_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply discount to book published more than 1 year ago"
+        },
+        {
+          "name": "apply_discount_to_new_book_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Reject discount on book published within last year"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "increase_stock_with_positive_quantity",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Increase book stock with positive quantity delta"
+        },
+        {
+          "name": "decrease_stock_below_zero_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Reject stock update that would result in negative stock"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_with_valid_jpeg",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Upload valid JPEG cover image"
+        },
+        {
+          "name": "upload_cover_with_unsupported_type_returns_415",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Reject cover upload with unsupported file type"
+        },
+        {
+          "name": "upload_cover_exceeding_size_limit_returns_413",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Reject cover upload exceeding 2 MB size limit"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_with_unique_name",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create tag with unique name"
+        },
+        {
+          "name": "create_tag_duplicate_name_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Reject tag creation with duplicate name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_to_book_idempotent",
+          "type": "edge_case",
+          "expected_status": 200,
+          "description": "Adding same tag twice should be idempotent"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_ok",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify health endpoint returns status ok"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_with_all_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create author with name, bio, and born_year"
+        },
+        {
+          "name": "create_author_missing_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Reject author creation without required name field"
+        },
+        {
+          "name": "create_author_born_year_out_of_range",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Reject author with born_year greater than 2026"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_returns_etag_header",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify GET author returns ETag header for caching"
+        },
+        {
+          "name": "get_author_with_if_none_match_etag",
+          "type": "edge_case",
+          "expected_status": 304,
+          "description": "Return 304 Not Modified when ETag matches via If-None-Match header"
+        },
+        {
+          "name": "get_nonexistent_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Return 404 for non-existent author ID"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_if_match_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update author when If-Match ETag is current"
+        },
+        {
+          "name": "update_author_with_stale_etag",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Reject update with If-Match header when ETag is stale"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_with_associated_books",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Prevent deletion of author with non-deleted books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_unique_name",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create category with unique name"
+        },
+        {
+          "name": "create_category_duplicate_name",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Reject category creation with duplicate name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_with_valid_isbn",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create book with ISBN between 10-13 characters"
+        },
+        {
+          "name": "create_book_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Reject book creation with duplicate ISBN"
+        },
+        {
+          "name": "create_book_isbn_too_short",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Reject book with ISBN shorter than 10 characters"
+        },
+        {
+          "name": "create_book_negative_price",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Reject book with negative price"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Return 410 Gone for soft-deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book_sets_is_deleted",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Soft delete book without physical removal"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a soft-deleted book"
+        },
+        {
+          "name": "restore_non_deleted_book",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Reject restore attempt on non-deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_old_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply discount to book published more than 1 year ago"
+        },
+        {
+          "name": "apply_discount_to_new_book",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Reject discount on book published within last year"
+        },
+        {
+          "name": "discount_rate_limit_exceeded",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Return 429 when discount endpoint rate limit (5 per 10s) exceeded"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "increase_stock_quantity",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Increase book stock with positive quantity delta"
+        },
+        {
+          "name": "decrease_stock_below_zero",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Reject stock decrease that would result in negative quantity"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_valid_jpeg",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Upload JPEG cover image successfully"
+        },
+        {
+          "name": "upload_cover_unsupported_type",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Reject cover upload with unsupported file type"
+        },
+        {
+          "name": "upload_cover_exceeds_size_limit",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Reject cover image larger than 2 MB"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_valid_rating",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create review with rating between 1-5"
+        },
+        {
+          "name": "create_review_on_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Reject review creation on soft-deleted book"
+        }
+      ]
+    }
+  ]
+}

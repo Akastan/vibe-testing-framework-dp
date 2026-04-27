@@ -1,0 +1,310 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify health check endpoint returns 200 OK"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new author with valid name, bio, and born_year"
+        },
+        {
+          "name": "create_author_missing_name_returns_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to create author without required name field"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an existing author by ID"
+        },
+        {
+          "name": "get_author_not_found_returns_404",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Request author with non-existent ID"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_valid_etag_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update author using correct If-Match header"
+        },
+        {
+          "name": "update_author_with_wrong_etag_returns_412",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Update author with stale If-Match header"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books_returns_204",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Delete an author that has no books assigned"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new category with valid name and description"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_categories_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List all categories"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new book with all required fields and valid references"
+        },
+        {
+          "name": "create_book_duplicate_isbn_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create a book with an ISBN that already exists"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_filters_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books with search, author_id, and price range filters"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_by_id_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an existing book by ID"
+        },
+        {
+          "name": "get_soft_deleted_book_returns_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Request a book that has been soft-deleted"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_book_with_valid_etag_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update book using correct If-Match header"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book_returns_204",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Soft delete an existing book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a previously soft-deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Add a review with valid rating and reviewer name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/rating",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_rating_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve average rating and review count for a book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_old_book_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply a valid discount to a book published more than 1 year ago"
+        },
+        {
+          "name": "apply_discount_to_new_book_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to apply discount to a book published in the current year"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_positive_delta_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Increase stock by a positive quantity"
+        },
+        {
+          "name": "update_stock_insufficient_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to decrease stock below zero"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_valid_image_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Upload a valid JPEG image as book cover"
+        },
+        {
+          "name": "upload_cover_unsupported_type_returns_415",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Upload a file with unsupported MIME type (e.g., GIF)"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a new tag with valid name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "add_tags_to_book_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Assign existing tags to a book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create an order with valid customer info and items"
+        },
+        {
+          "name": "create_order_insufficient_stock_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to order a book with insufficient stock"
+        }
+      ]
+    }
+  ]
+}

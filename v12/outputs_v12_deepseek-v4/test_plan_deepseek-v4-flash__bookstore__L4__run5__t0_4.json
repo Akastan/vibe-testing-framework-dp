@@ -1,0 +1,304 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_ok",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify health check endpoint returns status ok"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_with_minimal_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create author with only required name field"
+        },
+        {
+          "name": "create_author_missing_name_returns_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create author without name returns validation error"
+        },
+        {
+          "name": "create_author_name_too_long_returns_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create author with name exceeding 100 characters returns validation error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_nonexistent_author_returns_404",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Get author with non-existent id returns 404"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_name_successfully",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update author name and verify response"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books_returns_204",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Delete author that has no associated books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_with_duplicate_name_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Create category with duplicate name returns conflict"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories/{category_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_category_with_books_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Delete category that has associated books returns conflict"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_with_all_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create book with all required fields and verify response"
+        },
+        {
+          "name": "create_book_with_negative_price_returns_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create book with negative price returns validation error"
+        },
+        {
+          "name": "create_book_with_duplicate_isbn_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Create book with existing ISBN returns conflict"
+        },
+        {
+          "name": "create_book_with_nonexistent_author_returns_404",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Create book with non-existent author_id returns 404"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_soft_deleted_book_returns_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Get book that has been soft deleted returns 410"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book_returns_204",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Soft delete a book and verify it returns 204"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a soft deleted book and verify it becomes accessible"
+        },
+        {
+          "name": "restore_non_deleted_book_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Restore a book that is not deleted returns 400"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_old_book_returns_200",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply discount to book published more than 1 year ago"
+        },
+        {
+          "name": "apply_discount_to_new_book_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Apply discount to book published less than 1 year ago returns 400"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "increase_stock_returns_updated_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Increase stock quantity and verify updated stock value"
+        },
+        {
+          "name": "decrease_stock_below_zero_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Decrease stock below zero returns insufficient stock error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_with_unsupported_type_returns_415",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Upload cover with unsupported file type returns 415"
+        },
+        {
+          "name": "upload_cover_exceeding_size_limit_returns_413",
+          "type": "error",
+          "expected_status": 413,
+          "description": "Upload cover file larger than 2 MB returns 413"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_on_soft_deleted_book_returns_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Create review on soft deleted book returns 410"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_with_duplicate_name_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Create tag with duplicate name returns conflict"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags/{tag_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_tag_attached_to_book_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Delete tag that is assigned to a book returns conflict"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_insufficient_stock_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Create order with quantity exceeding stock returns 400"
+        },
+        {
+          "name": "create_order_with_duplicate_book_ids_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Create order with duplicate book_id in items returns 400"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "transition_order_from_pending_to_shipped_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Transition order from pending directly to shipped returns invalid transition error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/invoice",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_invoice_for_pending_order_returns_403",
+          "type": "error",
+          "expected_status": 403,
+          "description": "Get invoice for pending order returns forbidden"
+        }
+      ]
+    }
+  ]
+}

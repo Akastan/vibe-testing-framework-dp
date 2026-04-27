@@ -1,0 +1,310 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify health check endpoint returns 200"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create author with valid name, bio, born_year"
+        },
+        {
+          "name": "create_author_missing_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create author without required name field"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_default_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List authors with default skip and limit"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_existing",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Get author by valid id"
+        },
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Get author with non-existent id"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_valid",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update author name and bio with valid data"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_existing",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Delete existing author"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create book with all required fields"
+        },
+        {
+          "name": "create_book_invalid_price_negative",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create book with negative price"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_search",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books with search query"
+        },
+        {
+          "name": "list_books_invalid_page_zero",
+          "type": "error",
+          "expected_status": 422,
+          "description": "List books with page=0 (minimum 1)"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_existing",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Get book by valid id"
+        },
+        {
+          "name": "get_book_soft_deleted",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Get book that was soft deleted"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_book_valid",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update book title and price"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_book_existing",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Soft delete existing book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a soft-deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create review with rating and reviewer_name"
+        },
+        {
+          "name": "create_review_rating_out_of_range",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create review with rating 6 (max 5)"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_valid",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply valid discount percent"
+        },
+        {
+          "name": "apply_discount_exceeds_max",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Apply discount percent > 50"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_valid",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update stock quantity with positive integer"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_valid_jpeg",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Upload a valid JPEG cover image"
+        },
+        {
+          "name": "upload_cover_unsupported_format",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Upload cover with unsupported file type"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create category with valid name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create tag with valid name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_order_valid",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create order with customer info and items"
+        },
+        {
+          "name": "create_order_empty_items",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create order with empty items array"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_order_existing",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Get order by valid id"
+        }
+      ]
+    },
+    {
+      "endpoint": "/orders/{order_id}/status",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_order_status_valid",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update order status to shipped"
+        }
+      ]
+    }
+  ]
+}

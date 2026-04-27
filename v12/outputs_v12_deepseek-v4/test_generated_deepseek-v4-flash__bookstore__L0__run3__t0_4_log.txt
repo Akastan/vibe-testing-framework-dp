@@ -1,0 +1,171 @@
+# Log pro: test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py
+# Čas spuštění: 2026-04-26T21:29:10.078617
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 1 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_health_check_returns_200 PASSED [  3%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_author_valid_data PASSED [  6%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_author_missing_name PASSED [ 10%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_authors_default_pagination PASSED [ 13%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_author_by_id_found PASSED [ 16%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_author_by_id_not_found PASSED [ 20%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_author_valid_data PASSED [ 23%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_delete_author_existing PASSED [ 26%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_author_books_valid PASSED [ 30%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_category_valid PASSED [ 33%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_category_by_id_found PASSED [ 36%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_delete_category_existing PASSED [ 40%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_book_valid PASSED [ 43%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_book_invalid_price_negative PASSED [ 46%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_books_with_search_and_filters PASSED [ 50%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_book_by_id_active PASSED [ 53%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_book_by_id_soft_deleted PASSED [ 56%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_book_valid PASSED [ 60%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_delete_book_soft PASSED [ 63%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_restore_soft_deleted_book PASSED [ 66%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_review_valid PASSED [ 70%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_reviews_for_book PASSED [ 73%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_book_rating PASSED [ 76%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_apply_discount_valid PASSED [ 80%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_apply_discount_rate_limit_exceeded PASSED [ 83%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_stock_valid FAILED [ 86%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_upload_cover_valid_jpeg PASSED [ 90%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_upload_cover_unsupported_type PASSED [ 93%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_cover_no_cover PASSED [ 96%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_tag_valid PASSED [100%]
+
+================================== FAILURES ===================================
+___________________________ test_update_stock_valid ___________________________
+outputs\test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py:242: in test_update_stock_valid
+    assert data["stock"] == 10
+E   assert 15 == 10
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_stock_valid
+======================== 1 failed, 29 passed in 3.09s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 2 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_health_check_returns_200 PASSED [  3%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_author_valid_data PASSED [  6%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_author_missing_name PASSED [ 10%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_authors_default_pagination PASSED [ 13%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_author_by_id_found PASSED [ 16%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_author_by_id_not_found PASSED [ 20%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_author_valid_data PASSED [ 23%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_delete_author_existing PASSED [ 26%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_author_books_valid PASSED [ 30%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_category_valid PASSED [ 33%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_category_by_id_found PASSED [ 36%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_delete_category_existing PASSED [ 40%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_book_valid PASSED [ 43%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_book_invalid_price_negative PASSED [ 46%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_books_with_search_and_filters PASSED [ 50%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_book_by_id_active PASSED [ 53%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_book_by_id_soft_deleted PASSED [ 56%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_book_valid PASSED [ 60%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_delete_book_soft PASSED [ 63%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_restore_soft_deleted_book PASSED [ 66%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_review_valid PASSED [ 70%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_reviews_for_book PASSED [ 73%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_book_rating PASSED [ 76%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_apply_discount_valid PASSED [ 80%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_apply_discount_rate_limit_exceeded PASSED [ 83%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_stock_valid FAILED [ 86%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_upload_cover_valid_jpeg PASSED [ 90%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_upload_cover_unsupported_type PASSED [ 93%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_cover_no_cover PASSED [ 96%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_tag_valid PASSED [100%]
+
+================================== FAILURES ===================================
+___________________________ test_update_stock_valid ___________________________
+outputs\test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py:243: in test_update_stock_valid
+    assert data["stock"] == 10
+E   assert 15 == 10
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_stock_valid
+======================== 1 failed, 29 passed in 1.49s =========================
+
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 3 | pytest returncode=1
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_health_check_returns_200 PASSED [  3%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_author_valid_data PASSED [  6%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_author_missing_name PASSED [ 10%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_authors_default_pagination PASSED [ 13%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_author_by_id_found PASSED [ 16%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_author_by_id_not_found PASSED [ 20%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_author_valid_data PASSED [ 23%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_delete_author_existing PASSED [ 26%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_author_books_valid PASSED [ 30%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_category_valid PASSED [ 33%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_category_by_id_found PASSED [ 36%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_delete_category_existing PASSED [ 40%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_book_valid PASSED [ 43%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_book_invalid_price_negative PASSED [ 46%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_books_with_search_and_filters PASSED [ 50%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_book_by_id_active PASSED [ 53%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_book_by_id_soft_deleted PASSED [ 56%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_book_valid PASSED [ 60%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_delete_book_soft PASSED [ 63%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_restore_soft_deleted_book PASSED [ 66%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_review_valid PASSED [ 70%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_list_reviews_for_book PASSED [ 73%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_book_rating PASSED [ 76%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_apply_discount_valid PASSED [ 80%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_apply_discount_rate_limit_exceeded PASSED [ 83%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_stock_valid FAILED [ 86%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_upload_cover_valid_jpeg PASSED [ 90%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_upload_cover_unsupported_type PASSED [ 93%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_get_cover_no_cover PASSED [ 96%]
+outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_create_tag_valid PASSED [100%]
+
+================================== FAILURES ===================================
+___________________________ test_update_stock_valid ___________________________
+outputs\test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py:246: in test_update_stock_valid
+    assert data["stock"] == 10
+E   assert 15 == 10
+=========================== short test summary info ===========================
+FAILED outputs/test_generated_deepseek-v4-flash__bookstore__L0__run3__t0_4.py::test_update_stock_valid
+======================== 1 failed, 29 passed in 1.74s =========================
+
+

@@ -1,0 +1,498 @@
+import uuid
+import time
+import pytest
+import requests
+from typing import Optional
+
+BASE_URL = "http://localhost:8000"
+API_KEY = "test-api-key"
+AUTH = {"X-API-Key": API_KEY}
+TIMEOUT = 30
+
+
+def unique(prefix: str) -> str:
+    return f"{prefix}_{uuid.uuid4().hex[:8]}"
+
+
+def create_author(name: Optional[str] = None, bio: Optional[str] = None, born_year: Optional[int] = None):
+    if name is None:
+        name = unique("author")
+    payload = {"name": name}
+    if bio is not None:
+        payload["bio"] = bio
+    if born_year is not None:
+        payload["born_year"] = born_year
+    r = requests.post(f"{BASE_URL}/authors", json=payload, timeout=TIMEOUT)
+    assert r.status_code in (200, 201), f"Helper failed {r.status_code}: {r.text[:200]}"
+    return r.json()
+
+
+def create_category(name: Optional[str] = None, description: Optional[str] = None):
+    if name is None:
+        name = unique("category")
+    payload = {"name": name}
+    if description is not None:
+        payload["description"] = description
+    r = requests.post(f"{BASE_URL}/categories", json=payload, timeout=TIMEOUT)
+    assert r.status_code in (200, 201), f"Helper failed {r.status_code}: {r.text[:200]}"
+    return r.json()
+
+
+def create_book(author_id: int, category_id: int, title: Optional[str] = None,
+                isbn: Optional[str] = None, price: float = 29.99,
+                published_year: int = 2020, stock: int = 10):
+    if title is None:
+        title = unique("book")
+    if isbn is None:
+        isbn = unique("isbn")[:13]
+    payload = {
+        "title": title,
+        "isbn": isbn,
+        "price": price,
+        "published_year": published_year,
+        "stock": stock,
+        "author_id": author_id,
+        "category_id": category_id,
+    }
+    r = requests.post(f"{BASE_URL}/books", json=payload, timeout=TIMEOUT)
+    assert r.status_code in (200, 201), f"Helper failed {r.status_code}: {r.text[:200]}"
+    return r.json()
+
+
+def create_tag(name: Optional[str] = None):
+    if name is None:
+        name = unique("tag")
+    r = requests.post(f"{BASE_URL}/tags", json={"name": name}, timeout=TIMEOUT)
+    assert r.status_code in (200, 201), f"Helper failed {r.status_code}: {r.text[:200]}"
+    return r.json()
+
+
+def create_order(customer_name: str, customer_email: str, items: list):
+    payload = {
+        "customer_name": customer_name,
+        "customer_email": customer_email,
+        "items": items,
+    }
+    r = requests.post(f"{BASE_URL}/orders", json=payload, timeout=TIMEOUT)
+    assert r.status_code in (200, 201), f"Helper failed {r.status_code}: {r.text[:200]}"
+    return r.json()
+
+
+class TestHealth:
+    def test_health_check_returns_ok(self):
+        r = requests.get(f"{BASE_URL}/health", timeout=TIMEOUT)
+        assert r.status_code == 200
+        data = r.json()
+        assert "status" in data
+        assert data["status"] == "ok"
+
+
+class TestAuthorsCreate:
+    def test_create_author_with_all_fields(self):
+        name = unique("author")
+        bio = "Test biography"
+        born_year = 1980
+        r = requests.post(f"{BASE_URL}/authors", json={
+            "name": name,
+            "bio": bio,
+            "born_year": born_year,
+        }, timeout=TIMEOUT)
+        assert r.status_code == 201
+        data = r.json()
+        assert "id" in data
+        assert data["name"] == name
+        assert data["bio"] == bio
+        assert data["born_year"] == born_year
+        assert "created_at" in data
+        assert "updated_at" in data
+
+    def test_create_author_missing_name(self):
+        r = requests.post(f"{BASE_URL}/authors", json={
+            "bio": "Test bio",
+        }, timeout=TIMEOUT)
+        assert r.status_code == 422
+        data = r.json()
+        assert "detail" in data
+
+
+class TestAuthorsGet:
+    def test_get_author_returns_etag(self):
+        author = create_author()
+        r = requests.get(f"{BASE_URL}/authors/{author['id']}", timeout=TIMEOUT)
+        assert r.status_code == 200
+        assert "ETag" in r.headers
+        data = r.json()
+        assert data["id"] == author["id"]
+
+    def test_get_author_with_etag_not_modified(self):
+        author = create_author()
+        r1 = requests.get(f"{BASE_URL}/authors/{author['id']}", timeout=TIMEOUT)
+        assert r1.status_code == 200
+        etag = r1.headers.get("ETag")
+        assert etag is not None
+
+        r2 = requests.get(f"{BASE_URL}/authors/{author['id']}", 
+                         headers={"If-None-Match": etag}, timeout=TIMEOUT)
+        assert r2.status_code == 304
+
+    def test_get_nonexistent_author(self):
+        r = requests.get(f"{BASE_URL}/authors/999999", timeout=TIMEOUT)
+        assert r.status_code == 404
+        data = r.json()
+        assert "detail" in data
+
+
+class TestAuthorsUpdate:
+    def test_update_author_name(self):
+        author = create_author()
+        new_name = unique("updated_author")
+        r = requests.put(f"{BASE_URL}/authors/{author['id']}", json={
+            "name": new_name,
+        }, timeout=TIMEOUT)
+        assert r.status_code == 200
+        data = r.json()
+        assert data["name"] == new_name
+        assert data["id"] == author["id"]
+
+    def test_update_author_with_stale_etag(self):
+        author = create_author()
+        r1 = requests.get(f"{BASE_URL}/authors/{author['id']}", timeout=TIMEOUT)
+        old_etag = r1.headers.get("ETag")
+
+        requests.put(f"{BASE_URL}/authors/{author['id']}", json={
+            "name": unique("changed_author"),
+        }, timeout=TIMEOUT)
+
+        r2 = requests.put(f"{BASE_URL}/authors/{author['id']}", json={
+            "name": unique("stale_update"),
+        }, headers={"If-Match": old_etag}, timeout=TIMEOUT)
+        assert r2.status_code == 412
+        data = r2.json()
+        assert "detail" in data
+
+
+class TestAuthorsDelete:
+    def test_delete_author_without_books(self):
+        author = create_author()
+        r = requests.delete(f"{BASE_URL}/authors/{author['id']}", timeout=TIMEOUT)
+        assert r.status_code == 204
+
+        r2 = requests.get(f"{BASE_URL}/authors/{author['id']}", timeout=TIMEOUT)
+        assert r2.status_code == 404
+
+    def test_delete_author_with_books(self):
+        author = create_author()
+        category = create_category()
+        create_book(author["id"], category["id"])
+
+        r = requests.delete(f"{BASE_URL}/authors/{author['id']}", timeout=TIMEOUT)
+        assert r.status_code == 409
+        data = r.json()
+        assert "detail" in data
+
+
+class TestCategoriesCreate:
+    def test_create_category_unique_name(self):
+        name = unique("category")
+        r = requests.post(f"{BASE_URL}/categories", json={
+            "name": name,
+        }, timeout=TIMEOUT)
+        assert r.status_code == 201
+        data = r.json()
+        assert "id" in data
+        assert data["name"] == name
+
+    def test_create_category_duplicate_name(self):
+        name = unique("category")
+        create_category(name=name)
+        r = requests.post(f"{BASE_URL}/categories", json={
+            "name": name,
+        }, timeout=TIMEOUT)
+        assert r.status_code == 409
+        data = r.json()
+        assert "detail" in data
+
+
+class TestBooksCreate:
+    def test_create_book_with_valid_isbn(self):
+        author = create_author()
+        category = create_category()
+        isbn = unique("isbn")[:13]
+        title = unique("book")
+        r = requests.post(f"{BASE_URL}/books", json={
+            "title": title,
+            "isbn": isbn,
+            "price": 29.99,
+            "published_year": 2020,
+            "stock": 10,
+            "author_id": author["id"],
+            "category_id": category["id"],
+        }, timeout=TIMEOUT)
+        assert r.status_code == 201
+        data = r.json()
+        assert "id" in data
+        assert data["isbn"] == isbn
+        assert data["title"] == title
+
+    def test_create_book_duplicate_isbn(self):
+        author = create_author()
+        category = create_category()
+        isbn = unique("isbn")[:13]
+        create_book(author["id"], category["id"], isbn=isbn)
+
+        r = requests.post(f"{BASE_URL}/books", json={
+            "title": unique("book"),
+            "isbn": isbn,
+            "price": 29.99,
+            "published_year": 2020,
+            "stock": 10,
+            "author_id": author["id"],
+            "category_id": category["id"],
+        }, timeout=TIMEOUT)
+        assert r.status_code == 409
+        data = r.json()
+        assert "detail" in data
+
+    def test_create_book_negative_price(self):
+        author = create_author()
+        category = create_category()
+        r = requests.post(f"{BASE_URL}/books", json={
+            "title": unique("book"),
+            "isbn": unique("isbn")[:13],
+            "price": -5.0,
+            "published_year": 2020,
+            "stock": 10,
+            "author_id": author["id"],
+            "category_id": category["id"],
+        }, timeout=TIMEOUT)
+        assert r.status_code == 422
+        data = r.json()
+        assert "detail" in data
+
+
+class TestBooksGet:
+    def test_get_book_detail(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"])
+
+        r = requests.get(f"{BASE_URL}/books/{book['id']}", timeout=TIMEOUT)
+        assert r.status_code == 200
+        data = r.json()
+        assert data["id"] == book["id"]
+        assert "author" in data
+        assert "category" in data
+        assert data["author"]["id"] == author["id"]
+        assert data["category"]["id"] == category["id"]
+
+    def test_get_soft_deleted_book(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"])
+
+        requests.delete(f"{BASE_URL}/books/{book['id']}", timeout=TIMEOUT)
+
+        r = requests.get(f"{BASE_URL}/books/{book['id']}", timeout=TIMEOUT)
+        assert r.status_code == 410
+        data = r.json()
+        assert "detail" in data
+
+
+class TestBooksDelete:
+    def test_soft_delete_book(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"])
+
+        r = requests.delete(f"{BASE_URL}/books/{book['id']}", timeout=TIMEOUT)
+        assert r.status_code == 204
+
+        r2 = requests.get(f"{BASE_URL}/books/{book['id']}", timeout=TIMEOUT)
+        assert r2.status_code == 410
+
+
+class TestBooksRestore:
+    def test_restore_soft_deleted_book(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"])
+
+        requests.delete(f"{BASE_URL}/books/{book['id']}", timeout=TIMEOUT)
+
+        r = requests.post(f"{BASE_URL}/books/{book['id']}/restore", timeout=TIMEOUT)
+        assert r.status_code == 200
+        data = r.json()
+        assert data["id"] == book["id"]
+
+        r2 = requests.get(f"{BASE_URL}/books/{book['id']}", timeout=TIMEOUT)
+        assert r2.status_code == 200
+
+    def test_restore_non_deleted_book(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"])
+
+        r = requests.post(f"{BASE_URL}/books/{book['id']}/restore", timeout=TIMEOUT)
+        assert r.status_code == 400
+        data = r.json()
+        assert "detail" in data
+
+
+class TestBooksDiscount:
+    def test_apply_discount_to_old_book(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"], 
+                          price=100.0, published_year=2020)
+
+        r = requests.post(f"{BASE_URL}/books/{book['id']}/discount", json={
+            "discount_percent": 25,
+        }, timeout=TIMEOUT)
+        assert r.status_code == 200
+        data = r.json()
+        assert data["book_id"] == book["id"]
+        assert data["original_price"] == 100.0
+        assert data["discount_percent"] == 25
+        assert data["discounted_price"] == 75.0
+
+    def test_apply_discount_to_new_book(self):
+        author = create_author()
+        category = create_category()
+        current_year = 2026
+        book = create_book(author["id"], category["id"], 
+                          price=50.0, published_year=current_year)
+
+        r = requests.post(f"{BASE_URL}/books/{book['id']}/discount", json={
+            "discount_percent": 10,
+        }, timeout=TIMEOUT)
+        assert r.status_code == 400
+        data = r.json()
+        assert "detail" in data
+
+
+class TestBooksStock:
+    def test_increase_stock(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"], stock=5)
+
+        r = requests.patch(f"{BASE_URL}/books/{book['id']}/stock",
+                          params={"quantity": 10}, timeout=TIMEOUT)
+        assert r.status_code == 200
+        data = r.json()
+        assert data["stock"] == 15
+
+    def test_decrease_stock_below_zero(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"], stock=3)
+
+        r = requests.patch(f"{BASE_URL}/books/{book['id']}/stock",
+                          params={"quantity": -10}, timeout=TIMEOUT)
+        assert r.status_code == 400
+        data = r.json()
+        assert "detail" in data
+
+
+class TestBooksReviews:
+    def test_create_review_valid_rating(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"])
+
+        r = requests.post(f"{BASE_URL}/books/{book['id']}/reviews", json={
+            "rating": 5,
+            "reviewer_name": unique("reviewer"),
+            "comment": "Great book!",
+        }, timeout=TIMEOUT)
+        assert r.status_code == 201
+        data = r.json()
+        assert "id" in data
+        assert data["book_id"] == book["id"]
+        assert data["rating"] == 5
+
+
+class TestBooksRating:
+    def test_get_average_rating(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"])
+
+        requests.post(f"{BASE_URL}/books/{book['id']}/reviews", json={
+            "rating": 5,
+            "reviewer_name": unique("reviewer1"),
+        }, timeout=TIMEOUT)
+        requests.post(f"{BASE_URL}/books/{book['id']}/reviews", json={
+            "rating": 3,
+            "reviewer_name": unique("reviewer2"),
+        }, timeout=TIMEOUT)
+
+        r = requests.get(f"{BASE_URL}/books/{book['id']}/rating", timeout=TIMEOUT)
+        assert r.status_code == 200
+        data = r.json()
+        assert "average_rating" in data
+        assert "review_count" in data
+        assert data["average_rating"] == 4.0
+        assert data["review_count"] == 2
+
+
+class TestTagsCreate:
+    def test_create_tag_unique_name(self):
+        name = unique("tag")
+        r = requests.post(f"{BASE_URL}/tags", json={
+            "name": name,
+        }, timeout=TIMEOUT)
+        assert r.status_code == 201
+        data = r.json()
+        assert "id" in data
+        assert data["name"] == name
+
+    def test_create_tag_duplicate_name(self):
+        name = unique("tag")
+        create_tag(name=name)
+        r = requests.post(f"{BASE_URL}/tags", json={
+            "name": name,
+        }, timeout=TIMEOUT)
+        assert r.status_code == 409
+        data = r.json()
+        assert "detail" in data
+
+
+class TestBooksTagsAdd:
+    def test_add_tags_to_book(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"])
+        tag1 = create_tag()
+        tag2 = create_tag()
+
+        r = requests.post(f"{BASE_URL}/books/{book['id']}/tags", json={
+            "tag_ids": [tag1["id"], tag2["id"]],
+        }, timeout=TIMEOUT)
+        assert r.status_code == 200
+        data = r.json()
+        assert "tags" in data
+        assert len(data["tags"]) == 2
+        tag_ids = [t["id"] for t in data["tags"]]
+        assert tag1["id"] in tag_ids
+        assert tag2["id"] in tag_ids
+
+
+class TestBooksTagsRemove:
+    def test_remove_tags_from_book(self):
+        author = create_author()
+        category = create_category()
+        book = create_book(author["id"], category["id"])
+        tag = create_tag()
+
+        requests.post(f"{BASE_URL}/books/{book['id']}/tags", json={
+            "tag_ids": [tag["id"]],
+        }, timeout=TIMEOUT)
+
+        r = requests.delete(f"{BASE_URL}/books/{book['id']}/tags", json={
+            "tag_ids": [tag["id"]],
+        }, timeout=TIMEOUT)
+        assert r.status_code == 200
+        data = r.json()
+        assert "tags" in data
+        assert len(data["tags"]) == 0

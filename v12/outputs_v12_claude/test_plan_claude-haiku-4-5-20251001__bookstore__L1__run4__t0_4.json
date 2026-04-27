@@ -1,0 +1,262 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify health check endpoint returns 200 OK"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_with_all_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create author with name, bio, and born_year"
+        },
+        {
+          "name": "create_author_minimal_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create author with only required name field"
+        },
+        {
+          "name": "create_author_missing_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to create author without name returns validation error"
+        },
+        {
+          "name": "create_author_name_too_long",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Author name exceeding 100 characters returns validation error"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_default_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List authors with default skip and limit parameters"
+        },
+        {
+          "name": "list_authors_custom_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List authors with custom skip and limit values"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_detail_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve author detail and verify ETag header is present"
+        },
+        {
+          "name": "get_author_with_etag_match",
+          "type": "happy_path",
+          "expected_status": 304,
+          "description": "Retrieve author with If-None-Match header matching ETag returns 304"
+        },
+        {
+          "name": "get_nonexistent_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Attempt to retrieve non-existent author returns 404"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update author with valid data"
+        },
+        {
+          "name": "update_author_etag_mismatch",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Update author with If-Match header containing wrong ETag returns 412"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_author_books_with_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve paginated list of books by specific author"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create category with name and optional description"
+        },
+        {
+          "name": "create_category_duplicate_name",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create category with duplicate name returns 409 Conflict"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_categories_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve list of all categories"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create book with all required fields and valid ISBN"
+        },
+        {
+          "name": "create_book_invalid_isbn_length",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create book with ISBN outside 10-13 character range returns 422"
+        },
+        {
+          "name": "create_book_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Create book with duplicate ISBN returns 409 Conflict"
+        },
+        {
+          "name": "create_book_nonexistent_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Create book with non-existent author_id returns 404"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_default_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books with default pagination parameters"
+        },
+        {
+          "name": "list_books_with_search_filter",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books with search parameter filtering by title or ISBN"
+        },
+        {
+          "name": "list_books_with_price_range",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books filtered by min_price and max_price"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_detail_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve book detail with author and category information"
+        },
+        {
+          "name": "get_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to retrieve soft-deleted book returns 410 Gone"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_positive_quantity",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Increase book stock by positive quantity delta"
+        },
+        {
+          "name": "update_stock_negative_quantity",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Decrease book stock by negative quantity delta"
+        },
+        {
+          "name": "update_stock_insufficient_inventory",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to reduce stock below zero returns 400 Bad Request"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_old_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply valid discount to book published more than 1 year ago"
+        },
+        {
+          "name": "apply_discount_to_new_book",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to apply discount to book published within 1 year returns 400"
+        }
+      ]
+    }
+  ]
+}

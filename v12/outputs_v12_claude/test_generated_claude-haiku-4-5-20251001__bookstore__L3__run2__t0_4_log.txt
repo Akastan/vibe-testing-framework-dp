@@ -1,0 +1,52 @@
+# Log pro: test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py
+# Čas spuštění: 2026-04-24T15:51:48.778507
+
+
+════════════════════════════════════════════════════════════
+══ ITERACE 1 | pytest returncode=0
+════════════════════════════════════════════════════════════
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0 -- C:\Projects\vibe-testing-framework\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Projects\vibe-testing-framework
+plugins: anyio-4.12.1, timeout-2.4.0
+timeout: 30.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 30 items
+
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestHealth::test_health_check_success PASSED [  3%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestAuthorsPost::test_create_author_with_all_fields PASSED [  6%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestAuthorsPost::test_create_author_missing_name PASSED [ 10%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestAuthorsGet::test_get_author_with_etag PASSED [ 13%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestAuthorsGet::test_get_author_not_found PASSED [ 16%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestAuthorsGet::test_get_author_with_if_none_match PASSED [ 20%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestAuthorsPut::test_update_author_success PASSED [ 23%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestAuthorsPut::test_update_author_etag_mismatch PASSED [ 26%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestAuthorsDelete::test_delete_author_with_books PASSED [ 30%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestCategoriesPost::test_create_category_success PASSED [ 33%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestCategoriesPost::test_create_duplicate_category PASSED [ 36%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksPost::test_create_book_with_valid_isbn PASSED [ 40%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksPost::test_create_book_invalid_isbn_length PASSED [ 43%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksPost::test_create_book_duplicate_isbn PASSED [ 46%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksGet::test_list_books_with_pagination PASSED [ 50%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksGet::test_list_books_with_search_filter PASSED [ 53%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksGet::test_list_books_with_price_range PASSED [ 56%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksGetDetail::test_get_book_detail_success PASSED [ 60%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksGetDetail::test_get_soft_deleted_book PASSED [ 63%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksDelete::test_soft_delete_book_success PASSED [ 66%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksRestore::test_restore_soft_deleted_book PASSED [ 70%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksRestore::test_restore_non_deleted_book PASSED [ 73%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksDiscount::test_apply_discount_to_old_book PASSED [ 76%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksDiscount::test_apply_discount_to_new_book PASSED [ 80%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksDiscount::test_apply_discount_invalid_percentage PASSED [ 83%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksStock::test_increase_stock_success PASSED [ 86%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksStock::test_decrease_stock_insufficient PASSED [ 90%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksCover::test_upload_cover_valid_jpeg PASSED [ 93%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksCover::test_upload_cover_invalid_type PASSED [ 96%]
+outputs/test_generated_claude-haiku-4-5-20251001__bookstore__L3__run2__t0_4.py::TestBooksCover::test_upload_cover_too_large PASSED [100%]
+
+============================= 30 passed in 1.96s ==============================
+
+

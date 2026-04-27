@@ -1,0 +1,268 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_ok",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Health check endpoint returns 200 with ok status"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_with_all_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create author with name, bio, and born_year"
+        },
+        {
+          "name": "create_author_with_only_name",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create author with only required name field"
+        },
+        {
+          "name": "create_author_with_invalid_born_year",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create author with born_year outside valid range (0-2026)"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_with_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List authors with skip and limit parameters"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_returns_etag",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Get author detail returns ETag header"
+        },
+        {
+          "name": "get_author_with_if_none_match_returns_304",
+          "type": "edge_case",
+          "expected_status": 304,
+          "description": "Get author with matching If-None-Match header returns 304 Not Modified"
+        },
+        {
+          "name": "get_nonexistent_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Get author with invalid ID returns 404"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_if_match_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update author with correct If-Match ETag succeeds"
+        },
+        {
+          "name": "update_author_with_mismatched_etag",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Update author with incorrect If-Match ETag returns 412 Precondition Failed"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_with_no_books",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Delete author without associated books succeeds"
+        },
+        {
+          "name": "delete_author_with_books_fails",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Delete author with associated books returns 409 Conflict"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create category with unique name succeeds"
+        },
+        {
+          "name": "create_duplicate_category",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Create category with duplicate name returns 409 Conflict"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_with_valid_data",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create book with all required fields and valid ISBN (10-13 chars)"
+        },
+        {
+          "name": "create_book_with_invalid_isbn_length",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create book with ISBN outside 10-13 character range returns 422"
+        },
+        {
+          "name": "create_book_with_duplicate_isbn",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Create book with duplicate ISBN returns 409 Conflict"
+        },
+        {
+          "name": "create_book_with_nonexistent_author",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Create book with invalid author_id returns 404"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_with_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books with page and page_size parameters"
+        },
+        {
+          "name": "list_books_with_search_filter",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books with search filter on title and ISBN"
+        },
+        {
+          "name": "list_books_with_price_range",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books with min_price and max_price filters"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_detail_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Get book detail returns full book information with author and category"
+        },
+        {
+          "name": "get_soft_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Get soft-deleted book returns 410 Gone"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Delete book performs soft delete and sets is_deleted flag"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore soft-deleted book returns it to active state"
+        },
+        {
+          "name": "restore_non_deleted_book",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Restore non-deleted book returns 400 Bad Request"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_positive_delta",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update stock with positive quantity increases stock"
+        },
+        {
+          "name": "update_stock_negative_delta",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update stock with negative quantity decreases stock"
+        },
+        {
+          "name": "update_stock_insufficient",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Update stock with quantity that would result in negative stock returns 400"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_old_book",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply discount to book published more than 1 year ago succeeds"
+        }
+      ]
+    }
+  ]
+}

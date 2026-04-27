@@ -1,0 +1,274 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify health check endpoint returns 200"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_with_all_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create author with name, bio, and born_year"
+        },
+        {
+          "name": "create_author_missing_required_name",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to create author without required name field"
+        },
+        {
+          "name": "create_author_name_exceeds_max_length",
+          "type": "edge_case",
+          "expected_status": 422,
+          "description": "Create author with name exceeding 100 character limit"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_default_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List authors with default skip=0 and limit=100"
+        },
+        {
+          "name": "list_authors_custom_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List authors with custom skip and limit parameters"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve author details by valid ID and verify ETag header present"
+        },
+        {
+          "name": "get_author_not_found",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Attempt to retrieve non-existent author"
+        },
+        {
+          "name": "get_author_with_etag_not_modified",
+          "type": "edge_case",
+          "expected_status": 304,
+          "description": "Request author with If-None-Match header matching ETag"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_partial_fields",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update author with only some fields"
+        },
+        {
+          "name": "update_author_etag_mismatch",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Update author with mismatched If-Match ETag header"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Delete author and verify no content returned"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_with_all_required_fields",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create book with all required fields: title, isbn, price, published_year, author_id, category_id"
+        },
+        {
+          "name": "create_book_missing_required_field",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Create book without required isbn field"
+        },
+        {
+          "name": "create_book_invalid_isbn_length",
+          "type": "edge_case",
+          "expected_status": 422,
+          "description": "Create book with ISBN shorter than 10 characters"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_books_default_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books with default page=1 and page_size=10"
+        },
+        {
+          "name": "list_books_with_search_filter",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books filtered by search query parameter"
+        },
+        {
+          "name": "list_books_with_price_range",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List books filtered by min_price and max_price"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve book details with full author and category information"
+        },
+        {
+          "name": "get_deleted_book_returns_gone",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to retrieve soft-deleted book returns 410 Gone"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_book_price_only",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update only book price field"
+        },
+        {
+          "name": "update_deleted_book_returns_gone",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to update soft-deleted book returns 410 Gone"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Soft delete book and verify subsequent GET returns 410"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_deleted_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore soft-deleted book and verify it becomes accessible"
+        },
+        {
+          "name": "restore_non_deleted_book_error",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to restore book that is not deleted"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_with_rating_and_comment",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create review with rating, comment, and reviewer_name"
+        },
+        {
+          "name": "create_review_on_deleted_book",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to create review on soft-deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_book_reviews_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List all reviews for a book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_valid_percentage",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply discount with valid percentage between 0 and 50"
+        },
+        {
+          "name": "apply_discount_exceeds_rate_limit",
+          "type": "error",
+          "expected_status": 429,
+          "description": "Exceed rate limit of 5 requests per 10 seconds"
+        }
+      ]
+    }
+  ]
+}

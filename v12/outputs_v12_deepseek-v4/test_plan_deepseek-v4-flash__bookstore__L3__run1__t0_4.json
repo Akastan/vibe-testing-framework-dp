@@ -1,0 +1,286 @@
+{
+  "test_plan": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "health_check_returns_ok",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Verify health check endpoint returns 200 OK"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_author_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a valid author with all required fields"
+        },
+        {
+          "name": "create_author_missing_name_returns_422",
+          "type": "error",
+          "expected_status": 422,
+          "description": "Attempt to create author without required name field"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "list_authors_with_pagination",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "List authors with skip and limit parameters"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_author_by_id_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve an existing author by ID"
+        },
+        {
+          "name": "get_author_not_found_returns_404",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Attempt to get a non-existent author"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "PUT",
+      "test_cases": [
+        {
+          "name": "update_author_with_etag_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Update author with valid If-Match header"
+        },
+        {
+          "name": "update_author_etag_mismatch_returns_412",
+          "type": "error",
+          "expected_status": 412,
+          "description": "Update author with stale If-Match header"
+        }
+      ]
+    },
+    {
+      "endpoint": "/authors/{author_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_author_without_books_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Delete an author that has no associated books"
+        },
+        {
+          "name": "delete_author_with_books_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to delete an author that still has books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_category_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a valid category with name"
+        },
+        {
+          "name": "create_duplicate_category_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create a category with a duplicate name"
+        }
+      ]
+    },
+    {
+      "endpoint": "/categories/{category_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "delete_category_with_books_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to delete a category that has associated books"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_book_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a valid book with all required fields"
+        },
+        {
+          "name": "create_book_duplicate_isbn_returns_409",
+          "type": "error",
+          "expected_status": 409,
+          "description": "Attempt to create a book with an existing ISBN"
+        },
+        {
+          "name": "create_book_invalid_author_returns_404",
+          "type": "error",
+          "expected_status": 404,
+          "description": "Attempt to create a book with a non-existent author_id"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "GET",
+      "test_cases": [
+        {
+          "name": "get_book_success_with_etag",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Retrieve a book and verify ETag header is present"
+        },
+        {
+          "name": "get_soft_deleted_book_returns_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to get a book that has been soft-deleted"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}",
+      "method": "DELETE",
+      "test_cases": [
+        {
+          "name": "soft_delete_book_success",
+          "type": "happy_path",
+          "expected_status": 204,
+          "description": "Soft delete an existing book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/restore",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "restore_soft_deleted_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Restore a previously soft-deleted book"
+        },
+        {
+          "name": "restore_non_deleted_book_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to restore a book that is not deleted"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/reviews",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_review_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Add a valid review to an existing book"
+        },
+        {
+          "name": "create_review_on_deleted_book_returns_410",
+          "type": "error",
+          "expected_status": 410,
+          "description": "Attempt to add a review to a soft-deleted book"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/discount",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "apply_discount_to_old_book_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Apply a valid discount to a book published more than 1 year ago"
+        },
+        {
+          "name": "apply_discount_to_new_book_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to apply discount to a book published less than 1 year ago"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/stock",
+      "method": "PATCH",
+      "test_cases": [
+        {
+          "name": "update_stock_positive_delta_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Increase stock by a positive quantity"
+        },
+        {
+          "name": "update_stock_negative_delta_insufficient_returns_400",
+          "type": "error",
+          "expected_status": 400,
+          "description": "Attempt to decrease stock below zero"
+        }
+      ]
+    },
+    {
+      "endpoint": "/books/{book_id}/cover",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "upload_cover_valid_image_success",
+          "type": "happy_path",
+          "expected_status": 200,
+          "description": "Upload a valid JPEG image as book cover"
+        },
+        {
+          "name": "upload_cover_unsupported_type_returns_415",
+          "type": "error",
+          "expected_status": 415,
+          "description": "Upload a file with unsupported MIME type"
+        }
+      ]
+    },
+    {
+      "endpoint": "/tags",
+      "method": "POST",
+      "test_cases": [
+        {
+          "name": "create_tag_success",
+          "type": "happy_path",
+          "expected_status": 201,
+          "description": "Create a valid tag with name"
+        }
+      ]
+    }
+  ]
+}
