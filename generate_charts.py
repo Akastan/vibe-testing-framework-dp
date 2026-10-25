@@ -47,7 +47,7 @@ FIGSIZE_TALL = (8, 6)
 FIGSIZE_SQUARE = (6, 6)
 
 FILES = {
-    "deepseek-chat": "v12/outputs_v12_deepseek-chat/results/experiment_diplomka_v12_20260415_165515.json",
+    #"deepseek-chat": "v12/outputs_v12_deepseek-chat/results/experiment_diplomka_v12_20260415_165515.json",
     #"gemini-3.1-flash-lite-preview": "v12/outputs_v12_gemini/results/experiment_diplomka_v12_20260416_073106.json",
     "deepseek-v4-flash": "v12/outputs_v12_deepseek-V4/results/experiment_diplomka_v12_20260426_220445.json",
     "mistral-large-2512": "v12/outputs_v12_mistral/results/experiment_diplomka_v12_20260415_220449.json",
@@ -57,14 +57,14 @@ FILES = {
 LEVELS = ["L0", "L1", "L2", "L3", "L4"]
 LLMS = list(FILES.keys())
 LLM_SHORT = {
-    "deepseek-chat": "DeepSeek-chat",
+    #"deepseek-chat": "DeepSeek-chat",
     #"gemini-3.1-flash-lite-preview": "Gemini",
-    "deepseek-v4-flash": "DeepSeek-V4",
-    "mistral-large-2512": "Mistral",
-    "claude-haiku-4-5-20251001": "Claude Haiku"
+    "deepseek-v4-flash": "DeepSeek-V4-Flash",
+    "mistral-large-2512": "Mistral Large 3",
+    "claude-haiku-4-5-20251001": "Claude Haiku 4.5"
 }
 LLM_COLORS = {
-    "deepseek-chat": COLOR_DEEPSEEK,
+    #"deepseek-chat": COLOR_DEEPSEEK,
     #"gemini-3.1-flash-lite-preview": COLOR_GEMINI,
     "mistral-large-2512": COLOR_MISTRAL,
     "deepseek-v4-flash": COLOR_DEEPSEEK_V4,
@@ -73,13 +73,13 @@ LLM_COLORS = {
 
 # Code coverage z analytických reportů
 COVERAGE = {
-    "deepseek-chat": {
-        "L0": {"total": 68.15, "crud": 39.28, "main": 70.61},
-        "L1": {"total": 74.45, "crud": 56.43, "main": 69.66},
-        "L2": {"total": 73.70, "crud": 54.83, "main": 69.19},
-        "L3": {"total": 73.12, "crud": 53.75, "main": 68.64},
-        "L4": {"total": 73.50, "crud": 53.18, "main": 70.68},
-    },
+    #"deepseek-chat": {
+    #    "L0": {"total": 68.15, "crud": 39.28, "main": 70.61},
+    #    "L1": {"total": 74.45, "crud": 56.43, "main": 69.66},
+    #    "L2": {"total": 73.70, "crud": 54.83, "main": 69.19},
+    #    "L3": {"total": 73.12, "crud": 53.75, "main": 68.64},
+    #    "L4": {"total": 73.50, "crud": 53.18, "main": 70.68},
+    #},
     #"gemini-3.1-flash-lite-preview": {
     #    "L0": {"total": 62.32, "crud": 28.32, "main": 65.04},
     #    "L1": {"total": 68.46, "crud": 40.93, "main": 69.53},
@@ -217,14 +217,13 @@ def save_fig(fig, filename, out_dir):
 
 
 def decorate_chart(ax, title="", xlabel="", ylabel="", legend=True):
-    if title:
-        ax.set_title(title, fontsize=11, pad=10)
+    # title se záměrně ignoruje — popisky grafů řeší LaTeX (Tab. X Název grafu...)
     if xlabel:
-        ax.set_xlabel(xlabel, fontsize=10)
+        ax.set_xlabel(xlabel, fontsize=12)
     if ylabel:
-        ax.set_ylabel(ylabel, fontsize=10)
+        ax.set_ylabel(ylabel, fontsize=12)
     if legend and ax.get_legend_handles_labels()[0]:
-        ax.legend(fontsize=8, frameon=True, framealpha=0.9)
+        ax.legend(fontsize=11, frameon=True, framealpha=0.9)
     ax.grid(True, linestyle="--", linewidth=0.4, alpha=0.5)
 
 
@@ -233,75 +232,128 @@ def decorate_chart(ax, title="", xlabel="", ylabel="", legend=True):
 # ═══════════════════════════════════════════════════════════════════════════
 
 def rq1_01_line_validity(runs):
-    """Validity vs kontext — jedna křivka (avg 3 LLM) + error band."""
+    """Validity vs kontext — jedna křivka (avg 3 LLM) + stínovaný error band."""
     avg = level_cross_avg(runs, "validity_pct")
     std = level_cross_std(runs, "validity_pct")
+    m = model_level_matrix(runs, "validity_pct")
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     x = np.arange(len(LEVELS))
     ys = [avg[l] for l in LEVELS]
-    stds = [std[l] for l in LEVELS]
-    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Průměr 3 LLM")
-    ax.fill_between(x, [y - s for y, s in zip(ys, stds)], [y + s for y, s in zip(ys, stds)],
-                    alpha=0.18, color=COLOR_AVG, label="± 1σ")
+    yerr = [std[l] / np.sqrt(3) for l in LEVELS]  # SEM
+
+    y_lower = [y - e for y, e in zip(ys, yerr)]
+    y_upper = [y + e for y, e in zip(ys, yerr)]
+
+    # Vykreslení stínovaného pásu kolem průměru
+    ax.fill_between(x, y_lower, y_upper, color=COLOR_AVG, alpha=0.15, label="± SEM", zorder=1)
+
+    # Jednotlivé modely
+    for llm in LLMS:
+        yl = [m[llm][lvl] for lvl in LEVELS]
+        ax.plot(x, yl, marker="o", markersize=4, linewidth=1.5,
+                color=LLM_COLORS[llm], label=LLM_SHORT[llm], zorder=2)
+
+    # Zvýrazněná linka průměru
+    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG,
+            label="Průměr 3 LLM", zorder=3)
+
     for i, v in enumerate(ys):
-        ax.text(i, v + 0.4, f"{v:.1f}", ha="center", fontsize=9)
-    ax.set_xticks(x); ax.set_xticklabels(LEVELS)
-    decorate_chart(ax, "RQ1 — Validity Rate vs. úroveň kontextu",
-                   "Úroveň kontextu", "Validity (%)")
+        # Text ukotven stabilně nad bodem
+        ax.text(i, v + 0.4, f"{v:.1f}", ha="center", fontsize=10, zorder=4)
+
+    ax.set_xticks(x);
+    ax.set_xticklabels(LEVELS)
+    decorate_chart(ax, "", "Úroveň kontextu", "TVR (%)")
     save_fig(fig, "01_line_validity.png", RQ1_DIR)
 
 
 def rq1_02_line_assertion_depth(runs):
     avg = level_cross_avg(runs, "assertion_depth")
     std = level_cross_std(runs, "assertion_depth")
+    m = model_level_matrix(runs, "assertion_depth")
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     x = np.arange(len(LEVELS))
     ys = [avg[l] for l in LEVELS]
-    stds = [std[l] for l in LEVELS]
-    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG)
-    ax.fill_between(x, [y - s for y, s in zip(ys, stds)], [y + s for y, s in zip(ys, stds)],
-                    alpha=0.18, color=COLOR_AVG)
+    yerr = [std[l] / np.sqrt(3) for l in LEVELS]
+
+    y_lower = [y - e for y, e in zip(ys, yerr)]
+    y_upper = [y + e for y, e in zip(ys, yerr)]
+
+    ax.fill_between(x, y_lower, y_upper, color=COLOR_AVG, alpha=0.15, label="± SEM", zorder=1)
+
+    for llm in LLMS:
+        yl = [m[llm][lvl] for lvl in LEVELS]
+        ax.plot(x, yl, marker="o", markersize=4, linewidth=1.5,
+                color=LLM_COLORS[llm], label=LLM_SHORT[llm], zorder=2)
+
+    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Průměr 3 LLM", zorder=3)
+
     for i, v in enumerate(ys):
-        ax.text(i, v + 0.05, f"{v:.2f}", ha="center", fontsize=9)
-    ax.set_xticks(x); ax.set_xticklabels(LEVELS)
-    decorate_chart(ax, "RQ1 — Assertion Depth vs. úroveň kontextu",
-                   "Úroveň kontextu", "Počet asercí na test", legend=False)
+        ax.text(i, v + 0.05, f"{v:.2f}", ha="center", fontsize=10, zorder=4)
+
+    ax.set_xticks(x);
+    ax.set_xticklabels(LEVELS)
+    decorate_chart(ax, "", "Úroveň kontextu", "AD")
     save_fig(fig, "02_line_assertion_depth.png", RQ1_DIR)
 
 
 def rq1_03_line_response_validation(runs):
     avg = level_cross_avg(runs, "response_validation_pct")
     std = level_cross_std(runs, "response_validation_pct")
+    m = model_level_matrix(runs, "response_validation_pct")
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     x = np.arange(len(LEVELS))
     ys = [avg[l] for l in LEVELS]
-    stds = [std[l] for l in LEVELS]
-    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG)
-    ax.fill_between(x, [y - s for y, s in zip(ys, stds)], [y + s for y, s in zip(ys, stds)],
-                    alpha=0.18, color=COLOR_AVG)
+    yerr = [std[l] / np.sqrt(3) for l in LEVELS]
+
+    y_lower = [y - e for y, e in zip(ys, yerr)]
+    y_upper = [y + e for y, e in zip(ys, yerr)]
+
+    ax.fill_between(x, y_lower, y_upper, color=COLOR_AVG, alpha=0.15, label="± SEM", zorder=1)
+
+    for llm in LLMS:
+        yl = [m[llm][lvl] for lvl in LEVELS]
+        ax.plot(x, yl, marker="o", markersize=4, linewidth=1.5,
+                color=LLM_COLORS[llm], label=LLM_SHORT[llm], zorder=2)
+
+    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Průměr 3 LLM", zorder=3)
+
     for i, v in enumerate(ys):
-        ax.text(i, v + 1.2, f"{v:.1f}", ha="center", fontsize=9)
-    ax.set_xticks(x); ax.set_xticklabels(LEVELS)
-    decorate_chart(ax, "RQ1 — Response Validation vs. úroveň kontextu",
-                   "Úroveň kontextu", "Response Validation (%)", legend=False)
+        ax.text(i, v + 1.2, f"{v:.1f}", ha="center", fontsize=10, zorder=4)
+
+    ax.set_xticks(x);
+    ax.set_xticklabels(LEVELS)
+    decorate_chart(ax, "", "Úroveň kontextu", "RV (%)")
     save_fig(fig, "03_line_response_validation.png", RQ1_DIR)
 
 
 def rq1_04_line_diversity(runs):
     avg = level_cross_avg(runs, "diversity_count")
     std = level_cross_std(runs, "diversity_count")
+    m = model_level_matrix(runs, "diversity_count")
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     x = np.arange(len(LEVELS))
     ys = [avg[l] for l in LEVELS]
-    stds = [std[l] for l in LEVELS]
-    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG)
-    ax.fill_between(x, [y - s for y, s in zip(ys, stds)], [y + s for y, s in zip(ys, stds)],
-                    alpha=0.18, color=COLOR_AVG)
+    yerr = [std[l] / np.sqrt(3) for l in LEVELS]
+
+    y_lower = [y - e for y, e in zip(ys, yerr)]
+    y_upper = [y + e for y, e in zip(ys, yerr)]
+
+    ax.fill_between(x, y_lower, y_upper, color=COLOR_AVG, alpha=0.15, label="± SEM", zorder=1)
+
+    for llm in LLMS:
+        yl = [m[llm][lvl] for lvl in LEVELS]
+        ax.plot(x, yl, marker="o", markersize=4, linewidth=1.2,
+                color=LLM_COLORS[llm], label=LLM_SHORT[llm], zorder=2)
+
+    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Průměr 3 LLM", zorder=3)
+
     for i, v in enumerate(ys):
-        ax.text(i, v + 0.1, f"{v:.2f}", ha="center", fontsize=9)
-    ax.set_xticks(x); ax.set_xticklabels(LEVELS)
-    decorate_chart(ax, "RQ1 — Status Code Diversity vs. úroveň kontextu",
-                   "Úroveň kontextu", "Počet unikátních status kódů", legend=False)
+        ax.text(i, v + 0.1, f"{v:.2f}", ha="center", fontsize=9, zorder=4)
+
+    ax.set_xticks(x);
+    ax.set_xticklabels(LEVELS)
+    decorate_chart(ax, "", "Úroveň kontextu", "Počet unikátních status kódů")
     save_fig(fig, "04_line_status_diversity.png", RQ1_DIR)
 
 
@@ -315,7 +367,7 @@ def rq1_05_bar_validity(runs):
         ax.text(b.get_x() + b.get_width()/2, v + 0.4, f"{v:.1f}", ha="center", fontsize=9)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS); ax.set_ylim(0, 105)
     decorate_chart(ax, "RQ1 — Validity Rate (sloupcový graf)",
-                   "Úroveň kontextu", "Validity (%)", legend=False)
+                   "Úroveň kontextu", "Validita (%)", legend=False)
     save_fig(fig, "05_bar_validity.png", RQ1_DIR)
 
 
@@ -343,7 +395,7 @@ def rq1_07_bar_response_validation(runs):
         ax.text(b.get_x() + b.get_width()/2, v + 1, f"{v:.1f}", ha="center", fontsize=9)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS); ax.set_ylim(0, 100)
     decorate_chart(ax, "RQ1 — Response Validation (sloupcový graf)",
-                   "Úroveň kontextu", "Response Validation (%)", legend=False)
+                   "Úroveň kontextu", "Validace odpovědí (%)", legend=False)
     save_fig(fig, "07_bar_response_validation.png", RQ1_DIR)
 
 
@@ -371,7 +423,7 @@ def rq1_09_box_validity(runs):
     for med in bp["medians"]:
         med.set_color("black"); med.set_linewidth(1.5)
     decorate_chart(ax, "RQ1 — Validity (boxplot, n=15 / úroveň)",
-                   "Úroveň kontextu", "Validity (%)", legend=False)
+                   "Úroveň kontextu", "Validita (%)", legend=False)
     save_fig(fig, "09_box_validity.png", RQ1_DIR)
 
 
@@ -384,7 +436,7 @@ def rq1_10_box_assertion_depth(runs):
     for med in bp["medians"]:
         med.set_color("black"); med.set_linewidth(1.5)
     decorate_chart(ax, "RQ1 — Assertion Depth (boxplot, n=15 / úroveň)",
-                   "Úroveň kontextu", "Assertion Depth", legend=False)
+                   "Úroveň kontextu", "Hloubka asercí", legend=False)
     save_fig(fig, "10_box_assertion_depth.png", RQ1_DIR)
 
 
@@ -397,7 +449,7 @@ def rq1_11_box_response_validation(runs):
     for med in bp["medians"]:
         med.set_color("black"); med.set_linewidth(1.5)
     decorate_chart(ax, "RQ1 — Response Validation (boxplot, n=15 / úroveň)",
-                   "Úroveň kontextu", "Response Validation (%)", legend=False)
+                   "Úroveň kontextu", "Validace odpovědí (%)", legend=False)
     save_fig(fig, "11_box_response_validation.png", RQ1_DIR)
 
 
@@ -409,7 +461,7 @@ def rq1_12_violin_validity(runs):
         pc.set_facecolor(col); pc.set_alpha(0.55)
     ax.set_xticks(range(1, len(LEVELS) + 1)); ax.set_xticklabels(LEVELS)
     decorate_chart(ax, "RQ1 — Violin plot Validity napříč úrovněmi",
-                   "Úroveň kontextu", "Validity (%)", legend=False)
+                   "Úroveň kontextu", "Validita (%)", legend=False)
     save_fig(fig, "12_violin_validity.png", RQ1_DIR)
 
 
@@ -421,7 +473,7 @@ def rq1_13_violin_assertion_depth(runs):
         pc.set_facecolor(col); pc.set_alpha(0.55)
     ax.set_xticks(range(1, len(LEVELS) + 1)); ax.set_xticklabels(LEVELS)
     decorate_chart(ax, "RQ1 — Violin plot Assertion Depth napříč úrovněmi",
-                   "Úroveň kontextu", "Assertion Depth", legend=False)
+                   "Úroveň kontextu", "Hloubka asercí", legend=False)
     save_fig(fig, "13_violin_assertion_depth.png", RQ1_DIR)
 
 
@@ -430,7 +482,7 @@ def rq1_14_hist_validity(runs):
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     ax.hist(vals, bins=15, color=COLOR_AVG, edgecolor="black", alpha=0.75)
     decorate_chart(ax, f"RQ1 — Histogram Validity (všech n={len(vals)} runů)",
-                   "Validity (%)", "Počet runů", legend=False)
+                   "Validita (%)", "Počet runů", legend=False)
     save_fig(fig, "14_hist_validity.png", RQ1_DIR)
 
 
@@ -439,7 +491,7 @@ def rq1_15_hist_assertion_depth(runs):
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     ax.hist(vals, bins=15, color=COLOR_AVG, edgecolor="black", alpha=0.75)
     decorate_chart(ax, f"RQ1 — Histogram Assertion Depth (n={len(vals)} runů)",
-                   "Assertion Depth", "Počet runů", legend=False)
+                   "Hloubka asercí", "Počet runů", legend=False)
     save_fig(fig, "15_hist_assertion_depth.png", RQ1_DIR)
 
 
@@ -448,7 +500,7 @@ def rq1_16_hist_response_validation(runs):
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     ax.hist(vals, bins=15, color=COLOR_AVG, edgecolor="black", alpha=0.75)
     decorate_chart(ax, f"RQ1 — Histogram Response Validation (n={len(vals)} runů)",
-                   "Response Validation (%)", "Počet runů", legend=False)
+                   "Validace odpovědí (%)", "Počet runů", legend=False)
     save_fig(fig, "16_hist_response_validation.png", RQ1_DIR)
 
 
@@ -473,14 +525,14 @@ def rq1_18_stacked_bar_test_types(runs):
     d = [level_cross_avg(runs, "edge_pct")[lvl] for lvl in LEVELS]
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     x = np.arange(len(LEVELS))
-    ax.bar(x, h, color="#55A467", label="happy_path")
-    ax.bar(x, e, bottom=h, color="#C44E52", label="error")
-    ax.bar(x, d, bottom=[hi + ei for hi, ei in zip(h, e)], color="#DD8452", label="edge_case")
+    ax.bar(x, h, color="#55A467", label="Happy path")
+    ax.bar(x, e, bottom=h, color="#C44E52", label="Error state")
+    ax.bar(x, d, bottom=[hi + ei for hi, ei in zip(h, e)], color="#DD8452", label="Edge case")
     for i, (hi, ei, di) in enumerate(zip(h, e, d)):
-        ax.text(i, hi/2, f"{hi:.0f}", ha="center", fontsize=8, color="white", weight="bold")
-        ax.text(i, hi + ei/2, f"{ei:.0f}", ha="center", fontsize=8, color="white", weight="bold")
+        ax.text(i, hi/2, f"{hi:.0f}", ha="center", fontsize=10, color="white", weight="bold")
+        ax.text(i, hi + ei/2, f"{ei:.0f}", ha="center", fontsize=10, color="white", weight="bold")
         if di > 3:
-            ax.text(i, hi + ei + di/2, f"{di:.0f}", ha="center", fontsize=8, color="white", weight="bold")
+            ax.text(i, hi + ei + di/2, f"{di:.0f}", ha="center", fontsize=10, color="white", weight="bold")
     ax.set_xticks(x); ax.set_xticklabels(LEVELS); ax.set_ylim(0, 100)
     decorate_chart(ax, "RQ1 — Distribuce typů testů (stacked bar)",
                    "Úroveň kontextu", "Podíl (%)")
@@ -500,7 +552,6 @@ def rq1_19_pie_test_types_per_level(runs):
         colors = ["#55A467", "#C44E52", "#DD8452"]
         ax.pie(sizes, labels=list(vals.keys()), autopct="%1.1f%%",
                colors=colors, wedgeprops=dict(width=0.55, edgecolor="white"))
-        ax.set_title(f"RQ1 — Distribuce typů testů na úrovni {lvl}", fontsize=11)
         save_fig(fig, f"19_pie_test_types_{lvl}.png", RQ1_DIR)
 
 
@@ -528,13 +579,17 @@ def rq1_21_pie_status_codes(runs):
         for code, cnt in r["status_code_dist"].items():
             counter[str(code)] += cnt
     top = counter.most_common(10)
+    top_codes = {c for c, _ in top}
+    others_total = sum(v for c, v in counter.items() if c not in top_codes)
     labels = [c for c, _ in top]
     vals = [v for _, v in top]
-    colors = plt.cm.tab20(np.linspace(0, 1, len(top)))
+    if others_total > 0:
+        labels.append("ostatní")
+        vals.append(others_total)
+    colors = plt.cm.tab20(np.linspace(0, 1, len(labels)))
     fig, ax = plt.subplots(figsize=FIGSIZE_SQUARE)
     ax.pie(vals, labels=labels, autopct="%1.1f%%", colors=colors,
            wedgeprops=dict(width=0.55, edgecolor="white"))
-    ax.set_title("RQ1 — Top 10 HTTP status kódů (koláč)", fontsize=11)
     save_fig(fig, "21_pie_status_codes.png", RQ1_DIR)
 
 
@@ -556,7 +611,6 @@ def rq1_22_status_codes_per_level_heatmap(runs):
                 c = "white" if M[i, j] < M.max() * 0.5 else "black"
                 ax.text(j, i, str(M[i, j]), ha="center", va="center", fontsize=7, color=c)
     fig.colorbar(im, ax=ax, shrink=0.6, label="Počet výskytů")
-    ax.set_title("RQ1 — Status kódy × úroveň (heatmapa)", fontsize=11)
     ax.set_xlabel("Úroveň kontextu"); ax.set_ylabel("Status kód")
     save_fig(fig, "22_heatmap_status_codes_per_level.png", RQ1_DIR)
 
@@ -564,10 +618,10 @@ def rq1_22_status_codes_per_level_heatmap(runs):
 def rq1_23_multi_line_all_quality_metrics(runs):
     """Multi-line — všechny 4 RQ1 metriky normalizované na 0-100 %."""
     metrics = [
-        ("Validity (%)", "validity_pct", 100),
-        ("Assertion Depth", "assertion_depth", 4),
-        ("Response Validation (%)", "response_validation_pct", 100),
-        ("Status Diversity", "diversity_count", 20),
+        ("Validita (%)", "validity_pct", 100),
+        ("Hloubka asercí", "assertion_depth", 4),
+        ("Validace odpovědí (%)", "response_validation_pct", 100),
+        ("Diverzita status kódů", "diversity_count", 20),
     ]
     fig, ax = plt.subplots(figsize=FIGSIZE_WIDE)
     x = np.arange(len(LEVELS))
@@ -590,7 +644,7 @@ def rq1_24_scatter_assertion_vs_validity(runs):
         ax.scatter(xs, ys, color=LEVEL_COLORS[i], label=lvl, s=60, alpha=0.75,
                    edgecolors="white", linewidth=0.8)
     decorate_chart(ax, "RQ1 — Validity × Assertion Depth (bodový graf, 75 runů)",
-                   "Assertion Depth", "Validity (%)")
+                   "Hloubka asercí", "Validita (%)")
     save_fig(fig, "24_scatter_assertion_vs_validity.png", RQ1_DIR)
 
 
@@ -602,17 +656,17 @@ def rq1_25_scatter_response_vs_validity(runs):
         ax.scatter(xs, ys, color=LEVEL_COLORS[i], label=lvl, s=60, alpha=0.75,
                    edgecolors="white", linewidth=0.8)
     decorate_chart(ax, "RQ1 — Validity × Response Validation (bodový graf)",
-                   "Response Validation (%)", "Validity (%)")
+                   "Validace odpovědí (%)", "Validita (%)")
     save_fig(fig, "25_scatter_response_vs_validity.png", RQ1_DIR)
 
 
 def rq1_26_radar_levels(runs):
     """Radar chart — profil každé úrovně na RQ1 metrikách."""
     metrics = [
-        ("Validity", "validity_pct", 100),
-        ("Assert D.", "assertion_depth", 4),
-        ("Resp Val.", "response_validation_pct", 100),
-        ("Diversity", "diversity_count", 20),
+        ("Validita", "validity_pct", 100),
+        ("Hloubka asercí", "assertion_depth", 4),
+        ("Validace odp.", "response_validation_pct", 100),
+        ("Diverzita", "diversity_count", 20),
         ("Happy %", "happy_pct", 100),
         ("Error %", "error_pct", 100),
     ]
@@ -625,7 +679,6 @@ def rq1_26_radar_levels(runs):
         ax.plot(angles, vals, color=LEVEL_COLORS[i], linewidth=2, label=lvl)
         ax.fill(angles, vals, color=LEVEL_COLORS[i], alpha=0.1)
     ax.set_xticks(angles[:-1]); ax.set_xticklabels([m[0] for m in metrics])
-    ax.set_title("RQ1 — Radar profil úrovní kontextu (kvalitativní metriky)", pad=20)
     ax.legend(loc="upper right", bbox_to_anchor=(1.25, 1.1), fontsize=8)
     ax.set_ylim(0, 100)
     save_fig(fig, "26_radar_levels.png", RQ1_DIR)
@@ -633,10 +686,10 @@ def rq1_26_radar_levels(runs):
 
 def rq1_27_parallel_coords(runs):
     metrics = [
-        ("Validity", "validity_pct", 100),
-        ("AssertD", "assertion_depth", 4),
-        ("RespVal", "response_validation_pct", 100),
-        ("Diversity", "diversity_count", 20),
+        ("Validita", "validity_pct", 100),
+        ("Hloubka asercí", "assertion_depth", 4),
+        ("Validace odp.", "response_validation_pct", 100),
+        ("Diverzita", "diversity_count", 20),
         ("Happy%", "happy_pct", 100),
         ("Error%", "error_pct", 100),
     ]
@@ -667,19 +720,20 @@ def rq1_28_bar_stale_tests(runs):
 
 def rq1_29_line_stale_tests(runs):
     avg = level_cross_avg(runs, "stale_count")
-    std = level_cross_std(runs, "stale_count")
+    m = model_level_matrix(runs, "stale_count")
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     x = np.arange(len(LEVELS))
     ys = [avg[l] for l in LEVELS]
-    stds = [std[l] for l in LEVELS]
-    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG)
-    ax.fill_between(x, [y - s for y, s in zip(ys, stds)], [y + s for y, s in zip(ys, stds)],
-                    alpha=0.18, color=COLOR_AVG)
+    for llm in LLMS:
+        yl = [m[llm][lvl] for lvl in LEVELS]
+        ax.plot(x, yl, marker="o", markersize=4, linewidth=1.2,
+                color=LLM_COLORS[llm], label=LLM_SHORT[llm], alpha=0.6, zorder=2)
+    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG,
+            label="Průměr 3 LLM", zorder=3)
     for i, v in enumerate(ys):
         ax.text(i, v + 0.08, f"{v:.2f}", ha="center", fontsize=9)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS)
-    decorate_chart(ax, "RQ1 — Stale testy vs. úroveň kontextu",
-                   "Úroveň kontextu", "Počet stale testů (ø)", legend=False)
+    decorate_chart(ax, "", "Úroveň kontextu", "Počet stale testů (ø)")
     save_fig(fig, "29_line_stale_tests.png", RQ1_DIR)
 
 
@@ -693,7 +747,6 @@ def rq1_30_pie_overall_test_types(runs):
     fig, ax = plt.subplots(figsize=FIGSIZE_SQUARE)
     ax.pie(vals, labels=labels, autopct="%1.1f%%", colors=colors,
            wedgeprops=dict(width=0.45, edgecolor="white"), startangle=90)
-    ax.set_title(f"RQ1 — Celková distribuce typů testů (n={sum(vals)})", fontsize=11)
     save_fig(fig, "30_donut_overall_test_types.png", RQ1_DIR)
 
 
@@ -704,72 +757,123 @@ def rq1_30_pie_overall_test_types(runs):
 def rq2_01_line_endpoint_coverage(runs):
     avg = level_cross_avg(runs, "endpoint_coverage_pct")
     std = level_cross_std(runs, "endpoint_coverage_pct")
+    m = model_level_matrix(runs, "endpoint_coverage_pct")
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     x = np.arange(len(LEVELS))
     ys = [avg[l] for l in LEVELS]
-    stds = [std[l] for l in LEVELS]
-    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Průměr 3 LLM")
-    ax.fill_between(x, [y - s for y, s in zip(ys, stds)], [y + s for y, s in zip(ys, stds)],
-                    alpha=0.18, color=COLOR_AVG, label="± 1σ")
+    yerr = [std[l] / np.sqrt(3) for l in LEVELS]
+
+    y_lower = [y - e for y, e in zip(ys, yerr)]
+    y_upper = [y + e for y, e in zip(ys, yerr)]
+
+    ax.fill_between(x, y_lower, y_upper, color=COLOR_AVG, alpha=0.15, label="± SEM", zorder=1)
+
+    for llm in LLMS:
+        yl = [m[llm][lvl] for lvl in LEVELS]
+        ax.plot(x, yl, marker="o", markersize=4, linewidth=1.5,
+                color=LLM_COLORS[llm], label=LLM_SHORT[llm], zorder=2)
+
+    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Průměr 3 LLM", zorder=3)
+
     for i, v in enumerate(ys):
-        ax.text(i, v + 0.3, f"{v:.1f}", ha="center", fontsize=9)
-    ax.set_xticks(x); ax.set_xticklabels(LEVELS)
+        ax.text(i, v + 0.3, f"{v:.1f}", ha="center", fontsize=10, zorder=4)
+
+    ax.set_xticks(x);
+    ax.set_xticklabels(LEVELS)
     decorate_chart(ax, "RQ2 — Endpoint Coverage vs. úroveň kontextu",
-                   "Úroveň kontextu", "Endpoint Coverage (%)")
+                   "Úroveň kontextu", "EC (%)")
     save_fig(fig, "01_line_endpoint_coverage.png", RQ2_DIR)
 
 
 def rq2_02_line_total_code_coverage(runs):
     avg = level_cross_avg(runs, "code_cov_total")
     std = level_cross_std(runs, "code_cov_total")
+    m = model_level_matrix(runs, "code_cov_total")
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     x = np.arange(len(LEVELS))
     ys = [avg[l] for l in LEVELS]
-    stds = [std[l] for l in LEVELS]
-    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Průměr 3 LLM")
-    ax.fill_between(x, [y - s for y, s in zip(ys, stds)], [y + s for y, s in zip(ys, stds)],
-                    alpha=0.18, color=COLOR_AVG, label="± 1σ")
+    yerr = [std[l] / np.sqrt(3) for l in LEVELS]
+
+    y_lower = [y - e for y, e in zip(ys, yerr)]
+    y_upper = [y + e for y, e in zip(ys, yerr)]
+
+    ax.fill_between(x, y_lower, y_upper, color=COLOR_AVG, alpha=0.15, label="± SEM", zorder=1)
+
+    for llm in LLMS:
+        yl = [m[llm][lvl] for lvl in LEVELS]
+        ax.plot(x, yl, marker="o", markersize=4, linewidth=1.5,
+                color=LLM_COLORS[llm], label=LLM_SHORT[llm], zorder=2)
+
+    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Průměr 3 LLM", zorder=3)
+
     for i, v in enumerate(ys):
-        ax.text(i, v + 0.3, f"{v:.1f}", ha="center", fontsize=9)
-    ax.set_xticks(x); ax.set_xticklabels(LEVELS)
+        ax.text(i, v + 0.3, f"{v:.1f}", ha="center", fontsize=10, zorder=4)
+
+    ax.set_xticks(x);
+    ax.set_xticklabels(LEVELS)
     decorate_chart(ax, "RQ2 — Total Code Coverage vs. úroveň kontextu",
-                   "Úroveň kontextu", "Code Coverage (%)")
+                   "Úroveň kontextu", "CC (%)")
     save_fig(fig, "02_line_total_code_coverage.png", RQ2_DIR)
 
 
 def rq2_03_line_crud_coverage(runs):
     avg = level_cross_avg(runs, "code_cov_crud")
     std = level_cross_std(runs, "code_cov_crud")
+    m = model_level_matrix(runs, "code_cov_crud")
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     x = np.arange(len(LEVELS))
     ys = [avg[l] for l in LEVELS]
-    stds = [std[l] for l in LEVELS]
-    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Průměr 3 LLM")
-    ax.fill_between(x, [y - s for y, s in zip(ys, stds)], [y + s for y, s in zip(ys, stds)],
-                    alpha=0.18, color=COLOR_AVG, label="± 1σ")
+    yerr = [std[l] / np.sqrt(3) for l in LEVELS]
+
+    y_lower = [y - e for y, e in zip(ys, yerr)]
+    y_upper = [y + e for y, e in zip(ys, yerr)]
+
+    ax.fill_between(x, y_lower, y_upper, color=COLOR_AVG, alpha=0.15, label="± SEM", zorder=1)
+
+    for llm in LLMS:
+        yl = [m[llm][lvl] for lvl in LEVELS]
+        ax.plot(x, yl, marker="o", markersize=4, linewidth=1.2,
+                color=LLM_COLORS[llm], label=LLM_SHORT[llm], zorder=2)
+
+    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Průměr 3 LLM", zorder=3)
+
     for i, v in enumerate(ys):
-        ax.text(i, v + 0.5, f"{v:.1f}", ha="center", fontsize=9)
-    ax.set_xticks(x); ax.set_xticklabels(LEVELS)
+        ax.text(i, v + 0.5, f"{v:.1f}", ha="center", fontsize=9, zorder=4)
+
+    ax.set_xticks(x);
+    ax.set_xticklabels(LEVELS)
     decorate_chart(ax, "RQ2 — crud.py Coverage vs. úroveň kontextu",
-                   "Úroveň kontextu", "crud.py Coverage (%)")
+                   "Úroveň kontextu", "Pokrytí crud.py (%)")
     save_fig(fig, "03_line_crud_coverage.png", RQ2_DIR)
 
 
 def rq2_04_line_main_coverage(runs):
     avg = level_cross_avg(runs, "code_cov_main")
     std = level_cross_std(runs, "code_cov_main")
+    m = model_level_matrix(runs, "code_cov_main")
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     x = np.arange(len(LEVELS))
     ys = [avg[l] for l in LEVELS]
-    stds = [std[l] for l in LEVELS]
-    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG)
-    ax.fill_between(x, [y - s for y, s in zip(ys, stds)], [y + s for y, s in zip(ys, stds)],
-                    alpha=0.18, color=COLOR_AVG)
+    yerr = [std[l] / np.sqrt(3) for l in LEVELS]
+
+    y_lower = [y - e for y, e in zip(ys, yerr)]
+    y_upper = [y + e for y, e in zip(ys, yerr)]
+
+    ax.fill_between(x, y_lower, y_upper, color=COLOR_AVG, alpha=0.15, label="± SEM", zorder=1)
+
+    for llm in LLMS:
+        yl = [m[llm][lvl] for lvl in LEVELS]
+        ax.plot(x, yl, marker="o", markersize=4, linewidth=1.2,
+                color=LLM_COLORS[llm], label=LLM_SHORT[llm], zorder=2)
+
+    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Průměr 3 LLM", zorder=3)
+
     for i, v in enumerate(ys):
-        ax.text(i, v + 0.15, f"{v:.1f}", ha="center", fontsize=9)
-    ax.set_xticks(x); ax.set_xticklabels(LEVELS)
-    decorate_chart(ax, "RQ2 — main.py Coverage vs. úroveň kontextu",
-                   "Úroveň kontextu", "main.py Coverage (%)", legend=False)
+        ax.text(i, v + 0.15, f"{v:.1f}", ha="center", fontsize=9, zorder=4)
+
+    ax.set_xticks(x);
+    ax.set_xticklabels(LEVELS)
+    decorate_chart(ax, "", "Úroveň kontextu", "Pokrytí main.py (%)")
     save_fig(fig, "04_line_main_coverage.png", RQ2_DIR)
 
 
@@ -783,7 +887,7 @@ def rq2_05_bar_endpoint_coverage(runs):
         ax.text(b.get_x() + b.get_width()/2, v + 0.3, f"{v:.1f}", ha="center", fontsize=9)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS); ax.set_ylim(0, 50)
     decorate_chart(ax, "RQ2 — Endpoint Coverage (sloupcový graf)",
-                   "Úroveň kontextu", "Endpoint Coverage (%)", legend=False)
+                   "Úroveň kontextu", "Pokrytí endpointů (%)", legend=False)
     save_fig(fig, "05_bar_endpoint_coverage.png", RQ2_DIR)
 
 
@@ -797,7 +901,7 @@ def rq2_06_bar_total_coverage(runs):
         ax.text(b.get_x() + b.get_width()/2, v + 0.3, f"{v:.1f}", ha="center", fontsize=9)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS); ax.set_ylim(0, 80)
     decorate_chart(ax, "RQ2 — Total Code Coverage (sloupcový graf)",
-                   "Úroveň kontextu", "Code Coverage (%)", legend=False)
+                   "Úroveň kontextu", "Pokrytí kódu (%)", legend=False)
     save_fig(fig, "06_bar_total_coverage.png", RQ2_DIR)
 
 
@@ -811,7 +915,7 @@ def rq2_07_bar_crud_coverage(runs):
         ax.text(b.get_x() + b.get_width()/2, v + 0.4, f"{v:.1f}", ha="center", fontsize=9)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS); ax.set_ylim(0, 60)
     decorate_chart(ax, "RQ2 — crud.py Coverage (sloupcový graf)",
-                   "Úroveň kontextu", "crud.py Coverage (%)", legend=False)
+                   "Úroveň kontextu", "Pokrytí crud.py (%)", legend=False)
     save_fig(fig, "07_bar_crud_coverage.png", RQ2_DIR)
 
 
@@ -824,7 +928,7 @@ def rq2_08_box_endpoint_coverage(runs):
     for med in bp["medians"]:
         med.set_color("black"); med.set_linewidth(1.5)
     decorate_chart(ax, "RQ2 — Endpoint Coverage (boxplot, n=15 / úroveň)",
-                   "Úroveň kontextu", "Endpoint Coverage (%)", legend=False)
+                   "Úroveň kontextu", "Pokrytí endpointů (%)", legend=False)
     save_fig(fig, "08_box_endpoint_coverage.png", RQ2_DIR)
 
 
@@ -836,7 +940,7 @@ def rq2_09_violin_endpoint_coverage(runs):
         pc.set_facecolor(col); pc.set_alpha(0.55)
     ax.set_xticks(range(1, len(LEVELS) + 1)); ax.set_xticklabels(LEVELS)
     decorate_chart(ax, "RQ2 — Violin plot Endpoint Coverage napříč úrovněmi",
-                   "Úroveň kontextu", "Endpoint Coverage (%)", legend=False)
+                   "Úroveň kontextu", "Pokrytí endpointů (%)", legend=False)
     save_fig(fig, "09_violin_endpoint_coverage.png", RQ2_DIR)
 
 
@@ -845,7 +949,7 @@ def rq2_10_hist_endpoint_coverage(runs):
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     ax.hist(vals, bins=15, color=COLOR_AVG, edgecolor="black", alpha=0.75)
     decorate_chart(ax, f"RQ2 — Histogram Endpoint Coverage (n={len(vals)} runů)",
-                   "Endpoint Coverage (%)", "Počet runů", legend=False)
+                   "Pokrytí endpointů (%)", "Počet runů", legend=False)
     save_fig(fig, "10_hist_endpoint_coverage.png", RQ2_DIR)
 
 
@@ -854,7 +958,7 @@ def rq2_11_hist_crud_coverage(runs):
     fig, ax = plt.subplots(figsize=FIGSIZE_MED)
     ax.hist(vals, bins=15, color=COLOR_AVG, edgecolor="black", alpha=0.75)
     decorate_chart(ax, f"RQ2 — Histogram crud.py Coverage (n={len(vals)} runů)",
-                   "crud.py Coverage (%)", "Počet runů", legend=False)
+                   "Pokrytí crud.py (%)", "Počet runů", legend=False)
     save_fig(fig, "11_hist_crud_coverage.png", RQ2_DIR)
 
 
@@ -863,10 +967,10 @@ def rq2_12_combined_coverage_layers(runs):
     fig, ax = plt.subplots(figsize=FIGSIZE_WIDE)
     x = np.arange(len(LEVELS))
     metrics = [
-        ("Total Code Cov.", "code_cov_total", "#4C72B0"),
-        ("crud.py Cov.", "code_cov_crud", "#C44E52"),
-        ("main.py Cov.", "code_cov_main", "#55A467"),
-        ("Endpoint Cov.", "endpoint_coverage_pct", "#DD8452"),
+        ("Celkové pokrytí", "code_cov_total", "#4C72B0"),
+        ("Pokrytí crud.py", "code_cov_crud", "#C44E52"),
+        ("Pokrytí main.py", "code_cov_main", "#55A467"),
+        ("Pokrytí endpointů", "endpoint_coverage_pct", "#DD8452"),
     ]
     for name, key, color in metrics:
         ys = [level_cross_avg(runs, key)[lvl] for lvl in LEVELS]
@@ -875,7 +979,7 @@ def rq2_12_combined_coverage_layers(runs):
             ax.text(i, v + 1, f"{v:.1f}", ha="center", fontsize=7, color=color)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS)
     decorate_chart(ax, "RQ2 — Všechny coverage metriky vs. úroveň kontextu",
-                   "Úroveň kontextu", "Coverage (%)")
+                   "Úroveň kontextu", "Pokrytí (%)")
     save_fig(fig, "12_line_all_coverage.png", RQ2_DIR)
 
 
@@ -884,10 +988,10 @@ def rq2_13_delta_from_baseline(runs):
     fig, ax = plt.subplots(figsize=FIGSIZE_WIDE)
     x = np.arange(len(LEVELS))
     metrics = [
-        ("Endpoint Cov.", "endpoint_coverage_pct", "#DD8452"),
-        ("Total Code Cov.", "code_cov_total", "#4C72B0"),
-        ("crud.py Cov.", "code_cov_crud", "#C44E52"),
-        ("main.py Cov.", "code_cov_main", "#55A467"),
+        ("Pokrytí endpointů", "endpoint_coverage_pct", "#DD8452"),
+        ("Celkové pokrytí", "code_cov_total", "#4C72B0"),
+        ("Pokrytí crud.py", "code_cov_crud", "#C44E52"),
+        ("Pokrytí main.py", "code_cov_main", "#55A467"),
     ]
     for name, key, color in metrics:
         avg = level_cross_avg(runs, key)
@@ -897,7 +1001,7 @@ def rq2_13_delta_from_baseline(runs):
     ax.axhline(0, color="black", linestyle="--", linewidth=0.8, alpha=0.5)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS)
     decorate_chart(ax, "RQ2 — Δ coverage vs. L0 (o kolik roste každá metrika)",
-                   "Úroveň kontextu", "Δ Coverage (pp vs. L0)")
+                   "Úroveň kontextu", "Δ pokrytí (pp vs. L0)")
     save_fig(fig, "13_line_delta_from_baseline.png", RQ2_DIR)
 
 
@@ -910,7 +1014,7 @@ def rq2_14_scatter_endpoint_vs_crud(runs):
         ax.scatter(xs, ys, color=LEVEL_COLORS[i], label=lvl, s=60, alpha=0.75,
                    edgecolors="white", linewidth=0.8)
     decorate_chart(ax, "RQ2 — Endpoint Coverage × crud.py Coverage (75 runů)",
-                   "Endpoint Coverage (%)", "crud.py Coverage (%)")
+                   "Pokrytí endpointů (%)", "Pokrytí crud.py (%)")
     save_fig(fig, "14_scatter_endpoint_vs_crud.png", RQ2_DIR)
 
 
@@ -922,7 +1026,7 @@ def rq2_15_scatter_total_vs_crud(runs):
         ax.scatter(xs, ys, color=LEVEL_COLORS[i], label=lvl, s=60, alpha=0.75,
                    edgecolors="white", linewidth=0.8)
     decorate_chart(ax, "RQ2 — Total Coverage × crud.py Coverage",
-                   "Total Coverage (%)", "crud.py Coverage (%)")
+                   "Celkové pokrytí (%)", "Pokrytí crud.py (%)")
     save_fig(fig, "15_scatter_total_vs_crud.png", RQ2_DIR)
 
 
@@ -945,8 +1049,8 @@ def rq2_16_stacked_bar_coverage_layers(runs):
 
 def rq2_17_radar_coverage(runs):
     metrics = [
-        ("Endpoint Cov", "endpoint_coverage_pct", 50),
-        ("Total Code", "code_cov_total", 80),
+        ("Endpoint", "endpoint_coverage_pct", 50),
+        ("Celkový kód", "code_cov_total", 80),
         ("crud.py", "code_cov_crud", 60),
         ("main.py", "code_cov_main", 80),
     ]
@@ -959,7 +1063,6 @@ def rq2_17_radar_coverage(runs):
         ax.plot(angles, vals, color=LEVEL_COLORS[i], linewidth=2, label=lvl)
         ax.fill(angles, vals, color=LEVEL_COLORS[i], alpha=0.1)
     ax.set_xticks(angles[:-1]); ax.set_xticklabels([m[0] for m in metrics])
-    ax.set_title("RQ2 — Radar profil úrovní (coverage metriky)", pad=20)
     ax.legend(loc="upper right", bbox_to_anchor=(1.25, 1.1), fontsize=8)
     ax.set_ylim(0, 100)
     save_fig(fig, "17_radar_coverage.png", RQ2_DIR)
@@ -974,21 +1077,21 @@ def rq2_18_area_coverage_growth(runs):
     ys = [avg[l] for l in LEVELS]
     ax.fill_between(x, baseline, ys, where=[y >= baseline for y in ys],
                     alpha=0.35, color="#55A467", label="Zisk vs. L0")
-    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="crud.py coverage")
+    ax.plot(x, ys, marker="o", linewidth=2.5, color=COLOR_AVG, label="Pokrytí crud.py")
     ax.axhline(baseline, color="black", linestyle="--", linewidth=1, label=f"L0 baseline ({baseline:.1f}%)")
     for i, v in enumerate(ys):
         ax.text(i, v + 0.5, f"{v:.1f}", ha="center", fontsize=9)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS)
     decorate_chart(ax, "RQ2 — Zisk crud.py coverage oproti L0 baseline",
-                   "Úroveň kontextu", "crud.py Coverage (%)")
+                   "Úroveň kontextu", "Pokrytí crud.py (%)")
     save_fig(fig, "18_area_crud_growth.png", RQ2_DIR)
 
 
 def rq2_19_heatmap_coverage_per_level(runs):
     """Heatmapa coverage metrik × úrovní."""
     metrics = [
-        ("Endpoint Cov.", "endpoint_coverage_pct"),
-        ("Total Code", "code_cov_total"),
+        ("Pokrytí endpointů", "endpoint_coverage_pct"),
+        ("Celkový kód", "code_cov_total"),
         ("crud.py", "code_cov_crud"),
         ("main.py", "code_cov_main"),
     ]
@@ -1000,8 +1103,7 @@ def rq2_19_heatmap_coverage_per_level(runs):
     for i in range(M.shape[0]):
         for j in range(M.shape[1]):
             ax.text(j, i, f"{M[i,j]:.1f}", ha="center", va="center", fontsize=10)
-    fig.colorbar(im, ax=ax, shrink=0.6, label="Coverage (%)")
-    ax.set_title("RQ2 — Heatmapa coverage metrik × úroveň", fontsize=11)
+    fig.colorbar(im, ax=ax, shrink=0.6, label="Pokrytí (%)")
     ax.set_xlabel("Úroveň kontextu"); ax.set_ylabel("Metrika")
     save_fig(fig, "19_heatmap_coverage_per_level.png", RQ2_DIR)
 
@@ -1025,7 +1127,7 @@ def rq2_20_hypothesis_falsification(runs):
                     color="darkgreen" if delta > 2 else ("red" if delta < 0 else "gray"))
     ax.set_xticks(x); ax.set_xticklabels(LEVELS); ax.set_ylim(0, 55)
     decorate_chart(ax, "RQ2 — Δ crud.py coverage mezi úrovněmi (skok je na L1!)",
-                   "Úroveň kontextu", "crud.py Coverage (%)", legend=False)
+                   "Úroveň kontextu", "Pokrytí crud.py (%)", legend=False)
     save_fig(fig, "20_bar_delta_annotations.png", RQ2_DIR)
 
 
@@ -1044,9 +1146,9 @@ def rq2_21_scatter_with_regression(runs):
         z = np.polyfit(all_x, all_y, 1)
         xs_line = np.linspace(min(all_x), max(all_x), 100)
         ax.plot(xs_line, np.polyval(z, xs_line), "--", color="black", linewidth=1,
-                label=f"Trend (slope={z[0]:.2e})", alpha=0.7)
+                label=f"Trend (sklon={z[0]:.2e})", alpha=0.7)
     decorate_chart(ax, "RQ2 — Endpoint Coverage vs. velikost kontextu",
-                   "Kontext (tokeny po kompresi)", "Endpoint Coverage (%)")
+                   "Kontext (tokeny po kompresi)", "Pokrytí endpointů (%)")
     save_fig(fig, "21_scatter_context_vs_ep_coverage.png", RQ2_DIR)
 
 
@@ -1061,9 +1163,9 @@ def rq2_22_saturation_curve(runs):
     ep_norm = [ep[l] / ep["L0"] * 100 for l in LEVELS]
     code_norm = [code[l] / code["L0"] * 100 for l in LEVELS]
     crud_norm = [crud[l] / crud["L0"] * 100 for l in LEVELS]
-    ax.plot(x, ep_norm, marker="o", linewidth=2, color="#DD8452", label="Endpoint Coverage")
-    ax.plot(x, code_norm, marker="s", linewidth=2, color="#4C72B0", label="Total Code Coverage")
-    ax.plot(x, crud_norm, marker="^", linewidth=2, color="#C44E52", label="crud.py Coverage")
+    ax.plot(x, ep_norm, marker="o", linewidth=2, color="#DD8452", label="Pokrytí endpointů")
+    ax.plot(x, code_norm, marker="s", linewidth=2, color="#4C72B0", label="Celkové pokrytí kódu")
+    ax.plot(x, crud_norm, marker="^", linewidth=2, color="#C44E52", label="Pokrytí crud.py")
     ax.axhline(100, color="black", linestyle="--", linewidth=0.8, alpha=0.4)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS)
     decorate_chart(ax, "RQ2 — Relativní růst coverage metrik (L0 = 100 %)",
@@ -1080,7 +1182,6 @@ def rq2_23_donut_crud_coverage(runs):
         ax.pie([avg_crud, uncovered], labels=["Pokryto", "Nepokryto"],
                autopct="%1.1f%%", colors=["#55A467", "#C44E52"],
                wedgeprops=dict(width=0.45, edgecolor="white"), startangle=90)
-        ax.set_title(f"RQ2 — crud.py Coverage na úrovni {lvl}", fontsize=11)
         save_fig(fig, f"23_donut_crud_{lvl}.png", RQ2_DIR)
 
 
@@ -1091,19 +1192,18 @@ def rq2_24_dual_axis_ep_vs_code(runs):
     fig, ax1 = plt.subplots(figsize=FIGSIZE_MED)
     x = np.arange(len(LEVELS))
     ax1.plot(x, [ep[l] for l in LEVELS], marker="o", linewidth=2.5, color="#DD8452",
-             label="Endpoint Coverage")
-    ax1.set_ylabel("Endpoint Coverage (%)", color="#DD8452", fontsize=10)
+             label="Pokrytí endpointů")
+    ax1.set_ylabel("Pokrytí endpointů (%)", color="#DD8452", fontsize=10)
     ax1.tick_params(axis="y", labelcolor="#DD8452")
     ax1.set_xticks(x); ax1.set_xticklabels(LEVELS)
     ax1.set_ylim(0, 50)
     ax2 = ax1.twinx()
     ax2.plot(x, [crud[l] for l in LEVELS], marker="s", linewidth=2.5, color="#C44E52",
-             label="crud.py Coverage")
-    ax2.set_ylabel("crud.py Coverage (%)", color="#C44E52", fontsize=10)
+             label="Pokrytí crud.py")
+    ax2.set_ylabel("Pokrytí crud.py (%)", color="#C44E52", fontsize=10)
     ax2.tick_params(axis="y", labelcolor="#C44E52")
     ax2.set_ylim(0, 60)
     ax1.set_xlabel("Úroveň kontextu", fontsize=10)
-    ax1.set_title("RQ2 — Endpoint Coverage vs. crud.py Coverage (dvě osy)", fontsize=11)
     ax1.grid(True, linestyle="--", linewidth=0.4, alpha=0.5)
     fig.tight_layout()
     fig.savefig(RQ2_DIR / "24_dual_axis_ep_vs_crud.png", dpi=DPI, bbox_inches="tight")
@@ -1113,10 +1213,10 @@ def rq2_24_dual_axis_ep_vs_code(runs):
 def rq2_25_multi_line_all_coverage(runs):
     """Normalizovaný multi-line všech coverage metrik na jedné škále."""
     metrics = [
-        ("Endpoint Cov (% z 50)", "endpoint_coverage_pct", 50),
-        ("Total Code Cov", "code_cov_total", 100),
-        ("crud.py Cov (% z 60)", "code_cov_crud", 60),
-        ("main.py Cov", "code_cov_main", 100),
+        ("Pokrytí endpointů (% z 50)", "endpoint_coverage_pct", 50),
+        ("Celkové pokrytí", "code_cov_total", 100),
+        ("Pokrytí crud.py (% z 60)", "code_cov_crud", 60),
+        ("Pokrytí main.py", "code_cov_main", 100),
     ]
     fig, ax = plt.subplots(figsize=FIGSIZE_WIDE)
     x = np.arange(len(LEVELS))
@@ -1155,42 +1255,42 @@ def _three_line_chart(runs, key, title, ylabel, fname, y_lim=None, annotate=True
 def rq3_01_line_validity(runs):
     _three_line_chart(runs, "validity_pct",
                       "RQ3 — Validity Rate per model",
-                      "Validity (%)",
+                      "Validita (%)",
                       "01_line_validity.png", y_lim=(75, 102))
 
 
 def rq3_02_line_assertion_depth(runs):
     _three_line_chart(runs, "assertion_depth",
                       "RQ3 — Assertion Depth per model",
-                      "Assertion Depth",
+                      "Hloubka asercí",
                       "02_line_assertion_depth.png")
 
 
 def rq3_03_line_response_validation(runs):
     _three_line_chart(runs, "response_validation_pct",
                       "RQ3 — Response Validation per model",
-                      "Response Validation (%)",
+                      "Validace odpovědí (%)",
                       "03_line_response_validation.png")
 
 
 def rq3_04_line_endpoint_coverage(runs):
     _three_line_chart(runs, "endpoint_coverage_pct",
                       "RQ3 — Endpoint Coverage per model",
-                      "Endpoint Coverage (%)",
+                      "Pokrytí endpointů (%)",
                       "04_line_endpoint_coverage.png")
 
 
 def rq3_05_line_total_code_coverage(runs):
     _three_line_chart(runs, "code_cov_total",
                       "RQ3 — Total Code Coverage per model",
-                      "Code Coverage (%)",
+                      "Pokrytí kódu (%)",
                       "05_line_total_coverage.png")
 
 
 def rq3_06_line_crud_coverage(runs):
     _three_line_chart(runs, "code_cov_crud",
                       "RQ3 — crud.py Coverage per model",
-                      "crud.py Coverage (%)",
+                      "Pokrytí crud.py (%)",
                       "06_line_crud_coverage.png")
 
 
@@ -1241,7 +1341,7 @@ def rq3_12_bar_validity_grouped(runs):
                     ha="center", fontsize=7)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS); ax.set_ylim(0, 105)
     decorate_chart(ax, "RQ3 — Validity — grupovaný sloupcový graf",
-                   "Úroveň kontextu", "Validity (%)")
+                   "Úroveň kontextu", "Validita (%)")
     save_fig(fig, "12_bar_validity_grouped.png", RQ3_DIR)
 
 
@@ -1273,7 +1373,7 @@ def rq3_14_bar_endpoint_coverage_grouped(runs):
                     ha="center", fontsize=7)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS); ax.set_ylim(0, 55)
     decorate_chart(ax, "RQ3 — Endpoint Coverage — grupovaný sloupcový graf",
-                   "Úroveň kontextu", "Endpoint Coverage (%)")
+                   "Úroveň kontextu", "Pokrytí endpointů (%)")
     save_fig(fig, "14_bar_endpoint_coverage_grouped.png", RQ3_DIR)
 
 
@@ -1289,7 +1389,7 @@ def rq3_15_bar_crud_coverage_grouped(runs):
                     ha="center", fontsize=7)
     ax.set_xticks(x); ax.set_xticklabels(LEVELS); ax.set_ylim(0, 65)
     decorate_chart(ax, "RQ3 — crud.py Coverage — grupovaný sloupcový graf",
-                   "Úroveň kontextu", "crud.py Coverage (%)")
+                   "Úroveň kontextu", "Pokrytí crud.py (%)")
     save_fig(fig, "15_bar_crud_coverage_grouped.png", RQ3_DIR)
 
 
@@ -1303,8 +1403,7 @@ def rq3_16_heatmap_validity(runs):
     for i in range(M.shape[0]):
         for j in range(M.shape[1]):
             ax.text(j, i, f"{M[i,j]:.1f}", ha="center", va="center", fontsize=10)
-    fig.colorbar(im, ax=ax, shrink=0.7, label="Validity (%)")
-    ax.set_title("RQ3 — Heatmapa Validity (model × úroveň)", fontsize=11)
+    fig.colorbar(im, ax=ax, shrink=0.7, label="Validita (%)")
     save_fig(fig, "16_heatmap_validity.png", RQ3_DIR)
 
 
@@ -1319,8 +1418,7 @@ def rq3_17_heatmap_ep_coverage(runs):
         for j in range(M.shape[1]):
             c = "white" if M[i, j] < 35 else "black"
             ax.text(j, i, f"{M[i,j]:.1f}", ha="center", va="center", fontsize=10, color=c)
-    fig.colorbar(im, ax=ax, shrink=0.7, label="EP Coverage (%)")
-    ax.set_title("RQ3 — Heatmapa Endpoint Coverage (model × úroveň)", fontsize=11)
+    fig.colorbar(im, ax=ax, shrink=0.7, label="Pokrytí EP (%)")
     save_fig(fig, "17_heatmap_ep_coverage.png", RQ3_DIR)
 
 
@@ -1333,8 +1431,7 @@ def rq3_18_heatmap_crud_coverage(runs):
     for i in range(M.shape[0]):
         for j in range(M.shape[1]):
             ax.text(j, i, f"{M[i,j]:.1f}", ha="center", va="center", fontsize=10)
-    fig.colorbar(im, ax=ax, shrink=0.7, label="crud.py Coverage (%)")
-    ax.set_title("RQ3 — Heatmapa crud.py Coverage (model × úroveň)", fontsize=11)
+    fig.colorbar(im, ax=ax, shrink=0.7, label="Pokrytí crud.py (%)")
     save_fig(fig, "18_heatmap_crud_coverage.png", RQ3_DIR)
 
 
@@ -1350,8 +1447,7 @@ def rq3_19_heatmap_delta_validity(runs):
     for i in range(M.shape[0]):
         for j in range(M.shape[1]):
             ax.text(j, i, f"{M[i,j]:+.1f}", ha="center", va="center", fontsize=10)
-    fig.colorbar(im, ax=ax, shrink=0.7, label="Δ validity vs. L0 (pp)")
-    ax.set_title("RQ3 — Δ Validity per model (vs. vlastní L0)", fontsize=11)
+    fig.colorbar(im, ax=ax, shrink=0.7, label="Δ validita vs. L0 (pp)")
     save_fig(fig, "19_heatmap_delta_validity.png", RQ3_DIR)
 
 
@@ -1364,7 +1460,7 @@ def rq3_20_box_validity_by_model(runs):
     for med in bp["medians"]:
         med.set_color("black"); med.set_linewidth(1.5)
     decorate_chart(ax, "RQ3 — Validity distribuce per model (n=25 / model)",
-                   "Model", "Validity (%)", legend=False)
+                   "Model", "Validita (%)", legend=False)
     save_fig(fig, "20_box_validity_by_model.png", RQ3_DIR)
 
 
@@ -1390,7 +1486,7 @@ def rq3_22_box_ep_coverage_by_model(runs):
     for med in bp["medians"]:
         med.set_color("black"); med.set_linewidth(1.5)
     decorate_chart(ax, "RQ3 — EP Coverage distribuce per model",
-                   "Model", "Endpoint Coverage (%)", legend=False)
+                   "Model", "Pokrytí endpointů (%)", legend=False)
     save_fig(fig, "22_box_ep_coverage_by_model.png", RQ3_DIR)
 
 
@@ -1403,18 +1499,18 @@ def rq3_23_violin_validity_per_model(runs):
     ax.set_xticks(range(1, len(LLMS) + 1))
     ax.set_xticklabels([LLM_SHORT[l] for l in LLMS])
     decorate_chart(ax, "RQ3 — Violin plot Validity per model",
-                   "Model", "Validity (%)", legend=False)
+                   "Model", "Validita (%)", legend=False)
     save_fig(fig, "23_violin_validity_by_model.png", RQ3_DIR)
 
 
 def rq3_24_radar_models(runs):
     metrics = [
-        ("Validity", "validity_pct", 100),
-        ("EP Cov", "endpoint_coverage_pct", 50),
-        ("Code Cov", "code_cov_total", 100),
-        ("CRUD Cov", "code_cov_crud", 60),
-        ("Assert D.", "assertion_depth", 4),
-        ("Resp Val", "response_validation_pct", 100),
+        ("Validita", "validity_pct", 100),
+        ("Pokrytí EP", "endpoint_coverage_pct", 50),
+        ("Pokrytí kódu", "code_cov_total", 100),
+        ("Pokrytí CRUD", "code_cov_crud", 60),
+        ("Hloubka asercí", "assertion_depth", 4),
+        ("Validace odp.", "response_validation_pct", 100),
     ]
     angles = np.linspace(0, 2 * np.pi, len(metrics), endpoint=False).tolist()
     angles += angles[:1]
@@ -1428,7 +1524,6 @@ def rq3_24_radar_models(runs):
         ax.plot(angles, vals, color=LLM_COLORS[llm], linewidth=2, label=LLM_SHORT[llm])
         ax.fill(angles, vals, color=LLM_COLORS[llm], alpha=0.12)
     ax.set_xticks(angles[:-1]); ax.set_xticklabels([m[0] for m in metrics])
-    ax.set_title("RQ3 — Radar profil modelů (normalizováno)", pad=20)
     ax.legend(loc="upper right", bbox_to_anchor=(1.25, 1.1), fontsize=8)
     ax.set_ylim(0, 100)
     save_fig(fig, "24_radar_models.png", RQ3_DIR)
@@ -1436,12 +1531,12 @@ def rq3_24_radar_models(runs):
 
 def rq3_25_parallel_coords_models(runs):
     metrics = [
-        ("Validity", "validity_pct", 100),
-        ("EPCov", "endpoint_coverage_pct", 50),
-        ("CodeCov", "code_cov_total", 100),
+        ("Validita", "validity_pct", 100),
+        ("Pokrytí EP", "endpoint_coverage_pct", 50),
+        ("Pokrytí kódu", "code_cov_total", 100),
         ("CRUD", "code_cov_crud", 60),
-        ("AssertD", "assertion_depth", 4),
-        ("RespVal", "response_validation_pct", 100),
+        ("Hloubka asercí", "assertion_depth", 4),
+        ("Validace odp.", "response_validation_pct", 100),
     ]
     fig, ax = plt.subplots(figsize=FIGSIZE_WIDE)
     x = np.arange(len(metrics))
@@ -1464,7 +1559,7 @@ def rq3_26_scatter_cost_vs_validity(runs):
         ax.scatter(xs, ys, color=LLM_COLORS[llm], label=LLM_SHORT[llm],
                    s=60, alpha=0.75, edgecolors="white", linewidth=0.8)
     decorate_chart(ax, "RQ3 — Cena × Validity (75 runů)",
-                   "Cena na run (USD)", "Validity (%)")
+                   "Cena za běh (USD)", "Validita (%)")
     save_fig(fig, "26_scatter_cost_vs_validity.png", RQ3_DIR)
 
 
@@ -1476,7 +1571,7 @@ def rq3_27_scatter_ep_vs_validity(runs):
         ax.scatter(xs, ys, color=LLM_COLORS[llm], label=LLM_SHORT[llm],
                    s=60, alpha=0.75, edgecolors="white", linewidth=0.8)
     decorate_chart(ax, "RQ3 — Endpoint Coverage × Validity",
-                   "Endpoint Coverage (%)", "Validity (%)")
+                   "Pokrytí endpointů (%)", "Validita (%)")
     save_fig(fig, "27_scatter_ep_vs_validity.png", RQ3_DIR)
 
 
@@ -1488,7 +1583,7 @@ def rq3_28_scatter_tokens_vs_validity(runs):
         ax.scatter(xs, ys, color=LLM_COLORS[llm], label=LLM_SHORT[llm],
                    s=60, alpha=0.75, edgecolors="white", linewidth=0.8)
     decorate_chart(ax, "RQ3 — Tokeny × Validity",
-                   "Celkové tokeny", "Validity (%)")
+                   "Celkové tokeny", "Validita (%)")
     save_fig(fig, "28_scatter_tokens_vs_validity.png", RQ3_DIR)
 
 
@@ -1505,7 +1600,7 @@ def rq3_29_bubble_model_profile(runs):
         ax.annotate(f"{LLM_SHORT[llm]}\n(${cost:.4f})", (x, y), fontsize=8,
                     xytext=(8, 8), textcoords="offset points")
     decorate_chart(ax, "RQ3 — Bubble profil modelů (velikost = 1/cena)",
-                   "Endpoint Coverage (%)", "Validity (%)")
+                   "Pokrytí endpointů (%)", "Validita (%)")
     save_fig(fig, "29_bubble_model_profile.png", RQ3_DIR)
 
 
@@ -1551,8 +1646,7 @@ def rq3_31_heatmap_runwise_validity(runs):
             if not np.isnan(M[i, j]):
                 c = "white" if M[i, j] < 75 else "black"
                 ax.text(j, i, f"{M[i,j]:.0f}", ha="center", va="center", fontsize=7, color=c)
-    fig.colorbar(im, ax=ax, shrink=0.5, label="Validity (%)")
-    ax.set_title("RQ3 — Per-run heatmapa validity (15 runů × 5 úrovní)", fontsize=11)
+    fig.colorbar(im, ax=ax, shrink=0.5, label="Validita (%)")
     save_fig(fig, "31_heatmap_runwise_validity.png", RQ3_DIR)
 
 
@@ -1602,7 +1696,6 @@ def rq3_34_pie_test_types_per_model(runs):
         colors = ["#55A467", "#C44E52", "#DD8452"]
         ax.pie(list(vals.values()), labels=list(vals.keys()), autopct="%1.1f%%",
                colors=colors, wedgeprops=dict(width=0.55, edgecolor="white"))
-        ax.set_title(f"RQ3 — Distribuce typů testů — {LLM_SHORT[llm]}", fontsize=11)
         save_fig(fig, f"34_pie_test_types_{LLM_SHORT[llm]}.png", RQ3_DIR)
 
 
@@ -1617,15 +1710,13 @@ def rq3_35_stacked_bar_tokens_by_phase(runs):
         p = [plan[llm][l] for l in LEVELS]
         g = [gen[llm][l] for l in LEVELS]
         r = [rep[llm][l] for l in LEVELS]
-        ax.bar(x, p, color="#4C72B0", label="planning")
-        ax.bar(x, g, bottom=p, color="#DD8452", label="generation")
-        ax.bar(x, r, bottom=[a + b for a, b in zip(p, g)], color="#C44E52", label="repair")
+        ax.bar(x, p, color="#4C72B0", label="plánování")
+        ax.bar(x, g, bottom=p, color="#DD8452", label="generování")
+        ax.bar(x, r, bottom=[a + b for a, b in zip(p, g)], color="#C44E52", label="oprava")
         ax.set_xticks(x); ax.set_xticklabels(LEVELS)
-        ax.set_title(LLM_SHORT[llm])
         ax.grid(True, linestyle="--", linewidth=0.4, alpha=0.5)
     axs[0].set_ylabel("Tokeny")
     axs[-1].legend(fontsize=8)
-    fig.suptitle("RQ3 — Rozložení tokenů do fází per model", fontsize=11)
     save_fig(fig, "35_stacked_tokens_phase_per_model.png", RQ3_DIR)
 
 
@@ -1658,7 +1749,7 @@ def rq3_37_line_validity_with_range(runs):
         ax.plot(x, ys, marker="o", linewidth=2, color=LLM_COLORS[llm], label=LLM_SHORT[llm])
     ax.set_xticks(x); ax.set_xticklabels(LEVELS)
     decorate_chart(ax, "RQ3 — Validity per model s vyznačeným rozpětím",
-                   "Úroveň kontextu", "Validity (%)")
+                   "Úroveň kontextu", "Validita (%)")
     save_fig(fig, "37_line_validity_with_range.png", RQ3_DIR)
 
 
@@ -1671,7 +1762,7 @@ def rq3_38_scatter_assertion_vs_response(runs):
         ax.scatter(xs, ys, color=LLM_COLORS[llm], label=LLM_SHORT[llm],
                    s=60, alpha=0.75, edgecolors="white", linewidth=0.8)
     decorate_chart(ax, "RQ3 — Assertion Depth × Response Validation",
-                   "Assertion Depth", "Response Validation (%)")
+                   "Hloubka asercí", "Validace odpovědí (%)")
     save_fig(fig, "38_scatter_assertion_vs_response.png", RQ3_DIR)
 
 
@@ -1679,8 +1770,8 @@ def rq3_39_multi_heatmap_all_metrics(runs):
     """4× heatmapa vedle sebe — validity, EP cov, crud cov, cena."""
     fig, axs = plt.subplots(1, 4, figsize=(16, 4))
     metrics = [
-        ("Validity (%)", "validity_pct", HEATMAP_CMAP, None),
-        ("EP Cov (%)", "endpoint_coverage_pct", SEQUENTIAL_CMAP, None),
+        ("Validita (%)", "validity_pct", HEATMAP_CMAP, None),
+        ("Pokrytí EP (%)", "endpoint_coverage_pct", SEQUENTIAL_CMAP, None),
         ("crud.py (%)", "code_cov_crud", HEATMAP_CMAP, None),
         ("Cena (USD)", "cost_usd", "Reds", None),
     ]
@@ -1695,16 +1786,14 @@ def rq3_39_multi_heatmap_all_metrics(runs):
                 val = M[i, j]
                 txt = f"{val:.3f}" if key == "cost_usd" else f"{val:.1f}"
                 ax.text(j, i, txt, ha="center", va="center", fontsize=7)
-        ax.set_title(name, fontsize=10)
         fig.colorbar(im, ax=ax, shrink=0.7)
-    fig.suptitle("RQ3 — Multi-heatmapa: 4 metriky × 3 modely × 5 úrovní", fontsize=11)
     save_fig(fig, "39_multi_heatmap_all.png", RQ3_DIR)
 
 
 def rq3_40_scatter_matrix(runs):
     """Scatter matrix — 4 hlavní metriky × 3 modely."""
     keys = ["validity_pct", "endpoint_coverage_pct", "assertion_depth", "response_validation_pct"]
-    labels = ["Validity", "EP Cov", "Assert D", "Resp Val"]
+    labels = ["Validita", "Pokrytí EP", "Assert D", "Validace odp."]
     fig, axs = plt.subplots(len(keys), len(keys), figsize=(11, 11))
     for i, k1 in enumerate(keys):
         for j, k2 in enumerate(keys):
@@ -1724,7 +1813,6 @@ def rq3_40_scatter_matrix(runs):
             if j == 0:
                 ax.set_ylabel(labels[i], fontsize=8)
             ax.tick_params(labelsize=6)
-    fig.suptitle("RQ3 — Scatter matrix 4×4 (3 modely, 75 runů)", fontsize=12)
     save_fig(fig, "40_scatter_matrix.png", RQ3_DIR)
 
 
@@ -1738,7 +1826,7 @@ def rq3_41_bubble_validity_ep_cost(runs):
         ax.scatter(xs, ys, s=ss, color=LLM_COLORS[llm], label=LLM_SHORT[llm],
                    alpha=0.5, edgecolors="white", linewidth=0.8)
     decorate_chart(ax, "RQ3 — Bubble: Validity × EP Coverage × Cena (velikost)",
-                   "Validity (%)", "Endpoint Coverage (%)")
+                   "Validita (%)", "Pokrytí endpointů (%)")
     save_fig(fig, "41_bubble_validity_ep_cost.png", RQ3_DIR)
 
 

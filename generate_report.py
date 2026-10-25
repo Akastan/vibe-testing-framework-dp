@@ -4,7 +4,7 @@ import glob
 from collections import defaultdict
 
 # --- KONFIGURACE ---
-RESULTS_DIR = "./results"  # Složka, kde máš vygenerované JSONy z runů
+RESULTS_DIR = "./v12/outputs_v12_mistral/results"  # Složka, kde máš vygenerované JSONy z runů
 OUTPUT_FILE = "last_run_auto.md"
 
 

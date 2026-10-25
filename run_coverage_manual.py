@@ -39,23 +39,15 @@ RESULTS_DIR = Path(__file__).resolve().parent / "coverage_results"
 SERVER_HOST = "127.0.0.1"
 SERVER_PORT = 8000
 SERVER_STARTUP_TIMEOUT = 15  # sekund
-SERVER_SHUTDOWN_WAIT = 3     # sekund po SIGINT
+SERVER_SHUTDOWN_WAIT = 5     # sekund po SIGTERM (zvýšeno pro jistotu uložení dat)
 
 
 # ── Pomocné funkce ───────────────────────────────────────────
 
 def tag_from_filename(test_file: str) -> str:
-    """Extrahuje tag z názvu testovacího souboru pro pojmenování výstupu.
-
-    test_generated_gemini-3_1-flash-lite-preview__bookstore__L0__run1__t0_4.py
-    → gemini-3_1-flash-lite-preview__L0__run1
-    """
-    name = Path(test_file).stem  # bez .py
-    # Odstraň prefix "test_generated_"
+    name = Path(test_file).stem
     name = re.sub(r"^test_generated_", "", name)
-    # Parsuj části oddělené "__"
     parts = name.split("__")
-    # parts: [model, bookstore, level, run, temp]
     if len(parts) >= 4:
         model, _, level, run = parts[0], parts[1], parts[2], parts[3]
         return f"{model}__{level}__{run}"
@@ -63,7 +55,6 @@ def tag_from_filename(test_file: str) -> str:
 
 
 def wait_for_server(timeout: int = SERVER_STARTUP_TIMEOUT) -> bool:
-    """Čeká až server odpoví na /health."""
     import urllib.request
     import urllib.error
 
@@ -81,7 +72,6 @@ def wait_for_server(timeout: int = SERVER_STARTUP_TIMEOUT) -> bool:
 
 
 def reset_database():
-    """Resetuje databázi přes /reset endpoint."""
     import urllib.request
     import urllib.error
 
@@ -98,7 +88,6 @@ def reset_database():
 
 
 def slim_coverage(input_path: str, output_path: str):
-    """Zredukuje coverage JSON na per-function summary."""
     with open(input_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -143,7 +132,6 @@ def slim_coverage(input_path: str, output_path: str):
 # ── Hlavní logika ────────────────────────────────────────────
 
 def run_single(test_file: str):
-    """Spustí celý coverage cyklus pro jeden testovací soubor."""
     test_path = Path(test_file).resolve()
     tag = tag_from_filename(test_file)
 
@@ -160,9 +148,12 @@ def run_single(test_file: str):
     # 2. Spustit server s coverage
     print("  🚀 Spouštím server s coverage...")
     popen_kwargs = {}
-    if os.name != "nt":
-        # Unix: nová session, aby SIGINT nešel na náš skript
-        popen_kwargs["preexec_fn"] = os.setsid
+    if os.name == "nt":
+        # Windows: nezbytné pro správné zaslání CTRL_BREAK signálu pouze child procesu
+        popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+    else:
+        # Unix: oddělení do nové session
+        popen_kwargs["start_new_session"] = True
 
     server_proc = subprocess.Popen(
         [
@@ -200,42 +191,50 @@ def run_single(test_file: str):
             text=True,
         )
 
-        # Výsledek testů
         passed = result.stdout.count(" PASSED")
         failed = result.stdout.count(" FAILED")
         errors = result.stdout.count(" ERROR")
-        print(f"  📊 Testy: {passed} passed, {failed} failed, {errors} errors")
+        print(f"  📊 Výsledek testů: {passed} passed, {failed} failed, {errors} errors")
 
         if result.returncode != 0 and passed == 0:
-            print("  ⚠️  Žádný test neprošel, coverage bude prázdné")
-            # Detail chyby
-            for line in result.stdout.splitlines()[-10:]:
-                print(f"     {line}")
+            print("  ⚠️  Žádný test neprošel, coverage bude pravděpodobně velmi nízké")
 
     finally:
-        # 6. Zastavit server — graceful shutdown aby coverage uložil data
+        # 6. Zastavit server — graceful shutdown pro zápis coverage
         print("  🛑 Zastavuji server...")
         if os.name != "nt":
-            os.killpg(os.getpgid(server_proc.pid), signal.SIGINT)
+            # Unix: SIGTERM je standard pro čisté ukončení uvicornu
+            os.killpg(os.getpgid(server_proc.pid), signal.SIGTERM)
         else:
-            # Windows: pošleme CTRL_C_EVENT (graceful), ale náš skript
-            # si ho dočasně ignoruje, aby se nezabil sám
-            original_handler = signal.getsignal(signal.SIGINT)
-            signal.signal(signal.SIGINT, signal.SIG_IGN)
-            os.kill(server_proc.pid, signal.CTRL_C_EVENT)
+            # Windows: CTRL_BREAK_EVENT
+            os.kill(server_proc.pid, signal.CTRL_BREAK_EVENT)
 
         try:
             server_proc.wait(timeout=SERVER_SHUTDOWN_WAIT)
         except subprocess.TimeoutExpired:
-            print("  ⚠️  Server se nezastavil včas, zabíjím...")
+            print("  ⚠️  Server se nezastavil včas, vynucuji ukončení...")
             server_proc.kill()
             server_proc.wait()
-        finally:
-            if os.name == "nt":
-                # Obnovit původní SIGINT handler
-                signal.signal(signal.SIGINT, original_handler)
 
-    # 7. Vygenerovat coverage JSON
+    # 7. Vypsat záchranný coverage report do terminálu
+    print("  📈 Výpis z terminálu:")
+    report_result = subprocess.run(
+        [sys.executable, "-m", "coverage", "report"],
+        cwd=BOOKSTORE_DIR,
+        capture_output=True,
+        text=True,
+    )
+
+    if report_result.returncode == 0:
+        # Tisk pouze posledních pár řádků (summary table)
+        for line in report_result.stdout.splitlines()[-4:]:
+            print(f"     {line}")
+    else:
+        print("  ⚠️  Soubor .coverage neexistuje. Nelze vypsat report do terminálu.")
+        if report_result.stderr:
+            print(f"     [Chyba]: {report_result.stderr.strip()}")
+
+    # 8. Vygenerovat coverage JSON
     coverage_full = BOOKSTORE_DIR / "coverage_full.json"
     print("  📄 Generuji coverage JSON...")
     gen_result = subprocess.run(
@@ -247,39 +246,35 @@ def run_single(test_file: str):
 
     if gen_result.returncode != 0 or not coverage_full.exists():
         print(f"  ❌ Coverage JSON se nevygeneroval!")
-        print(f"     {gen_result.stderr.strip()}")
+        print(f"     [Chyba]: {gen_result.stderr.strip()}")
         return None
 
-    # 8. Slim + uložit do results
+    # 9. Slim + uložit do results
     RESULTS_DIR.mkdir(exist_ok=True)
     output_file = RESULTS_DIR / f"coverage_{tag}.json"
     slim_coverage(str(coverage_full), str(output_file))
 
     # Přečíst total coverage pro summary
-    with open(output_file, "r") as f:
+    with open(output_file, "r", encoding="utf-8") as f:
         slim_data = json.load(f)
     total_pct = slim_data.get("totals", {}).get("percent_covered", 0)
 
-    print(f"  🎯 Celkové pokrytí: {total_pct:.1f}%")
+    print(f"  🎯 Finální JSON coverage: {total_pct:.1f}%")
     print(f"  💾 Uloženo: {output_file.relative_to(Path.cwd())}")
 
     return {"tag": tag, "file": test_path.name, "coverage": total_pct, "passed": passed, "failed": failed}
 
 
 def collect_test_files(path_arg: str) -> list[str]:
-    """Rozpozná vstup — soubor, adresář, nebo glob pattern."""
-    # Glob pattern
     if "*" in path_arg or "?" in path_arg:
         files = sorted(glob.glob(path_arg))
         return [f for f in files if f.endswith(".py")]
 
     p = Path(path_arg)
 
-    # Jeden soubor
     if p.is_file():
         return [str(p)]
 
-    # Adresář — najdi všechny test_generated_*.py
     if p.is_dir():
         files = sorted(p.glob("test_generated_*.py"))
         return [str(f) for f in files]
@@ -289,7 +284,6 @@ def collect_test_files(path_arg: str) -> list[str]:
 
 
 def print_summary(results: list[dict]):
-    """Vytiskne souhrnnou tabulku."""
     if not results:
         return
 
@@ -314,7 +308,6 @@ def main():
         print(__doc__)
         sys.exit(1)
 
-    # --slim mód (zpětná kompatibilita)
     if sys.argv[1] == "--slim":
         if len(sys.argv) < 4:
             print("Použití: python run_coverage_manual.py --slim <input.json> <output.json>")
@@ -322,7 +315,6 @@ def main():
         slim_coverage(sys.argv[2], sys.argv[3])
         return
 
-    # Sesbírat testovací soubory
     test_files = collect_test_files(sys.argv[1])
 
     if not test_files:
@@ -333,7 +325,6 @@ def main():
     for f in test_files:
         print(f"   • {Path(f).name}")
 
-    # Spustit postupně
     results = []
     for i, tf in enumerate(test_files, 1):
         print(f"\n[{i}/{len(test_files)}]", end="")
@@ -341,10 +332,8 @@ def main():
         if r:
             results.append(r)
 
-    # Souhrnná tabulka
     print_summary(results)
 
-    # Uložit summary JSON
     if results:
         summary_path = RESULTS_DIR / "summary.json"
         with open(summary_path, "w", encoding="utf-8") as f:
